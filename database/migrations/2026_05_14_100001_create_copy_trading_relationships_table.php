@@ -8,6 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('copy_trading_relationships', function (Blueprint $table) {
+            $table->engine = 'InnoDB';
             $table->id();
             $table->foreignId('pro_trader_id')->constrained('copy_trading_pro_traders')->cascadeOnDelete();
             $table->foreignId('follower_id')->constrained('users')->cascadeOnDelete();
