@@ -51,6 +51,19 @@ return [
         'base_url' => env('BINSO_API_URL', 'https://binso.io/api/v1'),
         'api_key' => env('BINSO_API_KEY'),
     ],
+    'binance' => [
+        'spot_base_url' => env('BINANCE_SPOT_API_URL', 'https://api.binance.com'),
+        'futures_base_url' => env('BINANCE_FUTURES_API_URL', 'https://fapi.binance.com'),
+    ],
+    'bybit' => [
+        'base_url' => env('BYBIT_API_URL', 'https://api.bybit.com'),
+    ],
+    'okx' => [
+        'base_url' => env('OKX_API_URL', 'https://www.okx.com'),
+    ],
+    'market_data' => [
+        'providers' => array_values(array_filter(array_map('trim', explode(',', env('MARKET_DATA_PROVIDERS', 'binance,bybit,okx'))))),
+    ],
 
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
