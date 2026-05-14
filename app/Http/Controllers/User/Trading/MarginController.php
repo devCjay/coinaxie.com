@@ -170,20 +170,19 @@ class MarginController extends Controller
             return response()->json(['status' => 'error', 'message' => __('Invalid entry price')], 400);
         }
 
-        //check side againts current price, tp and sl
-        if ($request->side === 'buy' && $request->take_profit < $entry_price) {
+        if ($request->side === 'buy' && $request->take_profit <= $entry_price) {
             return response()->json(['status' => 'error', 'message' => __('Take profit should be greater than entry price')], 400);
         }
 
-        if ($request->side === 'sell' && $request->take_profit > $entry_price) {
+        if ($request->side === 'sell' && $request->take_profit >= $entry_price) {
             return response()->json(['status' => 'error', 'message' => __('Take profit should be less than entry price')], 400);
         }
 
-        if ($request->side === 'buy' && $request->stop_loss > $entry_price) {
+        if ($request->side === 'buy' && $request->stop_loss >= $entry_price) {
             return response()->json(['status' => 'error', 'message' => __('Stop loss should be less than entry price')], 400);
         }
 
-        if ($request->side === 'sell' && $request->stop_loss < $entry_price) {
+        if ($request->side === 'sell' && $request->stop_loss <= $entry_price) {
             return response()->json(['status' => 'error', 'message' => __('Stop loss should be greater than entry price')], 400);
         }
 
