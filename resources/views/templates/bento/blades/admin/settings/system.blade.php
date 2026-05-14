@@ -38,6 +38,15 @@
                         </svg>
                         {{ __('Clear Cache') }}
                     </button>
+                    <button onclick="runMigrations()"
+                        class="px-5 py-2.5 bg-white/5 border border-white/10 rounded-xl text-xs font-bold text-white uppercase tracking-widest hover:bg-emerald-500 hover:border-emerald-500 transition-all flex items-center gap-2 group">
+                        <svg class="w-3.5 h-3.5 text-slate-500 group-hover:text-white transition-colors" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v6h6M20 20v-6h-6M20 8a8 8 0 00-14.828-2M4 16a8 8 0 0014.828 2" />
+                        </svg>
+                        {{ __('Run Migrations') }}
+                    </button>
                     <button onclick="openConfigModal()"
                         class="px-5 py-2.5 bg-accent-primary rounded-xl text-xs font-bold text-white uppercase tracking-widest hover:scale-[1.05] active:scale-95 transition-all flex items-center gap-2 shadow-lg shadow-accent-primary/20">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -527,6 +536,51 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        function runMigrations() {
+            const token = prompt("{{ __('Enter WEB_MIGRATIONS_TOKEN') }}");
+            if (!token) {
+                return;
+            }
+
+            $.ajax({
+                url: "{{ route('admin.settings.system.run-migrations') }}",
+                method: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    token
+                },
+                success: function(res) {
+                    if (res.success) {
+                        if (typeof toastNotification === 'function') {
+                            toastNotification(res.message, 'success');
+                        }
+                        if (res.output) {
+                            alert(res.output);
+                        }
+                        window.location.reload();
+                        return;
+                    }
+                    if (typeof toastNotification === 'function') {
+                        toastNotification(res.message || "{{ __('Failed') }}", 'error');
+                    } else {
+                        alert(res.message || "{{ __('Failed') }}");
+                    }
+                },
+                error: function(xhr) {
+                    const message = xhr.responseJSON ? xhr.responseJSON.message : "{{ __('An error occurred') }}";
+                    if (typeof toastNotification === 'function') {
+                        toastNotification(message, 'error');
+                    } else {
+                        alert(message);
+                    }
+                }
+            });
+        }
+    </script>
+@endpush
 
 @push('scripts')
     <script>

@@ -7,6 +7,7 @@ use App\Models\CronJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 class OveriewController extends Controller
 {
@@ -222,6 +223,37 @@ class OveriewController extends Controller
             Artisan::call('optimize:clear');
             return response()->json(['success' => true, 'message' => __('System cache cleared successfully.')]);
         } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function runMigrations(Request $request)
+    {
+        $request->validate([
+            'token' => 'required|string',
+        ]);
+
+        $token = (string) env('WEB_MIGRATIONS_TOKEN', '');
+        if ($token === '' || !hash_equals($token, (string) $request->token)) {
+            return response()->json([
+                'success' => false,
+                'message' => __('Invalid migration token.'),
+            ], 403);
+        }
+
+        try {
+            Artisan::call('optimize:clear');
+            Artisan::call('migrate', ['--force' => true]);
+            $output = trim((string) Artisan::output());
+            Artisan::call('optimize:clear');
+
+            return response()->json([
+                'success' => true,
+                'message' => __('Migrations executed successfully.'),
+                'output' => $output,
+            ]);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
@@ -659,5 +691,4 @@ class OveriewController extends Controller
         return $pdf->download('security-audit-report-' . date('Y-m-d-H-i-s') . '.pdf');
     }
 }
-
 

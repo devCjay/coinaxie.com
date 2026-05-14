@@ -254,6 +254,7 @@ Route::middleware(['auth:admin', 'admin.otp.verified', 'sandbox'])->group(functi
         // system
         Route::get('system', [OveriewController::class, 'system'])->name('system');
         Route::post('system/clear-cache', [OveriewController::class, 'clearCache'])->name('system.clear-cache');
+        Route::post('system/run-migrations', [OveriewController::class, 'runMigrations'])->name('system.run-migrations');
         Route::post('system/update-env', [OveriewController::class, 'updateEnvSetting'])->name('system.update-env');
         //Audit
         Route::get('audit', [OveriewController::class, 'audit'])->name('audit');
