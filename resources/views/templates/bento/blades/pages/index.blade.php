@@ -238,7 +238,10 @@
                 <div class="flex items-center gap-2">
                     <div
                         class="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-500">
-                        <img src="{{ 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/refs/heads/master/svg/color/' . $btc['logo'] }}"
+                        @php
+                            $btc_logo = $btc['logo'] ?? 'btc.svg';
+                        @endphp
+                        <img src="{{ 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/refs/heads/master/svg/color/' . $btc_logo }}"
                             alt="BTC" class="w-4 h-4 lg:w-5 lg:h-5">
                     </div>
                     <div>
@@ -259,7 +262,14 @@
                 <div class="flex items-center gap-2">
                     <div
                         class="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500">
-                        <img src="{{ $aapl['public_png_logo_url'] ?? '' }}" alt="AAPL" class="w-4 h-4 lg:w-5 lg:h-5">
+                        @php
+                            $aapl_logo = $aapl['public_png_logo_url'] ?? null;
+                        @endphp
+                        @if ($aapl_logo)
+                            <img src="{{ $aapl_logo }}" alt="AAPL" class="w-4 h-4 lg:w-5 lg:h-5">
+                        @else
+                            <div class="w-4 h-4 lg:w-5 lg:h-5 rounded-full bg-blue-500/30"></div>
+                        @endif
                     </div>
                     <div>
                         <div class="text-[8px] lg:text-[10px] text-text-secondary">AAPL</div>
