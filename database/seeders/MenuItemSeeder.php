@@ -251,6 +251,17 @@ class MenuItemSeeder extends Seeder
             'route_wildcard' => 'user.trading.*',
         ]);
 
+        MenuItem::create([
+            'label' => "Copy Trading",
+            'route_name' => 'user.trading.copy-trading',
+            'url' => null,
+            'type' => 'user',
+            'sort_order' => 6,
+            'is_active' => true,
+            'parent_id' => $trading_parent->id,
+            'route_wildcard' => 'user.trading.*',
+        ]);
+
         // MenuItem::create([
         //     'label' => "Commodity Trading",
         //     'route_name' => 'user.trading.commodity',
@@ -985,6 +996,38 @@ class MenuItemSeeder extends Seeder
             'is_active' => true,
             'parent_id' => $forex_parrent->id,
             'route_wildcard' => 'admin.forex-trading.*',
+        ]);
+
+        $copy_trading_parent = MenuItem::create([
+            'route_name' => null,
+            'label' => 'Copy Trading',
+            'url' => "#",
+            'type' => 'admin',
+            'sort_order' => 7,
+            'is_active' => true,
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 6a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4"/><path d="M21 10v7a3 3 0 0 1-3 3h-7"/><path d="M8 12h6"/><path d="M8 8h4"/></svg>'
+        ]);
+
+        MenuItem::create([
+            'label' => "Pro Traders",
+            'route_name' => 'admin.copy-trading.pros.index',
+            'url' => null,
+            'type' => 'admin',
+            'sort_order' => 1,
+            'is_active' => true,
+            'parent_id' => $copy_trading_parent->id,
+            'route_wildcard' => 'admin.copy-trading.*',
+        ]);
+
+        MenuItem::create([
+            'label' => "Relationships",
+            'route_name' => 'admin.copy-trading.relationships.index',
+            'url' => null,
+            'type' => 'admin',
+            'sort_order' => 2,
+            'is_active' => true,
+            'parent_id' => $copy_trading_parent->id,
+            'route_wildcard' => 'admin.copy-trading.*',
         ]);
 
 

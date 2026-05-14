@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\MarginTradingOrder;
 use App\Models\MarginTradingPosition;
 use App\Models\TradingAccount;
+use App\Services\CopyTradingService;
 use App\Services\LozandServices;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -169,7 +170,7 @@ class MarginTradingManager extends Command
             }
 
             // Create Order record for closing
-            MarginTradingOrder::create([
+            $order = MarginTradingOrder::create([
                 'user_id' => $user->id,
                 'type' => 'market',
                 'ticker' => $position->ticker,
@@ -180,6 +181,9 @@ class MarginTradingManager extends Command
                 'leverage' => $position->leverage,
                 'timestamp' => (string) now()->valueOf(), // ms
             ]);
+            DB::afterCommit(function () use ($order) {
+                app(CopyTradingService::class)->handleMarginOrderCreated($order->fresh());
+            });
 
             $position->delete();
         });
@@ -393,7 +397,7 @@ class MarginTradingManager extends Command
             }
 
             // Create Order record for closing
-            MarginTradingOrder::create([
+            $order = MarginTradingOrder::create([
                 'user_id' => $user->id,
                 'type' => 'market',
                 'ticker' => $position->ticker,
@@ -404,6 +408,9 @@ class MarginTradingManager extends Command
                 'leverage' => $position->leverage,
                 'timestamp' => (string) now()->valueOf(), // ms
             ]);
+            DB::afterCommit(function () use ($order) {
+                app(CopyTradingService::class)->handleMarginOrderCreated($order->fresh());
+            });
 
             $position->delete();
         });

@@ -15,6 +15,10 @@ class FuturesTradingOrders extends Model
         'price',
         'status',
         'order_id',
+        'is_copy',
+        'copied_from_user_id',
+        'copied_from_order_id',
+        'copy_relationship_id',
         'timestamp',
         'take_profit',
         'stop_loss',
@@ -32,6 +36,10 @@ class FuturesTradingOrders extends Model
             'stop_loss' => 'float',
             'locked_margin' => 'float',
             'leverage' => 'integer',
+            'is_copy' => 'boolean',
+            'copied_from_user_id' => 'integer',
+            'copied_from_order_id' => 'integer',
+            'copy_relationship_id' => 'integer',
         ];
     }
 

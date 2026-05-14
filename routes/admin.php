@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\Settings\UtilityController;
 use App\Http\Controllers\Admin\Trading\ForexTradingController;
 use App\Http\Controllers\Admin\Trading\FuturesTradingController;
 use App\Http\Controllers\Admin\Trading\MarginTradingController;
+use App\Http\Controllers\Admin\Trading\CopyTradingController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WithdrawalController;
@@ -228,6 +229,14 @@ Route::middleware(['auth:admin', 'admin.otp.verified', 'sandbox'])->group(functi
             Route::post('cancel', [ForexTradingController::class, 'cancelOrder'])->name('cancel');
             Route::post('delete', [ForexTradingController::class, 'deleteOrder'])->name('delete');
         });
+    });
+
+    Route::prefix('copy-trading')->name('copy-trading.')->group(function () {
+        Route::get('/pros', [CopyTradingController::class, 'pros'])->name('pros.index');
+        Route::post('/pros/store', [CopyTradingController::class, 'storePro'])->name('pros.store');
+        Route::post('/pros/update', [CopyTradingController::class, 'updatePro'])->name('pros.update');
+        Route::post('/pros/delete', [CopyTradingController::class, 'deletePro'])->name('pros.delete');
+        Route::get('/relationships', [CopyTradingController::class, 'relationships'])->name('relationships.index');
     });
 
 

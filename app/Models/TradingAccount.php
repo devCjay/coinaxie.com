@@ -22,7 +22,7 @@ class TradingAccount extends Model
     // casts
     protected function casts(): array
     {
-        $decimal_places = getSetting('decimal_places');
+        $decimal_places = (int) (getSetting('decimal_places') ?: 8);
         return [
             'balance' => 'decimal:' . $decimal_places,
             'borrowed' => 'decimal:' . $decimal_places,

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User\Trading;
 use App\Http\Controllers\Controller;
 use App\Models\MarginTradingOrder;
 use App\Models\MarginTradingPosition;
+use App\Services\CopyTradingService;
 use App\Services\LozandServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -225,6 +226,9 @@ class MarginController extends Controller
                     'status' => $request->type === 'market' ? 'filled' : 'pending',
                     'timestamp' => (string) now()->valueOf(), // ms
                 ]);
+                DB::afterCommit(function () use ($order) {
+                    app(CopyTradingService::class)->handleMarginOrderCreated($order->fresh());
+                });
 
                 if ($request->type === 'market') {
                     // Fill Market Order
@@ -338,6 +342,9 @@ class MarginController extends Controller
                 }
 
                 $order->update(['status' => 'canceled']);
+                DB::afterCommit(function () use ($order) {
+                    app(CopyTradingService::class)->handleMarginOrderCanceled($order->fresh());
+                });
 
                 return response()->json([
                     'status' => 'success',

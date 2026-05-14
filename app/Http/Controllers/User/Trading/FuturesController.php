@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User\Trading;
 use App\Http\Controllers\Controller;
 use App\Models\FuturesTradingOrders;
 use App\Models\FuturesTradingPositions;
+use App\Services\CopyTradingService;
 use App\Services\LozandServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -205,6 +206,9 @@ class FuturesController extends Controller
                     'order_id' => 'ORD-' . strtoupper(\Str::random(10)),
                     'timestamp' => (string) now()->valueOf(), // ms
                 ]);
+                DB::afterCommit(function () use ($order) {
+                    app(CopyTradingService::class)->handleFuturesOrderCreated($order->fresh());
+                });
 
                 if ($request->type === 'market') {
                     // Fill Market Order
@@ -326,6 +330,9 @@ class FuturesController extends Controller
                 }
 
                 $order->update(['status' => 'canceled']);
+                DB::afterCommit(function () use ($order) {
+                    app(CopyTradingService::class)->handleFuturesOrderCanceled($order->fresh());
+                });
 
                 return response()->json([
                     'status' => 'success',

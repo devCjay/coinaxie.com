@@ -10,6 +10,10 @@ class MarginTradingOrder extends Model
         'user_id',
         'type',
         'order_mode',
+        'is_copy',
+        'copied_from_user_id',
+        'copied_from_order_id',
+        'copy_relationship_id',
         'ticker',
         'side',
         'size',
@@ -32,6 +36,10 @@ class MarginTradingOrder extends Model
             'take_profit' => 'decimal:8',
             'stop_loss' => 'decimal:8',
             'timestamp' => 'integer',
+            'is_copy' => 'boolean',
+            'copied_from_user_id' => 'integer',
+            'copied_from_order_id' => 'integer',
+            'copy_relationship_id' => 'integer',
         ];
     }
 

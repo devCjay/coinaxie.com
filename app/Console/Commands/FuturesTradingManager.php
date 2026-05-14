@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\FuturesTradingOrders;
 use App\Models\FuturesTradingPositions;
 use App\Models\TradingAccount;
+use App\Services\CopyTradingService;
 use App\Services\LozandServices;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -154,7 +155,7 @@ class FuturesTradingManager extends Command
             $trading_account->increment('balance', $final_amount);
 
             // Create Order record for closing
-            FuturesTradingOrders::create([
+            $order = FuturesTradingOrders::create([
                 'user_id' => $user->id,
                 'type' => 'market', // TP/SL closes at current market price
                 'ticker' => $position->ticker,
@@ -165,6 +166,9 @@ class FuturesTradingManager extends Command
                 'order_id' => 'ORD-' . strtoupper(Str::random(10)),
                 'timestamp' => (string) now()->valueOf(), // ms
             ]);
+            DB::afterCommit(function () use ($order) {
+                app(CopyTradingService::class)->handleFuturesOrderCreated($order->fresh());
+            });
 
             $position->delete();
         });
@@ -350,7 +354,7 @@ class FuturesTradingManager extends Command
             $trading_account->increment('balance', $final_amount);
 
             // Create Order record for closing
-            FuturesTradingOrders::create([
+            $order = FuturesTradingOrders::create([
                 'user_id' => $user->id,
                 'type' => 'market',
                 'ticker' => $position->ticker,
@@ -361,6 +365,9 @@ class FuturesTradingManager extends Command
                 'order_id' => 'LIQ-' . strtoupper(Str::random(10)), // Prefix order ID to indicate Liquidation
                 'timestamp' => (string) now()->valueOf(), // ms
             ]);
+            DB::afterCommit(function () use ($order) {
+                app(CopyTradingService::class)->handleFuturesOrderCreated($order->fresh());
+            });
 
             $position->delete();
         });
