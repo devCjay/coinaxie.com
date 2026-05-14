@@ -186,56 +186,71 @@ class MenuItemSeeder extends Seeder
         }
 
 
+        MenuItem::create([
+            'label' => "Account Overview",
+            'route_name' => 'user.trading.account',
+            'route_wildcard' => 'user.trading.*',
+            'url' => null,
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 2 2 5-5"/></svg>',
+            'type' => 'user',
+            'sort_order' => 5,
+            'is_active' => true,
+            'parent_id' => null,
+        ]);
+
+        MenuItem::create([
+            'label' => "Futures Trading",
+            'route_name' => 'user.trading.futures',
+            'route_wildcard' => 'user.trading.*',
+            'url' => null,
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V7a3 3 0 0 1 3-3h10"/><path d="M6 9h10a3 3 0 0 1 3 3v8"/><path d="M9 13h7"/><path d="M16 11l3 2-3 2"/></svg>',
+            'type' => 'user',
+            'sort_order' => 6,
+            'is_active' => true,
+            'parent_id' => null,
+        ]);
+
+        MenuItem::create([
+            'label' => "Margin Trading",
+            'route_name' => 'user.trading.margin',
+            'route_wildcard' => 'user.trading.*',
+            'url' => null,
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 13.5l3-3"/><path d="M8.5 15.5l-1 1a4 4 0 0 1-5.7-5.7l1-1"/><path d="M15.5 8.5l1-1a4 4 0 0 1 5.7 5.7l-1 1"/></svg>',
+            'type' => 'user',
+            'sort_order' => 7,
+            'is_active' => true,
+            'parent_id' => null,
+        ]);
+
+        MenuItem::create([
+            'label' => "Copy Trading",
+            'route_name' => 'user.trading.copy-trading',
+            'route_wildcard' => 'user.trading.*',
+            'url' => null,
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 6a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4"/><path d="M21 10v7a3 3 0 0 1-3 3h-7"/><path d="M8 12h6"/><path d="M8 8h4"/></svg>',
+            'type' => 'user',
+            'sort_order' => 8,
+            'is_active' => true,
+            'parent_id' => null,
+        ]);
+
         // Trading Menu
         $trading_parent = MenuItem::create([
             'route_name' => null,
             'label' => 'Self Trading',
             'url' => "#",
             'type' => 'user',
-            'sort_order' => 5,
+            'sort_order' => 12,
             'is_active' => true,
             'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5v4"/><rect width="4" height="6" x="7" y="9" rx="1"/><path d="M9 15v2"/><path d="M17 3v2"/><rect width="4" height="8" x="15" y="5" rx="1"/><path d="M17 13v3"/><path d="M3 3v18h18"/></svg>',
         ]);
-        // Trading submenu
-        MenuItem::create([
-            'label' => "Account Overview",
-            'route_name' => 'user.trading.account',
-            'url' => null,
-            'type' => 'user',
-            'sort_order' => 1,
-            'is_active' => true,
-            'parent_id' => $trading_parent->id,
-            'route_wildcard' => 'user.trading.*',
-        ]);
 
-        // Trading submenu
-        MenuItem::create([
-            'label' => "Futures Trading",
-            'route_name' => 'user.trading.futures',
-            'url' => null,
-            'type' => 'user',
-            'sort_order' => 2,
-            'is_active' => true,
-            'parent_id' => $trading_parent->id,
-            'route_wildcard' => 'user.trading.*',
-        ]);
-
-        MenuItem::create([
-            'label' => "Margin Trading",
-            'route_name' => 'user.trading.margin',
-            'url' => null,
-            'type' => 'user',
-            'sort_order' => 3,
-            'is_active' => true,
-            'parent_id' => $trading_parent->id,
-            'route_wildcard' => 'user.trading.*',
-        ]);
         MenuItem::create([
             'label' => "Forex Trading (Live)",
             'route_name' => 'user.trading.forex.live',
             'url' => null,
             'type' => 'user',
-            'sort_order' => 4,
+            'sort_order' => 1,
             'is_active' => true,
             'parent_id' => $trading_parent->id,
             'route_wildcard' => 'user.trading.*',
@@ -245,18 +260,7 @@ class MenuItemSeeder extends Seeder
             'route_name' => 'user.trading.forex.demo',
             'url' => null,
             'type' => 'user',
-            'sort_order' => 5,
-            'is_active' => true,
-            'parent_id' => $trading_parent->id,
-            'route_wildcard' => 'user.trading.*',
-        ]);
-
-        MenuItem::create([
-            'label' => "Copy Trading",
-            'route_name' => 'user.trading.copy-trading',
-            'url' => null,
-            'type' => 'user',
-            'sort_order' => 6,
+            'sort_order' => 2,
             'is_active' => true,
             'parent_id' => $trading_parent->id,
             'route_wildcard' => 'user.trading.*',
