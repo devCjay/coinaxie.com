@@ -26,6 +26,48 @@
                 radial-gradient(900px 420px at 80% 30%, rgba(168, 85, 247, 0.12), rgba(2, 6, 23, 0));
         }
 
+        .ct-profile {
+            background: radial-gradient(1200px 600px at 10% 0%, rgba(16, 185, 129, 0.18), rgba(2, 6, 23, 0)),
+                radial-gradient(1000px 520px at 70% 30%, rgba(59, 130, 246, 0.12), rgba(2, 6, 23, 0)),
+                radial-gradient(900px 520px at 30% 40%, rgba(124, 58, 237, 0.10), rgba(2, 6, 23, 0));
+        }
+
+        .ct-dotted {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+            background-size: 18px 18px;
+            background-position: 0 0;
+        }
+
+        .ct-profit-card {
+            background: radial-gradient(900px 420px at 50% 10%, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0)),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
+        }
+
+        .ct-profit-card:before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 1.5rem;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0));
+            opacity: 0.35;
+            pointer-events: none;
+        }
+
+        .ct-profit-card:after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 1.5rem;
+            background: radial-gradient(700px 260px at 50% 0%, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0));
+            opacity: 0.35;
+            pointer-events: none;
+        }
+
+        .ct-profit-card>* {
+            position: relative;
+            z-index: 1;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -533,7 +575,7 @@
                 $isCopying = (bool) $myRelationship;
             @endphp
 
-            <div class="ct-hero bg-secondary border border-white/5 rounded-[2.5rem] overflow-hidden relative">
+            <div class="ct-hero ct-profile bg-secondary border border-white/5 rounded-[2.5rem] overflow-hidden relative">
                 <div class="px-5 md:px-8 pt-9 pb-10 md:pt-12 md:pb-12">
                     <a href="{{ route('user.trading.copy-trading.leaders') }}"
                         class="inline-flex items-center gap-2 text-white/70 hover:text-white transition text-sm font-bold">
@@ -573,41 +615,44 @@
                             </div>
                         </div>
 
-                        <div class="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-7 relative overflow-hidden">
-                            <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-white/0 via-white/20 to-white/0"></div>
-                            <div class="text-center pt-1">
-                                <div class="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-white/55">
-                                    <span class="w-6 h-6 rounded-lg bg-white/5 border border-white/10 grid place-items-center text-white/55 font-black">%</span>
+                        @php
+                            $capPct = $capacityMax > 0 ? min(100, ($followers / $capacityMax) * 100) : 0;
+                        @endphp
+
+                        <div class="ct-dotted ct-profit-card bg-white/5 border border-white/10 rounded-3xl p-6 md:p-7 relative overflow-hidden">
+                            <div class="absolute inset-x-0 top-0 h-1 bg-white/90"></div>
+
+                            <div class="text-center pt-2">
+                                <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-[11px] font-black text-white/80">
+                                    <span class="w-6 h-6 rounded-lg bg-white/5 border border-white/10 grid place-items-center text-white/60 font-black">%</span>
                                     {{ __('Profit Share') }}
                                 </div>
-                                <div class="mt-3 text-white font-black text-4xl leading-none">{{ (int) $profitShare }}%</div>
+                                <div class="mt-4 text-white font-black text-5xl leading-none">{{ (int) $profitShare }}%</div>
                             </div>
 
-                            <div class="mt-5 grid grid-cols-2 gap-3">
-                                <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
-                                    <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Min. investment') }}</div>
-                                    <div class="mt-1 text-white font-black text-sm">{{ number_format($minInvestmentAmount, 2) }} {{ $minInvestmentCurrency }}</div>
+                            <div class="mt-6 grid grid-cols-2 gap-3">
+                                <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5">
+                                    <div class="text-[10px] uppercase tracking-widest font-black text-white/45">{{ __('Min. Investment') }}</div>
+                                    <div class="mt-1.5 text-white font-black text-sm">{{ number_format($minInvestmentAmount, 2) }} {{ $minInvestmentCurrency }}</div>
                                 </div>
-                                <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
-                                    <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Available spots') }}</div>
-                                    <div class="mt-1 text-white font-black text-sm">{{ number_format($availableSpots) }} / {{ number_format($capacityMax) }}</div>
+                                <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5">
+                                    <div class="text-[10px] uppercase tracking-widest font-black text-white/45">{{ __('Available Spots') }}</div>
+                                    <div class="mt-1.5 text-white font-black text-sm">{{ number_format($availableSpots) }} / {{ number_format($capacityMax) }}</div>
                                 </div>
                             </div>
 
-                            <div class="mt-5">
+                            <div class="mt-6">
                                 <div class="flex items-center justify-between text-[11px] text-white/55">
-                                    <span class="font-bold uppercase tracking-widest">{{ __('Capacity') }}</span>
-                                    <span class="text-white font-black">{{ number_format($followers) }}/{{ number_format($capacityMax) }}</span>
+                                    <span class="font-bold">{{ __('Capacity') }}</span>
+                                    <span class="text-white/70 font-bold">{{ number_format($capPct, 0) }}% {{ __('filled') }}</span>
                                 </div>
-                                <div class="mt-2.5 w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                                    @php
-                                        $capPct = $capacityMax > 0 ? min(100, ($followers / $capacityMax) * 100) : 0;
-                                    @endphp
-                                    <div class="h-full bg-accent-primary/60" style="width: {{ $capPct }}%"></div>
+                                <div class="mt-2.5 w-full h-2.5 bg-white/5 rounded-full overflow-hidden relative">
+                                    <div class="absolute inset-0 bg-white/10"></div>
+                                    <div class="absolute left-0 top-0 h-full bg-accent-primary/65" style="width: {{ $capPct }}%"></div>
                                 </div>
                             </div>
 
-                            <div class="mt-7 pb-1">
+                            <div class="mt-7 pb-2">
                                 <select class="copy-market hidden" data-pro-id="{{ $pro->id }}">
                                     <option value="both" selected></option>
                                 </select>
@@ -622,15 +667,14 @@
 
                                 @if ($isCopying)
                                     <button type="button" data-pro-id="{{ $pro->id }}"
-                                        class="btn-unfollow w-full bg-red-500/15 border border-red-500/25 text-red-200 rounded-2xl px-6 py-3 text-sm font-black hover:bg-red-500/20 transition inline-flex items-center justify-center gap-2">
+                                        class="btn-unfollow w-full bg-red-500/15 border border-red-500/25 text-red-200 rounded-2xl px-6 py-4 text-sm font-black hover:bg-red-500/20 transition inline-flex items-center justify-center gap-2">
                                         {{ __('Stop Copying') }}
                                     </button>
                                 @else
                                     <button type="button" data-pro-id="{{ $pro->id }}"
-                                        class="btn-follow w-full bg-white text-black rounded-2xl px-6 py-3 text-sm font-black hover:bg-white/90 transition inline-flex items-center justify-center gap-2">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 5v14m7-7H5"></path>
+                                        class="btn-follow w-full bg-white text-black rounded-2xl px-6 py-4 text-sm font-black hover:bg-white/90 transition inline-flex items-center justify-center gap-3">
+                                        <svg class="w-4 h-4 text-black/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-7 7h8a2 2 0 002-2V7a2 2 0 00-2-2H8a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                                         </svg>
                                         {{ __('Start Copying') }}
                                     </button>
