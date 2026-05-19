@@ -7,6 +7,7 @@ use App\Models\LaunchpadProject;
 use App\Services\LaunchpadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Models\TradingAccount;
 
 class LaunchpadController extends Controller
 {
@@ -15,9 +16,52 @@ class LaunchpadController extends Controller
         $page_title = __('Launchpad');
         $template = config('site.template');
 
-        $projects = LaunchpadProject::latest()->paginate(30);
+        $search = request('search');
+        $sort = request('sort', 'created_at');
+        $dir = request('dir', 'desc');
 
-        return view("templates.{$template}.blades.admin.launchpad.index", compact('page_title', 'projects'));
+        $allowedSort = ['created_at', 'sold_quote', 'sold_tokens', 'sale_price', 'name', 'status'];
+        if (!in_array($sort, $allowedSort, true)) {
+            $sort = 'created_at';
+        }
+        $dir = strtolower((string) $dir) === 'asc' ? 'asc' : 'desc';
+
+        $query = LaunchpadProject::query()
+            ->when($search, function ($q) use ($search) {
+                $term = (string) $search;
+                return $q->where(function ($qq) use ($term) {
+                    $qq->where('name', 'like', "%{$term}%")
+                        ->orWhere('token_symbol', 'like', "%{$term}%")
+                        ->orWhere('quote_currency', 'like', "%{$term}%")
+                        ->orWhere('status', 'like', "%{$term}%");
+                });
+            });
+
+        $allProjects = (clone $query)->get(['id', 'token_symbol', 'quote_currency', 'status', 'trading_enabled', 'sold_quote', 'sold_tokens']);
+        $tokenSymbols = $allProjects->pluck('token_symbol')->map(fn ($s) => strtoupper((string) $s))->unique()->values()->all();
+
+        $stats = [
+            'unique_tokens' => (int) $allProjects->pluck('token_symbol')->unique()->count(),
+            'launched_projects' => (int) $allProjects->filter(fn ($p) => (bool) $p->trading_enabled || (string) $p->status === 'launched')->count(),
+            'total_sales_quote' => (float) $allProjects->sum(fn ($p) => (float) $p->sold_quote),
+            'total_tokens_sold' => (float) $allProjects->sum(fn ($p) => (float) $p->sold_tokens),
+            'unique_holders' => $tokenSymbols
+                ? (int) TradingAccount::where('account_type', 'spot')
+                    ->whereIn('currency', $tokenSymbols)
+                    ->where('balance', '>', 0)
+                    ->distinct('user_id')
+                    ->count('user_id')
+                : 0,
+            'total_holdings' => $tokenSymbols
+                ? (float) TradingAccount::where('account_type', 'spot')
+                    ->whereIn('currency', $tokenSymbols)
+                    ->sum('balance')
+                : 0.0,
+        ];
+
+        $projects = $query->orderBy($sort, $dir)->paginate(30)->withQueryString();
+
+        return view("templates.{$template}.blades.admin.launchpad.index", compact('page_title', 'projects', 'stats'));
     }
 
     public function store(Request $request, LaunchpadService $launchpad)
@@ -134,4 +178,3 @@ class LaunchpadController extends Controller
         return back()->with('success', __('Trading enabled'));
     }
 }
-

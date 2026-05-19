@@ -6,6 +6,7 @@ use App\Models\MenuItem;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
@@ -34,6 +35,45 @@ class AppServiceProvider extends ServiceProvider
 
         //Support for  older MySQL / MariaDB
         Schema::defaultStringLength(191);
+
+        if (Schema::hasTable('menu_items')) {
+            $created = false;
+
+            if (Route::has('user.launchpad.index') && !MenuItem::where('type', 'user')->where('route_name', 'user.launchpad.index')->exists()) {
+                MenuItem::create([
+                    'label' => 'Launchpad',
+                    'route_name' => 'user.launchpad.index',
+                    'route_wildcard' => 'user.launchpad.*',
+                    'url' => null,
+                    'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13l3 3 9-9"/><path d="M9 16l-3.5 3.5a2 2 0 0 1-2.8 0 2 2 0 0 1 0-2.8L6 13"/><path d="M18 7l3.5-3.5a2 2 0 0 0 0-2.8 2 2 0 0 0-2.8 0L15 4"/></svg>',
+                    'type' => 'user',
+                    'sort_order' => 9,
+                    'is_active' => true,
+                    'parent_id' => null,
+                ]);
+                $created = true;
+            }
+
+            if (Route::has('admin.launchpad.index') && !MenuItem::where('type', 'admin')->where('route_name', 'admin.launchpad.index')->exists()) {
+                MenuItem::create([
+                    'label' => 'Launchpad',
+                    'route_name' => 'admin.launchpad.index',
+                    'route_wildcard' => 'admin.launchpad.*',
+                    'url' => null,
+                    'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></svg>',
+                    'type' => 'admin',
+                    'sort_order' => 7,
+                    'is_active' => true,
+                    'parent_id' => null,
+                ]);
+                $created = true;
+            }
+
+            if ($created) {
+                Cache::forget('admin_menu_items');
+                Cache::forget('user_menu_items');
+            }
+        }
 
         // Sharing variables only to the user layouts
         View::composer('templates.*.blades.layouts.user', function ($view) {
