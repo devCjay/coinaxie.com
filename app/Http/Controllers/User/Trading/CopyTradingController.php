@@ -5,6 +5,10 @@ namespace App\Http\Controllers\User\Trading;
 use App\Http\Controllers\Controller;
 use App\Models\CopyTradingProTrader;
 use App\Models\CopyTradingRelationship;
+use App\Models\FuturesTradingOrders;
+use App\Models\FuturesTradingPositions;
+use App\Models\MarginTradingOrder;
+use App\Models\MarginTradingPosition;
 use Illuminate\Http\Request;
 
 class CopyTradingController extends Controller
@@ -70,6 +74,98 @@ class CopyTradingController extends Controller
         $mode = 'leaders';
 
         return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'mode', 'pros', 'myRelationships'));
+    }
+
+    public function profile(int $id)
+    {
+        $page_title = __('Copy Trading');
+        $template = config('site.template');
+
+        $pro = CopyTradingProTrader::with('user')
+            ->withCount(['relationships as followers_count' => function ($q) {
+                $q->where('status', 'active');
+            }])
+            ->where('status', 'active')
+            ->findOrFail($id);
+
+        $myRelationship = CopyTradingRelationship::query()
+            ->where('pro_trader_id', $pro->id)
+            ->where('follower_id', auth()->id())
+            ->first();
+
+        $userId = (int) $pro->user_id;
+
+        $futuresTrades = FuturesTradingOrders::query()
+            ->where('user_id', $userId)
+            ->where('is_copy', false)
+            ->where('status', 'filled')
+            ->count();
+
+        $marginTrades = MarginTradingOrder::query()
+            ->where('user_id', $userId)
+            ->where('is_copy', false)
+            ->where('status', 'filled')
+            ->count();
+
+        $totalTrades = (int) ($futuresTrades + $marginTrades);
+
+        $futuresProfit = (float) FuturesTradingPositions::query()
+            ->where('user_id', $userId)
+            ->sum('realized_pnl');
+
+        $marginProfit = (float) MarginTradingPosition::query()
+            ->where('user_id', $userId)
+            ->sum('realized_pnl');
+
+        $totalProfit = (float) ($futuresProfit + $marginProfit);
+
+        $wins = (int) (FuturesTradingPositions::query()
+            ->where('user_id', $userId)
+            ->where('realized_pnl', '>', 0)
+            ->count()
+            + MarginTradingPosition::query()
+                ->where('user_id', $userId)
+                ->where('realized_pnl', '>', 0)
+                ->count());
+
+        $losses = (int) (FuturesTradingPositions::query()
+            ->where('user_id', $userId)
+            ->where('realized_pnl', '<', 0)
+            ->count()
+            + MarginTradingPosition::query()
+                ->where('user_id', $userId)
+                ->where('realized_pnl', '<', 0)
+                ->count());
+
+        $decisions = $wins + $losses;
+        $winRate = $decisions > 0 ? ($wins / $decisions) * 100 : 0;
+
+        $followers = (int) ($pro->followers_count ?? 0);
+        $capacityMax = 100;
+
+        $stats = [
+            'roi' => 0,
+            'win_rate' => $winRate,
+            'followers' => $followers,
+            'total_trades' => $totalTrades,
+            'total_profit' => $totalProfit,
+            'total_volume' => 0,
+            'avg_profit_per_trade' => $totalTrades > 0 ? ($totalProfit / $totalTrades) : 0,
+            'max_drawdown' => null,
+        ];
+
+        $profile = [
+            'style' => 'SWING',
+            'risk_level' => 'Conservative',
+            'profit_share_percent' => 0,
+            'min_investment_amount' => 100,
+            'min_investment_currency' => 'USDT',
+            'capacity_max' => $capacityMax,
+        ];
+
+        $mode = 'profile';
+
+        return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'mode', 'pro', 'myRelationship', 'stats', 'profile'));
     }
 
     public function requestLeader(Request $request)

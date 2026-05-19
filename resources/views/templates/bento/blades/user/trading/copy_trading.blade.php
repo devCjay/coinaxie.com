@@ -293,7 +293,7 @@
                                     <span class="font-black text-white">0%</span>
                                     <span class="text-white/55 font-bold">{{ __('Profit Share') }}</span>
                                 </div>
-                                <a href="{{ route('user.trading.copy-trading.leaders') }}"
+                        <a href="{{ route('user.trading.copy-trading.profile', ['id' => $pro->id]) }}"
                                     class="text-[13px] font-black text-white hover:text-accent-primary transition inline-flex items-center gap-2">
                                     {{ __('View Profile') }}
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -370,7 +370,7 @@
                     @endif
                 </div>
             </div>
-        @else
+        @elseif ($mode === 'leaders')
             <div class="bg-secondary border border-white/5 rounded-[2.5rem] overflow-hidden relative">
                 <div class="px-5 md:px-8 py-6 md:py-8">
                     <div class="flex items-center justify-between gap-4 flex-wrap">
@@ -428,6 +428,17 @@
                                 {{ $pro->bio }}
                             </div>
                         @endif
+
+                        <div class="mt-4 flex items-center justify-between gap-3">
+                            <a href="{{ route('user.trading.copy-trading.profile', ['id' => $pro->id]) }}"
+                                class="text-[13px] font-black text-white/85 hover:text-accent-primary transition inline-flex items-center gap-2">
+                                {{ __('View Profile') }}
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                                    </path>
+                                </svg>
+                            </a>
+                        </div>
 
                         <div class="mt-5 space-y-3">
                             <div class="grid grid-cols-2 gap-3">
@@ -509,6 +520,254 @@
                         {{ __('No professional traders available yet.') }}
                     </div>
                 @endforelse
+            </div>
+        @else
+            @php
+                $name = $pro->display_name ?: ($pro->user->username ?? $pro->user->first_name ?? 'Trader');
+                $followers = (int) ($stats['followers'] ?? 0);
+                $capacityMax = (int) ($profile['capacity_max'] ?? 100);
+                $availableSpots = max(0, $capacityMax - $followers);
+                $profitShare = (float) ($profile['profit_share_percent'] ?? 0);
+                $minInvestmentAmount = (float) ($profile['min_investment_amount'] ?? 0);
+                $minInvestmentCurrency = strtoupper((string) ($profile['min_investment_currency'] ?? 'USDT'));
+                $isCopying = (bool) $myRelationship;
+            @endphp
+
+            <div class="ct-hero bg-secondary border border-white/5 rounded-[2.5rem] overflow-hidden relative">
+                <div class="px-5 md:px-8 py-7 md:py-10">
+                    <a href="{{ route('user.trading.copy-trading.leaders') }}"
+                        class="inline-flex items-center gap-2 text-white/70 hover:text-white transition text-sm font-bold">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                        </svg>
+                        {{ __('Back to Leaders') }}
+                    </a>
+
+                    <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-6 items-start">
+                        <div class="lg:col-span-2">
+                            <div class="flex items-start gap-4">
+                                <div class="w-16 h-16 rounded-full bg-white/5 border border-white/10 grid place-items-center text-white font-black text-lg relative overflow-hidden">
+                                    <span class="relative z-[1]">{{ strtoupper(substr($name, 0, 2)) }}</span>
+                                    <div class="absolute inset-0 bg-accent-primary/15"></div>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-white font-black text-2xl md:text-3xl leading-tight">{{ $name }}</div>
+                                    <div class="mt-2 flex flex-wrap items-center gap-2">
+                                        <span class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1.5 text-[11px] font-black uppercase tracking-widest text-white/70">
+                                            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                            {{ strtoupper((string) ($profile['style'] ?? 'SWING')) }}
+                                        </span>
+                                        <span class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1.5 text-[11px] font-black text-emerald-200">
+                                            {{ (string) ($profile['risk_level'] ?? 'Conservative') }}
+                                        </span>
+                                        <span class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1.5 text-[11px] font-black uppercase tracking-widest text-white/55">
+                                            {{ __('Since') }} {{ $pro->created_at ? $pro->created_at->format('M Y') : __('2025') }}
+                                        </span>
+                                    </div>
+                                    @if ($pro->bio)
+                                        <div class="mt-3 text-white/55 text-sm max-w-xl">
+                                            {{ $pro->bio }}
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white/5 border border-white/10 rounded-3xl p-5 md:p-6 relative overflow-hidden">
+                            <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-white/0 via-white/20 to-white/0"></div>
+                            <div class="text-center">
+                                <div class="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-white/55">
+                                    <span class="w-6 h-6 rounded-lg bg-white/5 border border-white/10 grid place-items-center text-white/55 font-black">%</span>
+                                    {{ __('Profit Share') }}
+                                </div>
+                                <div class="mt-3 text-white font-black text-4xl leading-none">{{ (int) $profitShare }}%</div>
+                            </div>
+
+                            <div class="mt-5 grid grid-cols-2 gap-3">
+                                <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+                                    <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Min. investment') }}</div>
+                                    <div class="mt-1 text-white font-black text-sm">{{ number_format($minInvestmentAmount, 2) }} {{ $minInvestmentCurrency }}</div>
+                                </div>
+                                <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+                                    <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Available spots') }}</div>
+                                    <div class="mt-1 text-white font-black text-sm">{{ number_format($availableSpots) }} / {{ number_format($capacityMax) }}</div>
+                                </div>
+                            </div>
+
+                            <div class="mt-5">
+                                <div class="flex items-center justify-between text-[11px] text-white/55">
+                                    <span class="font-bold uppercase tracking-widest">{{ __('Capacity') }}</span>
+                                    <span class="text-white font-black">{{ number_format($followers) }}/{{ number_format($capacityMax) }}</span>
+                                </div>
+                                <div class="mt-2.5 w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                                    @php
+                                        $capPct = $capacityMax > 0 ? min(100, ($followers / $capacityMax) * 100) : 0;
+                                    @endphp
+                                    <div class="h-full bg-accent-primary/60" style="width: {{ $capPct }}%"></div>
+                                </div>
+                            </div>
+
+                            <div class="mt-6">
+                                <select class="copy-market hidden" data-pro-id="{{ $pro->id }}">
+                                    <option value="both" selected></option>
+                                </select>
+                                <select class="copy-allocation-type hidden" data-pro-id="{{ $pro->id }}">
+                                    <option value="percent" selected></option>
+                                </select>
+                                <input type="number" class="copy-allocation-value hidden" data-pro-id="{{ $pro->id }}" value="10" />
+                                <input type="number" class="copy-leverage hidden" data-pro-id="{{ $pro->id }}" value="50" />
+                                <select class="copy-margin-mode hidden" data-pro-id="{{ $pro->id }}">
+                                    <option value="normal" selected></option>
+                                </select>
+
+                                @if ($isCopying)
+                                    <button type="button" data-pro-id="{{ $pro->id }}"
+                                        class="btn-unfollow w-full bg-red-500/15 border border-red-500/25 text-red-200 rounded-2xl px-6 py-3 text-sm font-black hover:bg-red-500/20 transition inline-flex items-center justify-center gap-2">
+                                        {{ __('Stop Copying') }}
+                                    </button>
+                                @else
+                                    <button type="button" data-pro-id="{{ $pro->id }}"
+                                        class="btn-follow w-full bg-white text-black rounded-2xl px-6 py-3 text-sm font-black hover:bg-white/90 transition inline-flex items-center justify-center gap-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 5v14m7-7H5"></path>
+                                        </svg>
+                                        {{ __('Start Copying') }}
+                                    </button>
+                                @endif
+                                <a href="{{ route('user.trading.copy-trading.leaders') }}"
+                                    class="mt-3 block text-center text-xs font-black uppercase tracking-widest text-white/55 hover:text-white transition">
+                                    {{ __('Advanced settings') }}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-7 md:mt-8 grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
+                        <div class="bg-white/5 border border-white/10 rounded-3xl px-5 py-4">
+                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Total ROI') }}</div>
+                            <div class="mt-2 text-emerald-300 font-black text-2xl">+{{ number_format((float) ($stats['roi'] ?? 0), 2) }}%</div>
+                            <div class="text-white/45 text-xs mt-1">{{ __('All-time return') }}</div>
+                        </div>
+                        <div class="bg-white/5 border border-white/10 rounded-3xl px-5 py-4">
+                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Win Rate') }}</div>
+                            <div class="mt-2 text-white font-black text-2xl">{{ number_format((float) ($stats['win_rate'] ?? 0), 2) }}%</div>
+                            <div class="text-white/45 text-xs mt-1">{{ __('Success rate') }}</div>
+                        </div>
+                        <div class="bg-white/5 border border-white/10 rounded-3xl px-5 py-4">
+                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Followers') }}</div>
+                            <div class="mt-2 text-white font-black text-2xl">{{ number_format((int) ($stats['followers'] ?? 0)) }}</div>
+                            <div class="text-white/45 text-xs mt-1">{{ __('Capacity') }} {{ number_format((int) ($stats['followers'] ?? 0)) }}/{{ number_format($capacityMax) }}</div>
+                        </div>
+                        <div class="bg-white/5 border border-white/10 rounded-3xl px-5 py-4">
+                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Total Trades') }}</div>
+                            <div class="mt-2 text-white font-black text-2xl">{{ number_format((int) ($stats['total_trades'] ?? 0)) }}</div>
+                            <div class="text-white/45 text-xs mt-1">{{ __('Completed Trades') }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-10 md:mt-12 grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-6">
+                <div class="lg:col-span-2">
+                    <div class="text-white font-black text-lg flex items-center gap-2">
+                        <svg class="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 17v-6a2 2 0 012-2h2a2 2 0 012 2v6m3 0V9a2 2 0 00-2-2H8a2 2 0 00-2 2v8m16 0H4"></path>
+                        </svg>
+                        {{ __('Performance Metrics') }}
+                    </div>
+
+                    <div class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
+                        <div class="bg-secondary border border-white/5 rounded-3xl px-5 py-5">
+                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Total profit') }}</div>
+                            <div class="mt-2 text-emerald-300 font-black text-lg">{{ number_format((float) ($stats['total_profit'] ?? 0), 2) }} USDT</div>
+                        </div>
+                        <div class="bg-secondary border border-white/5 rounded-3xl px-5 py-5">
+                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Total volume') }}</div>
+                            <div class="mt-2 text-white font-black text-lg">{{ number_format((float) ($stats['total_volume'] ?? 0), 2) }} USDT</div>
+                        </div>
+                        <div class="bg-secondary border border-white/5 rounded-3xl px-5 py-5">
+                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Avg. profit/trade') }}</div>
+                            <div class="mt-2 text-white font-black text-lg">{{ number_format((float) ($stats['avg_profit_per_trade'] ?? 0), 2) }} USDT</div>
+                        </div>
+                        <div class="bg-secondary border border-white/5 rounded-3xl px-5 py-5">
+                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Max drawdown') }}</div>
+                            <div class="mt-2 text-white font-black text-lg">{{ ($stats['max_drawdown'] === null) ? 'N/A' : number_format((float) $stats['max_drawdown'], 2) . '%' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-3 py-2 text-xs font-black text-white/70">
+                            <span class="bg-white/10 rounded-xl px-3 py-1">{{ __('Recent Trades') }}</span>
+                            <span class="text-white/40">•</span>
+                            <span class="text-white/55">{{ __('Markets') }}</span>
+                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/10 text-white/70 text-[11px] font-black">1</span>
+                            <span class="text-white/40">•</span>
+                            <span class="text-white/55">{{ __('Performance') }}</span>
+                        </div>
+
+                        <div class="mt-6 bg-secondary border border-white/5 rounded-3xl p-10 md:p-16 text-center">
+                            <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 mx-auto grid place-items-center">
+                                <svg class="w-8 h-8 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M3 12h2l3 7 4-14 3 7h6"></path>
+                                </svg>
+                            </div>
+                            <div class="mt-5 text-white font-black text-xl">{{ __('No Recent Trades') }}</div>
+                            <div class="mt-2 text-white/55">{{ __("This leader hasn't completed any trades yet.") }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-secondary border border-white/5 rounded-3xl p-6 md:p-7 h-fit">
+                    <div class="text-white font-black text-lg flex items-center gap-2">
+                        <svg class="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        {{ __('Quick Info') }}
+                    </div>
+
+                    <div class="mt-5 space-y-4 text-sm">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="text-white/60 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17l6-6 4 4 7-7"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 7h6v6"></path>
+                                </svg>
+                                {{ __('Style') }}
+                            </div>
+                            <div class="text-white font-black">{{ strtoupper((string) ($profile['style'] ?? 'SWING')) }}</div>
+                        </div>
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="text-white/60 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                {{ __('Risk Level') }}
+                            </div>
+                            <div class="text-emerald-300 font-black">{{ (string) ($profile['risk_level'] ?? 'Conservative') }}</div>
+                        </div>
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="text-white/60 flex items-center gap-2">
+                                <span class="w-5 h-5 rounded-lg bg-white/5 border border-white/10 grid place-items-center text-white/55 font-black text-xs">%</span>
+                                {{ __('Profit Share') }}
+                            </div>
+                            <div class="text-white font-black">{{ (int) $profitShare }}%</div>
+                        </div>
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="text-white/60 flex items-center gap-2">
+                                <svg class="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                {{ __('Min. Investment') }}
+                            </div>
+                            <div class="text-white font-black">{{ number_format($minInvestmentAmount, 2) }} {{ $minInvestmentCurrency }}</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         @endif
     </div>

@@ -121,6 +121,7 @@ Route::prefix('user')->middleware(['auth', 'otp.verified', 'user.status', 'user.
         Route::post('/margin/cancel-order', [MarginController::class, 'cancelOrder'])->name('margin.cancel-order');
         Route::get('/copy-trading', [CopyTradingController::class, 'index'])->name('copy-trading');
         Route::get('/copy-trading/leaders', [CopyTradingController::class, 'leaders'])->name('copy-trading.leaders');
+        Route::get('/copy-trading/leaders/{id}', [CopyTradingController::class, 'profile'])->name('copy-trading.profile');
         Route::post('/copy-trading/follow', [CopyTradingController::class, 'follow'])->name('copy-trading.follow');
         Route::post('/copy-trading/unfollow', [CopyTradingController::class, 'unfollow'])->name('copy-trading.unfollow');
         Route::post('/copy-trading/request-leader', [CopyTradingController::class, 'requestLeader'])->name('copy-trading.request-leader');
