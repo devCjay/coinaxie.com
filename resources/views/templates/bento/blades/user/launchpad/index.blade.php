@@ -205,8 +205,10 @@
                         </div>
                     </div>
                 @empty
-                    <div class="bg-secondary border border-white/5 rounded-3xl p-8 text-center text-white/50 md:col-span-2 xl:col-span-4">
-                        {{ __('No launchpad projects yet.') }}
+                    <div class="md:col-span-2 xl:col-span-4">
+                        <div class="bg-secondary border border-white/5 rounded-3xl p-10 text-center text-white/50 max-w-2xl mx-auto flex items-center justify-center min-h-[140px]">
+                            {{ __('No launchpad projects yet.') }}
+                        </div>
                     </div>
                 @endforelse
             </div>
