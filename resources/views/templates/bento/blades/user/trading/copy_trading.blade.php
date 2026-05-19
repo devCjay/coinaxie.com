@@ -796,11 +796,7 @@
                     <div class="mt-6">
                         <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-3 py-2 text-xs font-black text-white/70">
                             <span class="bg-white/10 rounded-xl px-3 py-1">{{ __('Recent Trades') }}</span>
-                            <span class="text-white/40">•</span>
-                            <span class="text-white/55">{{ __('Markets') }}</span>
-                            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/10 text-white/70 text-[11px] font-black">1</span>
-                            <span class="text-white/40">•</span>
-                            <span class="text-white/55">{{ __('Performance') }}</span>
+                        
                         </div>
 
                         <div class="mt-6 bg-secondary border border-white/5 rounded-3xl p-10 md:p-16 text-center">
