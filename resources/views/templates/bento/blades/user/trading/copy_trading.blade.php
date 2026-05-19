@@ -211,36 +211,64 @@
                             $name = $pro->display_name ?: ($pro->user->username ?? $pro->user->first_name ?? 'Trader');
                             $followers = (int) ($pro->followers_count ?? 0);
                         @endphp
-                        <div class="bg-secondary border border-white/5 rounded-3xl p-5 md:p-6">
+                        <div class="relative overflow-hidden bg-secondary border border-white/5 rounded-3xl p-5 md:p-6">
+                            <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-emerald-500/0 via-emerald-400/60 to-emerald-500/0"></div>
+                            <div class="absolute -top-16 -left-16 w-40 h-40 rounded-full bg-accent-primary/10 blur-3xl pointer-events-none"></div>
+
                             <div class="flex items-start justify-between gap-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-12 h-12 rounded-full bg-accent-primary/20 border border-accent-primary/25 grid place-items-center text-accent-primary font-black">
-                                        {{ strtoupper(substr($name, 0, 1)) }}
+                                    <div class="relative w-12 h-12 rounded-full bg-white/5 border border-white/10 grid place-items-center text-white font-black">
+                                        <span class="relative z-[1]">{{ strtoupper(substr($name, 0, 1)) }}</span>
+                                        <div class="absolute inset-0 rounded-full bg-accent-primary/15"></div>
                                     </div>
-                                    <div>
-                                        <div class="text-white font-black leading-tight">{{ $name }}</div>
-                                        <div class="text-[10px] text-white/50 font-black uppercase tracking-widest mt-1">
-                                            {{ __('Verified Leader') }}
+                                    <div class="min-w-0">
+                                        <div class="text-white font-black leading-tight truncate">{{ $name }}</div>
+                                        <div class="mt-1 flex items-center gap-2 text-[11px] text-white/55">
+                                            <span class="inline-flex items-center gap-2">
+                                                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                                <span class="font-bold uppercase tracking-widest">{{ __('Verified') }}</span>
+                                            </span>
+                                            <span class="text-white/25">•</span>
+                                            <span class="font-bold uppercase tracking-widest">{{ __('Active') }}</span>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-xs px-2 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">
-                                    {{ __('Active') }}
+                                <div class="text-xs px-2.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 font-black uppercase tracking-widest">
+                                    {{ __('Leader') }}
                                 </div>
                             </div>
 
                             <div class="mt-6 grid grid-cols-3 gap-3.5">
-                                <div class="bg-white/5 border border-white/10 rounded-2xl px-3.5 py-3">
-                                    <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('ROI') }}</div>
-                                    <div class="mt-1.5 text-emerald-300 font-black leading-tight">+0.0%</div>
+                                <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5">
+                                    <div class="flex items-center gap-2 text-[10px] uppercase tracking-widest font-black text-white/50">
+                                        <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17l6-6 4 4 7-7"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 7h6v6"></path>
+                                        </svg>
+                                        {{ __('ROI') }}
+                                    </div>
+                                    <div class="mt-2 text-emerald-300 font-black leading-tight">+0.0%</div>
                                 </div>
-                                <div class="bg-white/5 border border-white/10 rounded-2xl px-3.5 py-3">
-                                    <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Win Rate') }}</div>
-                                    <div class="mt-1.5 text-white font-black leading-tight">0.0%</div>
+                                <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5">
+                                    <div class="flex items-center gap-2 text-[10px] uppercase tracking-widest font-black text-white/50">
+                                        <svg class="w-4 h-4 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        {{ __('Win Rate') }}
+                                    </div>
+                                    <div class="mt-2 text-white font-black leading-tight">0.0%</div>
                                 </div>
-                                <div class="bg-white/5 border border-white/10 rounded-2xl px-3.5 py-3">
-                                    <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Followers') }}</div>
-                                    <div class="mt-1.5 text-white font-black leading-tight">{{ number_format($followers) }}</div>
+                                <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5">
+                                    <div class="flex items-center gap-2 text-[10px] uppercase tracking-widest font-black text-white/50">
+                                        <svg class="w-4 h-4 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-4-4h-1"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20H4v-2a4 4 0 014-4h1"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                        </svg>
+                                        {{ __('Followers') }}
+                                    </div>
+                                    <div class="mt-2 text-white font-black leading-tight">{{ number_format($followers) }}</div>
                                 </div>
                             </div>
 
@@ -257,9 +285,13 @@
                                 </div>
                             </div>
 
-                            <div class="mt-6 flex items-center justify-between gap-3">
-                                <div class="text-[11px] px-2.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-white/70 font-bold">
-                                    {{ __('Profit Share') }} <span class="text-white font-black ml-1">0%</span>
+                            <div class="mt-6 h-px bg-white/10"></div>
+
+                            <div class="mt-4 flex items-center justify-between gap-3">
+                                <div class="text-[11px] px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-white/70 font-bold inline-flex items-center gap-2">
+                                    <span class="w-6 h-6 rounded-lg bg-white/5 border border-white/10 grid place-items-center text-white/55 font-black">%</span>
+                                    <span class="font-black text-white">0%</span>
+                                    <span class="text-white/55 font-bold">{{ __('Profit Share') }}</span>
                                 </div>
                                 <a href="{{ route('user.trading.copy-trading.leaders') }}"
                                     class="text-[13px] font-black text-white hover:text-accent-primary transition inline-flex items-center gap-2">
