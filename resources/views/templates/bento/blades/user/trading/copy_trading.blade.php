@@ -238,37 +238,37 @@
                                 </div>
                             </div>
 
-                            <div class="mt-6 grid grid-cols-3 gap-3.5">
-                                <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5">
-                                    <div class="flex items-center gap-2 text-[10px] uppercase tracking-widest font-black text-white/50">
-                                        <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="mt-6 grid grid-cols-3 gap-3">
+                                <div class="bg-white/5 border border-white/10 rounded-2xl px-3 py-3">
+                                    <div class="flex items-center gap-1.5 text-[9px] uppercase tracking-widest font-black text-white/50">
+                                        <svg class="w-3.5 h-3.5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17l6-6 4 4 7-7"></path>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 7h6v6"></path>
                                         </svg>
                                         {{ __('ROI') }}
                                     </div>
-                                    <div class="mt-2 text-emerald-300 font-black leading-tight">+0.0%</div>
+                                    <div class="mt-1.5 text-emerald-300 font-black leading-tight text-sm md:text-base">+0.0%</div>
                                 </div>
-                                <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5">
-                                    <div class="flex items-center gap-2 text-[10px] uppercase tracking-widest font-black text-white/50">
-                                        <svg class="w-4 h-4 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="bg-white/5 border border-white/10 rounded-2xl px-3 py-3">
+                                    <div class="flex items-center gap-1.5 text-[9px] uppercase tracking-widest font-black text-white/50">
+                                        <svg class="w-3.5 h-3.5 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
                                         {{ __('Win Rate') }}
                                     </div>
-                                    <div class="mt-2 text-white font-black leading-tight">0.0%</div>
+                                    <div class="mt-1.5 text-white font-black leading-tight text-sm md:text-base">0.0%</div>
                                 </div>
-                                <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3.5">
-                                    <div class="flex items-center gap-2 text-[10px] uppercase tracking-widest font-black text-white/50">
-                                        <svg class="w-4 h-4 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div class="bg-white/5 border border-white/10 rounded-2xl px-3 py-3">
+                                    <div class="flex items-center gap-1.5 text-[9px] uppercase tracking-widest font-black text-white/50">
+                                        <svg class="w-3.5 h-3.5 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-4-4h-1"></path>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20H4v-2a4 4 0 014-4h1"></path>
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
                                         </svg>
                                         {{ __('Followers') }}
                                     </div>
-                                    <div class="mt-2 text-white font-black leading-tight">{{ number_format($followers) }}</div>
+                                    <div class="mt-1.5 text-white font-black leading-tight text-sm md:text-base">{{ number_format($followers) }}</div>
                                 </div>
                             </div>
 
