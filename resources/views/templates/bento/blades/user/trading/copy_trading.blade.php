@@ -222,34 +222,91 @@
                     {{ __('Start copy trading in minutes with our streamlined process') }}
                 </p>
 
-                <div class="pb-5 pt-5 mt-7 md:mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 text-left">
-                    <div class="bg-secondary border border-white/5 rounded-3xl p-6">
+                <div class="mt-7 md:mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 text-left">
+                    <div class="bg-secondary border border-white/5 rounded-3xl p-6 relative overflow-hidden">
+                        <div class="absolute top-5 right-6 text-white/10 font-black text-5xl">01</div>
                         <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 grid place-items-center">
                             <svg class="w-6 h-6 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14m-6 0l-4.553 2.276A1 1 0 013 15.382V8.618a1 1 0 011.447-.894L9 10m6 0v4M9 10v4m6-4H9">
-                                </path>
+                                    d="M12 6a6 6 0 100 12 6 6 0 000-12z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 10v4m0-6h.01"></path>
                             </svg>
                         </div>
                         <div class="mt-4 text-white font-black">{{ __('Choose a Leader') }}</div>
                         <div class="mt-2 text-white/55 text-sm leading-relaxed">
-                            {{ __('Browse verified leaders, review their profiles, and select the strategy that matches your risk appetite.') }}
+                            {{ __('Browse verified leaders, analyze their performance metrics, and pick a trader that matches your risk appetite.') }}
+                        </div>
+                        <div class="mt-4 space-y-2 text-sm">
+                            <div class="flex items-center gap-2 text-white/70">
+                                <span class="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 grid place-items-center">
+                                    <svg class="w-3 h-3 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </span>
+                                {{ __('Verified track record') }}
+                            </div>
+                            <div class="flex items-center gap-2 text-white/70">
+                                <span class="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 grid place-items-center">
+                                    <svg class="w-3 h-3 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </span>
+                                {{ __('Real-time statistics') }}
+                            </div>
+                            <div class="flex items-center gap-2 text-white/70">
+                                <span class="w-5 h-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 grid place-items-center">
+                                    <svg class="w-3 h-3 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </span>
+                                {{ __('Risk profiling') }}
+                            </div>
                         </div>
                     </div>
-                    <div class="bg-secondary border border-white/5 rounded-3xl p-6">
+
+                    <div class="bg-secondary border border-white/5 rounded-3xl p-6 relative overflow-hidden">
+                        <div class="absolute top-5 right-6 text-white/10 font-black text-5xl">02</div>
                         <div class="w-12 h-12 rounded-2xl bg-sky-500/15 border border-sky-500/25 grid place-items-center">
                             <svg class="w-6 h-6 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12h6m2 0a2 2 0 11-4 0 2 2 0 014 0zM7 12a2 2 0 11-4 0 2 2 0 014 0zm12 0h.01M12 6v.01M12 18v.01">
-                                </path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h10v10H7z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 9h6v6H9z"></path>
                             </svg>
                         </div>
                         <div class="mt-4 text-white font-black">{{ __('Configure & Subscribe') }}</div>
                         <div class="mt-2 text-white/55 text-sm leading-relaxed">
-                            {{ __('Set allocation mode, risk limits, and leverage preferences. You stay in control.') }}
+                            {{ __('Set your investment amount, choose copy mode, and configure risk management settings tailored to your needs.') }}
+                        </div>
+                        <div class="mt-4 space-y-2 text-sm">
+                            <div class="flex items-center gap-2 text-white/70">
+                                <span class="w-5 h-5 rounded-full bg-sky-500/10 border border-sky-500/20 grid place-items-center">
+                                    <svg class="w-3 h-3 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </span>
+                                {{ __('Multiple copy modes') }}
+                            </div>
+                            <div class="flex items-center gap-2 text-white/70">
+                                <span class="w-5 h-5 rounded-full bg-sky-500/10 border border-sky-500/20 grid place-items-center">
+                                    <svg class="w-3 h-3 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </span>
+                                {{ __('Custom risk limits') }}
+                            </div>
+                            <div class="flex items-center gap-2 text-white/70">
+                                <span class="w-5 h-5 rounded-full bg-sky-500/10 border border-sky-500/20 grid place-items-center">
+                                    <svg class="w-3 h-3 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </span>
+                                {{ __('Flexible allocation') }}
+                            </div>
                         </div>
                     </div>
-                    <div class="bg-secondary border border-white/5 rounded-3xl p-6">
+
+                    <div class="bg-secondary border border-white/5 rounded-3xl p-6 relative overflow-hidden">
+                        <div class="absolute top-5 right-6 text-white/10 font-black text-5xl">03</div>
                         <div class="w-12 h-12 rounded-2xl bg-violet-500/15 border border-violet-500/25 grid place-items-center">
                             <svg class="w-6 h-6 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -258,7 +315,33 @@
                         </div>
                         <div class="mt-4 text-white font-black">{{ __('Earn Automatically') }}</div>
                         <div class="mt-2 text-white/55 text-sm leading-relaxed">
-                            {{ __('Trades are copied in real-time. Monitor performance and adjust anytime.') }}
+                            {{ __('Sit back as trades are copied in real-time. Monitor your portfolio and watch your profits grow.') }}
+                        </div>
+                        <div class="mt-4 space-y-2 text-sm">
+                            <div class="flex items-center gap-2 text-white/70">
+                                <span class="w-5 h-5 rounded-full bg-violet-500/10 border border-violet-500/20 grid place-items-center">
+                                    <svg class="w-3 h-3 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </span>
+                                {{ __('Real-time copying') }}
+                            </div>
+                            <div class="flex items-center gap-2 text-white/70">
+                                <span class="w-5 h-5 rounded-full bg-violet-500/10 border border-violet-500/20 grid place-items-center">
+                                    <svg class="w-3 h-3 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </span>
+                                {{ __('Automatic execution') }}
+                            </div>
+                            <div class="flex items-center gap-2 text-white/70">
+                                <span class="w-5 h-5 rounded-full bg-violet-500/10 border border-violet-500/20 grid place-items-center">
+                                    <svg class="w-3 h-3 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </span>
+                                {{ __('Full transparency') }}
+                            </div>
                         </div>
                     </div>
                 </div>
