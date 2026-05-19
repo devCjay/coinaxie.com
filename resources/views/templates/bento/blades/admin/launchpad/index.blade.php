@@ -228,6 +228,24 @@
                                     'canceled' => 'bg-red-500/15 border border-red-500/25 text-red-300',
                                     default => 'bg-white/5 border border-white/10 text-white/55',
                                 };
+                                $projectPayload = [
+                                    'id' => $p->id,
+                                    'name' => $p->name,
+                                    'token_symbol' => strtoupper($p->token_symbol),
+                                    'token_name' => $p->token_name,
+                                    'token_decimals' => (int) ($p->token_decimals ?? 8),
+                                    'token_logo_url' => $p->token_logo_url,
+                                    'description' => $p->description,
+                                    'quote_currency' => strtoupper($p->quote_currency),
+                                    'sale_price' => (float) $p->sale_price,
+                                    'hard_cap_quote' => (float) $p->hard_cap_quote,
+                                    'min_buy_quote' => (float) $p->min_buy_quote,
+                                    'max_buy_quote' => (float) $p->max_buy_quote,
+                                    'sale_start_at' => $p->sale_start_at ? $p->sale_start_at->format('Y-m-d\\TH:i') : '',
+                                    'sale_end_at' => $p->sale_end_at ? $p->sale_end_at->format('Y-m-d\\TH:i') : '',
+                                    'launch_at' => $p->launch_at ? $p->launch_at->format('Y-m-d\\TH:i') : '',
+                                    'status' => $p->status,
+                                ];
                             @endphp
                             <tr class="group hover:bg-white/[0.01] transition-colors relative">
                                 <td class="px-8 py-5">
@@ -277,24 +295,7 @@
                                     <div class="flex items-center justify-end gap-2 flex-wrap">
                                         <button type="button"
                                             class="btn-edit bg-white/5 border border-white/10 text-white rounded-xl px-4 py-2 font-semibold hover:bg-white/10 transition"
-                                            data-project='@json([
-                                                "id" => $p->id,
-                                                "name" => $p->name,
-                                                "token_symbol" => strtoupper($p->token_symbol),
-                                                "token_name" => $p->token_name,
-                                                "token_decimals" => (int) ($p->token_decimals ?? 8),
-                                                "token_logo_url" => $p->token_logo_url,
-                                                "description" => $p->description,
-                                                "quote_currency" => strtoupper($p->quote_currency),
-                                                "sale_price" => (float) $p->sale_price,
-                                                "hard_cap_quote" => (float) $p->hard_cap_quote,
-                                                "min_buy_quote" => (float) $p->min_buy_quote,
-                                                "max_buy_quote" => (float) $p->max_buy_quote,
-                                                "sale_start_at" => $p->sale_start_at ? $p->sale_start_at->format("Y-m-d\\TH:i") : "",
-                                                "sale_end_at" => $p->sale_end_at ? $p->sale_end_at->format("Y-m-d\\TH:i") : "",
-                                                "launch_at" => $p->launch_at ? $p->launch_at->format("Y-m-d\\TH:i") : "",
-                                                "status" => $p->status,
-                                            ])'>
+                                            data-project='@json($projectPayload)'>
                                             {{ __('Edit') }}
                                         </button>
 
