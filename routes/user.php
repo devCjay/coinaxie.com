@@ -120,8 +120,10 @@ Route::prefix('user')->middleware(['auth', 'otp.verified', 'user.status', 'user.
         Route::post('/margin/trade', [MarginController::class, 'trade'])->name('margin.trade');
         Route::post('/margin/cancel-order', [MarginController::class, 'cancelOrder'])->name('margin.cancel-order');
         Route::get('/copy-trading', [CopyTradingController::class, 'index'])->name('copy-trading');
+        Route::get('/copy-trading/leaders', [CopyTradingController::class, 'leaders'])->name('copy-trading.leaders');
         Route::post('/copy-trading/follow', [CopyTradingController::class, 'follow'])->name('copy-trading.follow');
         Route::post('/copy-trading/unfollow', [CopyTradingController::class, 'unfollow'])->name('copy-trading.unfollow');
+        Route::post('/copy-trading/request-leader', [CopyTradingController::class, 'requestLeader'])->name('copy-trading.request-leader');
         Route::get('/forex/live/{ticker?}', [ForexController::class, 'index'])->name('forex.live');
         Route::get('/forex/demo/{ticker?}', [ForexController::class, 'index'])->name('forex.demo');
         Route::post('/forex/trade', [ForexController::class, 'trade'])->name('forex.trade');

@@ -14,6 +14,46 @@ class CopyTradingController extends Controller
         $page_title = __('Copy Trading');
         $template = config('site.template');
 
+        $activeLeaders = CopyTradingProTrader::query()
+            ->where('status', 'active');
+
+        $leadersCount = (int) $activeLeaders->count();
+
+        $relationshipsCount = (int) CopyTradingRelationship::query()
+            ->where('status', 'active')
+            ->count();
+
+        $topLeaders = CopyTradingProTrader::with('user')
+            ->where('status', 'active')
+            ->withCount(['relationships as followers_count' => function ($q) {
+                $q->where('status', 'active');
+            }])
+            ->orderByDesc('followers_count')
+            ->latest()
+            ->take(3)
+            ->get();
+
+        $myPro = CopyTradingProTrader::query()
+            ->where('user_id', auth()->id())
+            ->first();
+
+        $stats = [
+            'leaders' => $leadersCount,
+            'followers' => $relationshipsCount,
+            'volume' => 0,
+            'top_roi' => 0,
+        ];
+
+        $mode = 'landing';
+
+        return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'mode', 'stats', 'topLeaders', 'myPro'));
+    }
+
+    public function leaders()
+    {
+        $page_title = __('Copy Trading');
+        $template = config('site.template');
+
         $pros = CopyTradingProTrader::with('user')
             ->where('status', 'active')
             ->withCount(['relationships as followers_count' => function ($q) {
@@ -27,7 +67,42 @@ class CopyTradingController extends Controller
             ->get()
             ->keyBy('pro_trader_id');
 
-        return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'pros', 'myRelationships'));
+        $mode = 'leaders';
+
+        return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'mode', 'pros', 'myRelationships'));
+    }
+
+    public function requestLeader(Request $request)
+    {
+        $request->validate([
+            'display_name' => 'nullable|string|max:255',
+            'bio' => 'nullable|string|max:2000',
+        ]);
+
+        $existing = CopyTradingProTrader::query()
+            ->where('user_id', auth()->id())
+            ->first();
+
+        if ($existing && $existing->status === 'active') {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('You are already a leader'),
+            ], 422);
+        }
+
+        CopyTradingProTrader::updateOrCreate(
+            ['user_id' => auth()->id()],
+            [
+                'display_name' => $request->display_name,
+                'bio' => $request->bio,
+                'status' => 'inactive',
+            ]
+        );
+
+        return response()->json([
+            'status' => 'success',
+            'message' => __('Leader request submitted. Awaiting admin approval.'),
+        ]);
     }
 
     public function follow(Request $request)
