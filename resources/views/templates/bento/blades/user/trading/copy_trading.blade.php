@@ -577,7 +577,7 @@
 
             <div class="ct-hero ct-profile bg-secondary border border-white/5 rounded-[2.5rem] overflow-hidden relative">
                 <div class="px-5 md:px-8 pt-9 pb-10 md:pt-12 md:pb-12">
-                    <div class="pt-3 md:pt-0 pb-2 md:pb-3">
+                    <div class="pt-5 pb-5 md:pt-0 pb-2 md:pb-3">
                         <a href="{{ route('user.trading.copy-trading.leaders') }}"
                             class="inline-flex items-center gap-2 text-white/70 hover:text-white transition text-sm font-bold">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
