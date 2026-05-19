@@ -54,7 +54,7 @@
                     {{ __('Discover, invest, and launch tokens on the most trusted ITO platform. Secure, transparent, and regulated.') }}
                 </p>
 
-                <div class="mt-7 flex items-center justify-center gap-3 flex-wrap">
+                <div class="mt-8 md:mt-9 flex items-center justify-center gap-4 md:gap-5 flex-wrap">
                     <a href="#lp-explore"
                         class="bg-accent-primary/20 border border-accent-primary/30 text-white rounded-xl px-6 py-3 text-sm font-semibold hover:bg-accent-primary/25 transition">
                         {{ __('Explore Offerings') }}
@@ -65,16 +65,16 @@
                     </button>
                 </div>
 
-                <div class="mt-7 flex items-center justify-center gap-3 flex-wrap">
-                    <div class="bg-white/5 border border-white/10 rounded-full px-4 py-2 text-xs text-white/70">
+                <div class="mt-8 flex items-center justify-center gap-4 md:gap-5 flex-wrap">
+                    <div class="bg-white/5 border border-white/10 rounded-full px-5 py-2.5 text-xs text-white/70">
                         <span class="font-semibold text-white">{{ number_format((int) ($stats['projects'] ?? 0)) }}</span>
                         <span class="text-white/50">{{ __('Projects') }}</span>
                     </div>
-                    <div class="bg-white/5 border border-white/10 rounded-full px-4 py-2 text-xs text-white/70">
+                    <div class="bg-white/5 border border-white/10 rounded-full px-5 py-2.5 text-xs text-white/70">
                         <span class="font-semibold text-white">{{ number_format((int) ($stats['investors'] ?? 0)) }}</span>
                         <span class="text-white/50">{{ __('Investors') }}</span>
                     </div>
-                    <div class="bg-white/5 border border-white/10 rounded-full px-4 py-2 text-xs text-white/70">
+                    <div class="bg-white/5 border border-white/10 rounded-full px-5 py-2.5 text-xs text-white/70">
                         <span class="font-semibold text-white">{{ $fmt8($stats['total_raised'] ?? 0) }}</span>
                         <span class="text-white/50">{{ __('Total Raised') }}</span>
                     </div>
