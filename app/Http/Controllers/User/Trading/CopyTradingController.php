@@ -34,6 +34,7 @@ class CopyTradingController extends Controller
             }])
             ->orderByDesc('followers_count')
             ->latest()
+            ->take(3)
             ->get();
 
         $myPro = CopyTradingProTrader::query()
@@ -70,9 +71,13 @@ class CopyTradingController extends Controller
             ->get()
             ->keyBy('pro_trader_id');
 
+        $myPro = CopyTradingProTrader::query()
+            ->where('user_id', auth()->id())
+            ->first();
+
         $mode = 'leaders';
 
-        return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'mode', 'pros', 'myRelationships'));
+        return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'mode', 'pros', 'myRelationships', 'myPro'));
     }
 
     public function profile(int $id)
