@@ -26,6 +26,29 @@
                 radial-gradient(900px 420px at 80% 30%, rgba(168, 85, 247, 0.12), rgba(2, 6, 23, 0));
         }
 
+        .ct-hero--landing:before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                radial-gradient(rgba(255, 255, 255, 0.10) 1px, transparent 1px),
+                radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+                radial-gradient(800px 420px at 50% 40%, rgba(124, 58, 237, 0.16), rgba(2, 6, 23, 0));
+            background-size: 24px 24px, 40px 40px, auto;
+            background-position: 0 0, 10px 10px, 0 0;
+            opacity: 0.35;
+            pointer-events: none;
+        }
+
+        .ct-hero--landing:after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(900px 500px at 50% 15%, rgba(255, 255, 255, 0.08), rgba(2, 6, 23, 0));
+            opacity: 0.25;
+            pointer-events: none;
+        }
+
         .ct-profile {
             background: radial-gradient(1200px 600px at 10% 0%, rgba(16, 185, 129, 0.18), rgba(2, 6, 23, 0)),
                 radial-gradient(1000px 520px at 70% 30%, rgba(59, 130, 246, 0.12), rgba(2, 6, 23, 0)),
@@ -95,8 +118,8 @@
 
     <div class="min-h-screen px-2 md:px-0">
         @if ($mode === 'landing')
-            <div class="ct-hero bg-secondary border border-white/5 rounded-[2.5rem] overflow-hidden relative">
-                <div class="px-5 md:px-10 py-10 md:py-14 text-center">
+            <div class="ct-hero ct-hero--landing bg-secondary border border-white/5 rounded-[2.5rem] overflow-hidden relative">
+                <div class="relative z-[1] px-5 md:px-10 py-12 md:py-16 text-center min-h-[520px] md:min-h-[640px] flex flex-col items-center justify-center">
                     <div
                         class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white/70">
                         <svg class="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -134,30 +157,52 @@
                         </button>
                     </div>
 
-                    <div
-                        class="mt-8 md:mt-10 max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-left">
-                        <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
-                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">
-                                {{ __('Active Leaders') }}</div>
-                            <div class="text-white font-black text-lg mt-1">{{ number_format((int) ($stats['leaders'] ?? 0)) }}
-                            </div>
+                    <div class="mt-9 md:mt-10 flex items-center justify-center gap-3 md:gap-4 flex-wrap">
+                        <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-xs text-white/70">
+                            <svg class="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-4-4h-1"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20H4v-2a4 4 0 014-4h1"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                            <span class="font-black text-white">{{ number_format((int) ($stats['leaders'] ?? 0)) }}+</span>
+                            <span class="text-white/55 font-bold">{{ __('Active Leaders') }}</span>
                         </div>
-                        <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
-                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">
-                                {{ __('Total Followers') }}</div>
-                            <div class="text-white font-black text-lg mt-1">{{ number_format((int) ($stats['followers'] ?? 0)) }}
-                            </div>
+                        <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-xs text-white/70">
+                            <svg class="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-4-4h-1"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20H4v-2a4 4 0 014-4h1"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                            <span class="font-black text-white">{{ number_format((int) ($stats['followers'] ?? 0)) }}+</span>
+                            <span class="text-white/55 font-bold">{{ __('Total Followers') }}</span>
                         </div>
-                        <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
-                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">
-                                {{ __('Trading Volume') }}</div>
-                            <div class="text-white font-black text-lg mt-1">{{ $fmtShort($stats['volume'] ?? 0) }}</div>
+                        <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-xs text-white/70">
+                            <svg class="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 14l3-3 4 4 5-6"></path>
+                            </svg>
+                            <span class="font-black text-white">${{ $fmtShort($stats['volume'] ?? 0) }}</span>
+                            <span class="text-white/55 font-bold">{{ __('Trading Volume') }}</span>
                         </div>
-                        <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
-                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">
-                                {{ __('Top ROI') }}</div>
-                            <div class="text-white font-black text-lg mt-1">+{{ $fmt2($stats['top_roi'] ?? 0) }}%</div>
+                        <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-xs text-white/70">
+                            <svg class="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17l6-6 4 4 7-7"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 7h6v6"></path>
+                            </svg>
+                            <span class="font-black text-white">+{{ $fmt2($stats['top_roi'] ?? 0) }}%</span>
+                            <span class="text-white/55 font-bold">{{ __('Top ROI') }}</span>
                         </div>
+                    </div>
+
+                    <div class="mt-10 md:mt-12 text-white/50 text-[11px] font-black uppercase tracking-widest inline-flex items-center gap-2">
+                        <span class="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 grid place-items-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </span>
+                        {{ __('Scroll to explore') }}
                     </div>
                 </div>
             </div>
