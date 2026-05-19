@@ -211,15 +211,15 @@
                             $name = $pro->display_name ?: ($pro->user->username ?? $pro->user->first_name ?? 'Trader');
                             $followers = (int) ($pro->followers_count ?? 0);
                         @endphp
-                        <div class="bg-secondary border border-white/5 rounded-3xl p-6">
+                        <div class="bg-secondary border border-white/5 rounded-3xl p-5 md:p-6">
                             <div class="flex items-start justify-between gap-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-12 h-12 rounded-full bg-accent-primary/20 border border-accent-primary/25 grid place-items-center text-accent-primary font-black">
                                         {{ strtoupper(substr($name, 0, 1)) }}
                                     </div>
                                     <div>
-                                        <div class="text-white font-black">{{ $name }}</div>
-                                        <div class="text-[10px] text-white/50 font-black uppercase tracking-widest mt-0.5">
+                                        <div class="text-white font-black leading-tight">{{ $name }}</div>
+                                        <div class="text-[10px] text-white/50 font-black uppercase tracking-widest mt-1">
                                             {{ __('Verified Leader') }}
                                         </div>
                                     </div>
@@ -229,27 +229,27 @@
                                 </div>
                             </div>
 
-                            <div class="mt-5 grid grid-cols-3 gap-3">
-                                <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+                            <div class="mt-6 grid grid-cols-3 gap-3.5">
+                                <div class="bg-white/5 border border-white/10 rounded-2xl px-3.5 py-3">
                                     <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('ROI') }}</div>
-                                    <div class="mt-1 text-emerald-300 font-black">+0.0%</div>
+                                    <div class="mt-1.5 text-emerald-300 font-black leading-tight">+0.0%</div>
                                 </div>
-                                <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+                                <div class="bg-white/5 border border-white/10 rounded-2xl px-3.5 py-3">
                                     <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Win Rate') }}</div>
-                                    <div class="mt-1 text-white font-black">0.0%</div>
+                                    <div class="mt-1.5 text-white font-black leading-tight">0.0%</div>
                                 </div>
-                                <div class="bg-white/5 border border-white/10 rounded-2xl px-4 py-3">
+                                <div class="bg-white/5 border border-white/10 rounded-2xl px-3.5 py-3">
                                     <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Followers') }}</div>
-                                    <div class="mt-1 text-white font-black">{{ number_format($followers) }}</div>
+                                    <div class="mt-1.5 text-white font-black leading-tight">{{ number_format($followers) }}</div>
                                 </div>
                             </div>
 
-                            <div class="mt-5">
-                                <div class="flex items-center justify-between text-xs text-white/55">
+                            <div class="mt-6">
+                                <div class="flex items-center justify-between text-[11px] text-white/55">
                                     <span class="font-bold uppercase tracking-widest">{{ __('Capacity') }}</span>
                                     <span class="text-white font-black">{{ number_format($followers) }}/100</span>
                                 </div>
-                                <div class="mt-2 w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                                <div class="mt-2.5 w-full h-2 bg-white/5 rounded-full overflow-hidden">
                                     @php
                                         $capPct = min(100, ($followers / 100) * 100);
                                     @endphp
@@ -257,12 +257,12 @@
                                 </div>
                             </div>
 
-                            <div class="mt-5 flex items-center justify-between gap-3">
-                                <div class="text-xs px-2 py-1 rounded-lg bg-white/5 border border-white/10 text-white/70 font-bold">
+                            <div class="mt-6 flex items-center justify-between gap-3">
+                                <div class="text-[11px] px-2.5 py-1.5 rounded-xl bg-white/5 border border-white/10 text-white/70 font-bold">
                                     {{ __('Profit Share') }} <span class="text-white font-black ml-1">0%</span>
                                 </div>
                                 <a href="{{ route('user.trading.copy-trading.leaders') }}"
-                                    class="text-sm font-black text-white hover:text-accent-primary transition inline-flex items-center gap-2">
+                                    class="text-[13px] font-black text-white hover:text-accent-primary transition inline-flex items-center gap-2">
                                     {{ __('View Profile') }}
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
