@@ -157,7 +157,7 @@
                         </button>
                     </div>
 
-                    <div class="mt-9 md:mt-10 flex items-center justify-center gap-3 md:gap-4 flex-wrap">
+                    <div class="pb-5 pt-5 mt-9 md:mt-10 flex items-center justify-center gap-3 md:gap-4 flex-wrap">
                         <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-xs text-white/70">
                             <svg class="w-4 h-4 text-accent-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-4-4h-1"></path>
