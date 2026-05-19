@@ -704,41 +704,92 @@
                     </div>
 
                     <div class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
-                        <div class="bg-secondary border border-white/5 rounded-3xl px-5 py-5">
-                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Total ROI') }}</div>
-                            <div class="mt-2 text-emerald-300 font-black text-lg">+{{ number_format((float) ($stats['roi'] ?? 0), 2) }}%</div>
-                            <div class="text-white/45 text-xs mt-1">{{ __('All-time return') }}</div>
+                        <div class="bg-secondary border border-white/5 rounded-3xl px-6 py-6 text-center">
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 mx-auto grid place-items-center">
+                                <svg class="w-5 h-5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 17l6-6 4 4 7-7"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 7h6v6"></path>
+                                </svg>
+                            </div>
+                            <div class="mt-4 text-emerald-300 font-black text-xl">+{{ number_format((float) ($stats['roi'] ?? 0), 2) }}%</div>
+                            <div class="mt-1 text-white/45 text-xs font-bold">{{ __('Total ROI') }}</div>
                         </div>
-                        <div class="bg-secondary border border-white/5 rounded-3xl px-5 py-5">
-                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Win Rate') }}</div>
-                            <div class="mt-2 text-white font-black text-lg">{{ number_format((float) ($stats['win_rate'] ?? 0), 2) }}%</div>
-                            <div class="text-white/45 text-xs mt-1">{{ __('Success rate') }}</div>
+
+                        <div class="bg-secondary border border-white/5 rounded-3xl px-6 py-6 text-center">
+                            <div class="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/20 mx-auto grid place-items-center">
+                                <svg class="w-5 h-5 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="mt-4 text-white font-black text-xl">{{ number_format((float) ($stats['win_rate'] ?? 0), 2) }}%</div>
+                            <div class="mt-1 text-white/45 text-xs font-bold">{{ __('Win Rate') }}</div>
                         </div>
-                        <div class="bg-secondary border border-white/5 rounded-3xl px-5 py-5">
-                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Followers') }}</div>
-                            <div class="mt-2 text-white font-black text-lg">{{ number_format((int) ($stats['followers'] ?? 0)) }}</div>
-                            <div class="text-white/45 text-xs mt-1">{{ __('Capacity') }} {{ number_format((int) ($stats['followers'] ?? 0)) }}/{{ number_format($capacityMax) }}</div>
+
+                        <div class="bg-secondary border border-white/5 rounded-3xl px-6 py-6 text-center">
+                            <div class="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 mx-auto grid place-items-center">
+                                <svg class="w-5 h-5 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-4-4h-1"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20H4v-2a4 4 0 014-4h1"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="mt-4 text-white font-black text-xl">{{ number_format((int) ($stats['followers'] ?? 0)) }}</div>
+                            <div class="mt-1 text-white/45 text-xs font-bold">{{ __('Followers') }}</div>
                         </div>
-                        <div class="bg-secondary border border-white/5 rounded-3xl px-5 py-5">
-                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Total Trades') }}</div>
-                            <div class="mt-2 text-white font-black text-lg">{{ number_format((int) ($stats['total_trades'] ?? 0)) }}</div>
-                            <div class="text-white/45 text-xs mt-1">{{ __('Completed Trades') }}</div>
+
+                        <div class="bg-secondary border border-white/5 rounded-3xl px-6 py-6 text-center">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 mx-auto grid place-items-center">
+                                <svg class="w-5 h-5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3v18h18"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 14l3-3 4 4 5-6"></path>
+                                </svg>
+                            </div>
+                            <div class="mt-4 text-white font-black text-xl">{{ number_format((int) ($stats['total_trades'] ?? 0)) }}</div>
+                            <div class="mt-1 text-white/45 text-xs font-bold">{{ __('Total Trades') }}</div>
                         </div>
-                        <div class="bg-secondary border border-white/5 rounded-3xl px-5 py-5">
-                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Total profit') }}</div>
-                            <div class="mt-2 text-emerald-300 font-black text-lg">{{ number_format((float) ($stats['total_profit'] ?? 0), 2) }} USDT</div>
+
+                        <div class="bg-secondary border border-white/5 rounded-3xl px-6 py-6 text-center">
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 mx-auto grid place-items-center">
+                                <svg class="w-5 h-5 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="mt-4 text-emerald-300 font-black text-xl">{{ number_format((float) ($stats['total_profit'] ?? 0), 2) }} USDT</div>
+                            <div class="mt-1 text-white/45 text-xs font-bold">{{ __('Total profit') }}</div>
                         </div>
-                        <div class="bg-secondary border border-white/5 rounded-3xl px-5 py-5">
-                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Total volume') }}</div>
-                            <div class="mt-2 text-white font-black text-lg">{{ number_format((float) ($stats['total_volume'] ?? 0), 2) }} USDT</div>
+
+                        <div class="bg-secondary border border-white/5 rounded-3xl px-6 py-6 text-center">
+                            <div class="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/20 mx-auto grid place-items-center">
+                                <svg class="w-5 h-5 text-sky-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-7 7h8a2 2 0 002-2V7a2 2 0 00-2-2H8a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <div class="mt-4 text-white font-black text-xl">{{ number_format((float) ($stats['total_volume'] ?? 0), 2) }} USDT</div>
+                            <div class="mt-1 text-white/45 text-xs font-bold">{{ __('Total volume') }}</div>
                         </div>
-                        <div class="bg-secondary border border-white/5 rounded-3xl px-5 py-5">
-                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Avg. profit/trade') }}</div>
-                            <div class="mt-2 text-white font-black text-lg">{{ number_format((float) ($stats['avg_profit_per_trade'] ?? 0), 2) }} USDT</div>
+
+                        <div class="bg-secondary border border-white/5 rounded-3xl px-6 py-6 text-center">
+                            <div class="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 mx-auto grid place-items-center">
+                                <svg class="w-5 h-5 text-violet-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3v18m8-10v10M3 9v12"></path>
+                                </svg>
+                            </div>
+                            <div class="mt-4 text-white font-black text-xl">{{ number_format((float) ($stats['avg_profit_per_trade'] ?? 0), 2) }} USDT</div>
+                            <div class="mt-1 text-white/45 text-xs font-bold">{{ __('Avg. profit/trade') }}</div>
                         </div>
-                        <div class="bg-secondary border border-white/5 rounded-3xl px-5 py-5">
-                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Max drawdown') }}</div>
-                            <div class="mt-2 text-white font-black text-lg">{{ ($stats['max_drawdown'] === null) ? 'N/A' : number_format((float) $stats['max_drawdown'], 2) . '%' }}</div>
+
+                        <div class="bg-secondary border border-white/5 rounded-3xl px-6 py-6 text-center">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 mx-auto grid place-items-center">
+                                <svg class="w-5 h-5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"></path>
+                                </svg>
+                            </div>
+                            <div class="mt-4 text-white font-black text-xl">{{ ($stats['max_drawdown'] === null) ? 'N/A' : number_format((float) $stats['max_drawdown'], 2) . '%' }}</div>
+                            <div class="mt-1 text-white/45 text-xs font-bold">{{ __('Max Drawdown') }}</div>
                         </div>
                     </div>
 
@@ -765,7 +816,8 @@
                     </div>
                 </div>
 
-                <div class="bg-secondary border border-white/5 rounded-3xl p-6 md:p-7 h-fit">
+                <div class="bg-secondary border border-white/5 rounded-3xl p-6 md:p-7 h-fit relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/5 via-white/0 to-white/5 opacity-60 pointer-events-none"></div>
                     <div class="text-white font-black text-lg flex items-center gap-2">
                         <svg class="w-5 h-5 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
