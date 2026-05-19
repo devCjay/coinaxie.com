@@ -1105,7 +1105,7 @@
                         </div>
                     </div>
 
-                    <label class="mt-6 text-sm font-black text-white/70 block">{{ __('Stop Loss') }}</label>
+                    <label class="mt-6 pb-7 text-sm font-black text-white/70 block">{{ __('Stop Loss') }}</label>
                     <div class="mt-2 flex items-stretch rounded-2xl overflow-hidden border border-white/10 bg-white/5">
                         <input id="copyTraderStopLossPercent" name="stop_loss_percent" type="number" step="0.1" min="0" max="95"
                             class="flex-1 bg-transparent px-4 py-3 text-white/90 outline-none text-sm"
@@ -1116,7 +1116,7 @@
                     </div>
 
                     <button type="submit" id="copyTraderSubmit"
-                        class="mt-7 pt-7 pb-7 w-full bg-accent-primary text-white rounded-2xl py-3.5 text-sm font-black hover:opacity-95 transition">
+                        class="mt-7 w-full bg-accent-primary text-white rounded-2xl py-3.5 text-sm font-black hover:opacity-95 transition">
                         {{ __('Submit') }}
                     </button>
                 </form>
