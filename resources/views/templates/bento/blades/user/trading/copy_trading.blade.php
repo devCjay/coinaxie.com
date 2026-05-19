@@ -643,28 +643,7 @@
                         </div>
                     </div>
 
-                    <div class="mt-7 md:mt-8 grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6">
-                        <div class="bg-white/5 border border-white/10 rounded-3xl px-5 py-4">
-                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Total ROI') }}</div>
-                            <div class="mt-2 text-emerald-300 font-black text-2xl">+{{ number_format((float) ($stats['roi'] ?? 0), 2) }}%</div>
-                            <div class="text-white/45 text-xs mt-1">{{ __('All-time return') }}</div>
-                        </div>
-                        <div class="bg-white/5 border border-white/10 rounded-3xl px-5 py-4">
-                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Win Rate') }}</div>
-                            <div class="mt-2 text-white font-black text-2xl">{{ number_format((float) ($stats['win_rate'] ?? 0), 2) }}%</div>
-                            <div class="text-white/45 text-xs mt-1">{{ __('Success rate') }}</div>
-                        </div>
-                        <div class="bg-white/5 border border-white/10 rounded-3xl px-5 py-4">
-                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Followers') }}</div>
-                            <div class="mt-2 text-white font-black text-2xl">{{ number_format((int) ($stats['followers'] ?? 0)) }}</div>
-                            <div class="text-white/45 text-xs mt-1">{{ __('Capacity') }} {{ number_format((int) ($stats['followers'] ?? 0)) }}/{{ number_format($capacityMax) }}</div>
-                        </div>
-                        <div class="bg-white/5 border border-white/10 rounded-3xl px-5 py-4">
-                            <div class="text-[10px] uppercase tracking-widest font-black text-white/50">{{ __('Total Trades') }}</div>
-                            <div class="mt-2 text-white font-black text-2xl">{{ number_format((int) ($stats['total_trades'] ?? 0)) }}</div>
-                            <div class="text-white/45 text-xs mt-1">{{ __('Completed Trades') }}</div>
-                        </div>
-                    </div>
+                    
                 </div>
             </div>
 
