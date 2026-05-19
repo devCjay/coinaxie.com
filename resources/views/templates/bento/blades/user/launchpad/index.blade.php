@@ -40,51 +40,7 @@
 
     <div class="min-h-screen px-2 md:px-0">
         <div class="lp-hero bg-secondary border border-white/5 rounded-[2.5rem] overflow-hidden relative">
-            <div class="px-6 md:px-10 py-10 md:py-14 text-center">
-                <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white/70">
-                    <span class="w-1.5 h-1.5 rounded-full bg-accent-primary"></span>
-                    {{ __('The Regulated ITO Platform') }}
-                </div>
-
-                <h1 class="mt-6 text-3xl md:text-5xl font-black tracking-tight text-white">
-                    {{ __('The Future of') }}
-                    <span class="text-accent-primary">{{ __('Token Offerings') }}</span>
-                </h1>
-                <p class="mt-4 text-white/60 max-w-2xl mx-auto text-sm md:text-base leading-relaxed">
-                    {{ __('Discover, invest, and launch tokens on the most trusted ITO platform. Secure, transparent, and regulated.') }}
-                </p>
-
-                <div class="mt-8 md:mt-9 flex items-center justify-center gap-4 md:gap-5 flex-wrap">
-                    <a href="#lp-explore"
-                        class="bg-accent-primary/20 border border-accent-primary/30 text-white rounded-xl px-6 py-3 text-sm font-semibold hover:bg-accent-primary/25 transition">
-                        {{ __('Explore Offerings') }}
-                    </a>
-                    <button type="button" onclick="openModal('launchProjectModal')"
-                        class="bg-white/5 border border-white/10 text-white rounded-xl px-6 py-3 text-sm font-semibold hover:bg-white/10 transition">
-                        {{ __('Launch Your Project') }}
-                    </button>
-                </div>
-
-                <div class="mt-8 flex items-center justify-center gap-4 md:gap-5 flex-wrap">
-                    <div class="bg-white/5 border border-white/10 rounded-full px-5 py-2.5 text-xs text-white/70">
-                        <span class="font-semibold text-white">{{ number_format((int) ($stats['projects'] ?? 0)) }}</span>
-                        <span class="text-white/50">{{ __('Projects') }}</span>
-                    </div>
-                    <div class="bg-white/5 border border-white/10 rounded-full px-5 py-2.5 text-xs text-white/70">
-                        <span class="font-semibold text-white">{{ number_format((int) ($stats['investors'] ?? 0)) }}</span>
-                        <span class="text-white/50">{{ __('Investors') }}</span>
-                    </div>
-                    <div class="bg-white/5 border border-white/10 rounded-full px-5 py-2.5 text-xs text-white/70">
-                        <span class="font-semibold text-white">{{ $fmt8($stats['total_raised'] ?? 0) }}</span>
-                        <span class="text-white/50">{{ __('Total Raised') }}</span>
-                    </div>
-                </div>
-
-                <div class="mt-10 text-white/40 text-[10px] font-bold uppercase tracking-widest">
-                    {{ __('Scroll to explore') }}
-                </div>
-            </div>
-        </div>
+  
 
         <div id="lp-explore" class="mt-8 md:mt-10">
             <div class="text-center">
