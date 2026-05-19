@@ -234,6 +234,19 @@ class MenuItemSeeder extends Seeder
             'parent_id' => null,
         ]);
 
+        MenuItem::updateOrCreate(
+            ['route_name' => 'user.launchpad.index', 'type' => 'user'],
+            [
+                'label' => 'Launchpad',
+                'url' => null,
+                'route_wildcard' => 'user.launchpad.*',
+                'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13l3 3 9-9"/><path d="M9 16l-3.5 3.5a2 2 0 0 1-2.8 0 2 2 0 0 1 0-2.8L6 13"/><path d="M18 7l3.5-3.5a2 2 0 0 0 0-2.8 2 2 0 0 0-2.8 0L15 4"/></svg>',
+                'sort_order' => 9,
+                'is_active' => true,
+                'parent_id' => null,
+            ]
+        );
+
         // Trading Menu
         $trading_parent = MenuItem::create([
             'route_name' => null,
@@ -465,6 +478,18 @@ class MenuItemSeeder extends Seeder
                 'sort_order' => 1,
                 'is_active' => true,
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1" /><rect width="7" height="5" x="14" y="3" rx="1" /><rect width="7" height="9" x="14" y="12" rx="1" /><rect width="7" height="5" x="3" y="16" rx="1" /></svg>',
+            ]
+        );
+
+        MenuItem::updateOrCreate(
+            ['route_name' => 'admin.launchpad.index', 'type' => 'admin'],
+            [
+                'label' => 'Launchpad',
+                'url' => null,
+                'sort_order' => 7,
+                'is_active' => true,
+                'route_wildcard' => 'admin.launchpad.*',
+                'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></svg>',
             ]
         );
 

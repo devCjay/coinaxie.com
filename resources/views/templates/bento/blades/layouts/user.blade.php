@@ -450,52 +450,7 @@
                 </p>
             </div>
 
-            <!-- Live Clock (Center) -->
-            <div
-                class="hidden xl:flex items-center justify-center absolute left-1/2 transform -translate-x-1/2 z-10 select-none pointer-events-none">
-                <div
-                    class="flex items-center bg-secondary-dark/80 backdrop-blur-xl border border-white/5 rounded-full p-1 shadow-2xl ring-1 ring-white/5">
-
-                    <!-- Server Time -->
-                    <div
-                        class="flex items-center gap-3 px-5 py-2 rounded-l-full rounded-r-sm bg-white/5 border-r border-white/5">
-                        <div class="flex flex-col items-end">
-                            <span
-                                class="text-[9px] font-bold text-accent-primary uppercase tracking-widest leading-none mb-1">{{ __('Server') }}</span>
-                            <div class="flex items-center gap-2">
-                                <span class="relative flex h-1.5 w-1.5">
-                                    <span
-                                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent-primary opacity-75"></span>
-                                    <span
-                                        class="relative inline-flex rounded-full h-1.5 w-1.5 bg-accent-primary"></span>
-                                </span>
-                                <span
-                                    class="font-mono text-xs font-bold text-white tabular-nums tracking-wider live-server-clock"
-                                    data-time="{{ now()->format('Y-m-d H:i:s') }}">--:--:--</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Local Time -->
-                    <div class="flex items-center gap-3 px-5 py-2">
-                        <div class="flex flex-col items-start">
-                            <span
-                                class="text-[9px] font-bold text-text-secondary uppercase tracking-widest leading-none mb-1">{{ __('Local') }}</span>
-                            <div class="flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-text-secondary"
-                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <polyline points="12 6 12 12 16 14" />
-                                </svg>
-                                <span
-                                    class="font-mono text-xs font-bold text-text-primary tabular-nums tracking-wider live-local-clock">--:--:--</span>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
+           
 
 
 

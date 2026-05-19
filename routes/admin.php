@@ -32,6 +32,7 @@ use App\Http\Controllers\Admin\Trading\ForexTradingController;
 use App\Http\Controllers\Admin\Trading\FuturesTradingController;
 use App\Http\Controllers\Admin\Trading\MarginTradingController;
 use App\Http\Controllers\Admin\Trading\CopyTradingController;
+use App\Http\Controllers\Admin\LaunchpadController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WithdrawalController;
@@ -237,6 +238,14 @@ Route::middleware(['auth:admin', 'admin.otp.verified', 'sandbox'])->group(functi
         Route::post('/pros/update', [CopyTradingController::class, 'updatePro'])->name('pros.update');
         Route::post('/pros/delete', [CopyTradingController::class, 'deletePro'])->name('pros.delete');
         Route::get('/relationships', [CopyTradingController::class, 'relationships'])->name('relationships.index');
+    });
+
+    Route::prefix('launchpad')->name('launchpad.')->group(function () {
+        Route::get('/', [LaunchpadController::class, 'index'])->name('index');
+        Route::post('/store', [LaunchpadController::class, 'store'])->name('store')->withoutMiddleware('sandbox');
+        Route::post('/update', [LaunchpadController::class, 'update'])->name('update')->withoutMiddleware('sandbox');
+        Route::post('/finalize', [LaunchpadController::class, 'finalize'])->name('finalize')->withoutMiddleware('sandbox');
+        Route::post('/enable-trading', [LaunchpadController::class, 'enableTrading'])->name('enable-trading')->withoutMiddleware('sandbox');
     });
 
 

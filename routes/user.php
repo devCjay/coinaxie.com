@@ -20,6 +20,8 @@ use App\Http\Controllers\User\Trading\FuturesController;
 use App\Http\Controllers\User\Trading\MarginController;
 use App\Http\Controllers\User\Trading\CopyTradingController;
 use App\Http\Controllers\User\Trading\TradingAccountController;
+use App\Http\Controllers\User\LaunchpadController;
+use App\Http\Controllers\User\LaunchpadTradeController;
 use App\Http\Controllers\User\TransactionController;
 use App\Http\Controllers\User\WithdrawalController;
 use App\Http\Controllers\User\Withdrawal\NowpaymentController as NowpaymentWithdrawalController;
@@ -126,6 +128,15 @@ Route::prefix('user')->middleware(['auth', 'otp.verified', 'user.status', 'user.
         Route::post('/forex/cancel-order', [ForexController::class, 'cancelOrder'])->name('forex.cancel-order');
         Route::post('/forex/close-position', [ForexController::class, 'closePosition'])->name('forex.close-position');
         // Route::get('/commodity', [CommodityController::class, 'index'])->name('commodity');
+    });
+
+    Route::prefix('launchpad')->name('launchpad.')->group(function () {
+        Route::get('/', [LaunchpadController::class, 'index'])->name('index');
+        Route::get('/{slug}', [LaunchpadController::class, 'show'])->name('show');
+        Route::post('/buy', [LaunchpadController::class, 'buy'])->name('buy');
+        Route::get('/{slug}/trade', [LaunchpadTradeController::class, 'index'])->name('trade');
+        Route::post('/trade/order', [LaunchpadTradeController::class, 'placeOrder'])->name('trade.order');
+        Route::post('/trade/cancel', [LaunchpadTradeController::class, 'cancelOrder'])->name('trade.cancel');
     });
 
 
