@@ -365,17 +365,18 @@
                             {{ __('Discover top-rated traders with proven track records and consistent returns') }}
                         </p>
                     </div>
-                    <a href="{{ route('user.trading.copy-trading.leaders') }}"
-                        class="bg-white/5 border border-white/10 text-white rounded-2xl px-6 py-3 text-sm font-black hover:bg-white/10 transition inline-flex items-center gap-2">
-                        {{ __('View All Leaders') }}
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7">
+                    <button type="button"
+                        class="btnBecomeLeader bg-white/5 border border-white/10 text-white rounded-2xl px-6 py-3 text-sm font-black hover:bg-white/10 transition inline-flex items-center gap-2">
+                        {{ __('Become a Leader') }}
+                        <svg class="w-4 h-4 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4">
                             </path>
                         </svg>
-                    </a>
+                    </button>
                 </div>
 
-                <div class="pb-5 pt-5 mt-7 md:mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                <div class="pb-5 pt-5 mt-7 md:mt-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
                     @forelse ($topLeaders as $pro)
                         @php
                             $name = $pro->display_name ?: ($pro->user->username ?? $pro->user->first_name ?? 'Trader');
@@ -1002,7 +1003,7 @@
             if (mode === 'landing') {
                 const $modal = $('#leaderModal');
 
-                $('#btnBecomeLeader').on('click', function() {
+                $('#btnBecomeLeader, .btnBecomeLeader').on('click', function() {
                     $modal.show();
                 });
 

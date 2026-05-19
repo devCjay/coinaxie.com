@@ -34,7 +34,6 @@ class CopyTradingController extends Controller
             }])
             ->orderByDesc('followers_count')
             ->latest()
-            ->take(3)
             ->get();
 
         $myPro = CopyTradingProTrader::query()
