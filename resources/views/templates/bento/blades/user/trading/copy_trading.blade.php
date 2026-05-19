@@ -641,7 +641,7 @@
                                 </div>
                             </div>
 
-                            <div class="mt-6">
+                            <div class="mt-6 mb-2">
                                 <div class="flex items-center justify-between text-[11px] text-white/55">
                                     <span class="font-bold">{{ __('Capacity') }}</span>
                                     <span class="text-white/70 font-bold">{{ number_format($capPct, 0) }}% {{ __('filled') }}</span>
@@ -652,7 +652,7 @@
                                 </div>
                             </div>
 
-                            <div class="mt-7 pb-2">
+                            <div class="mt-8 pb-2">
                                 <select class="copy-market hidden" data-pro-id="{{ $pro->id }}">
                                     <option value="both" selected></option>
                                 </select>
