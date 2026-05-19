@@ -222,7 +222,7 @@
                     {{ __('Start copy trading in minutes with our streamlined process') }}
                 </p>
 
-                <div class="mt-7 md:mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 text-left">
+                <div class="pt-5 pb-5 mt-7 md:mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 text-left">
                     <div class="bg-secondary border border-white/5 rounded-3xl p-6 relative overflow-hidden">
                         <div class="absolute top-5 right-6 text-white/10 font-black text-5xl">01</div>
                         <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 grid place-items-center">
@@ -375,7 +375,7 @@
                     </a>
                 </div>
 
-                <div class="pb-5 bt-5 mt-7 md:mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                <div class="pb-5 pt-5 mt-7 md:mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                     @forelse ($topLeaders as $pro)
                         @php
                             $name = $pro->display_name ?: ($pro->user->username ?? $pro->user->first_name ?? 'Trader');
