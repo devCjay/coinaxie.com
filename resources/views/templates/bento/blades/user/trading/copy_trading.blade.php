@@ -1116,7 +1116,7 @@
                     </div>
 
                     <button type="submit" id="copyTraderSubmit"
-                        class="mt-7 pt-7 w-full bg-accent-primary text-white rounded-2xl py-3.5 text-sm font-black hover:opacity-95 transition">
+                        class="mt-7 pt-7 pb-7 w-full bg-accent-primary text-white rounded-2xl py-3.5 text-sm font-black hover:opacity-95 transition">
                         {{ __('Submit') }}
                     </button>
                 </form>
