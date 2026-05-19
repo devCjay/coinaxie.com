@@ -587,7 +587,7 @@
                         </a>
                     </div>
 
-                    <div class="mt-7 md:mt-8 grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-6 items-start">
+                    <div class="pb-5 mt-7 md:mt-8 grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-6 items-start">
                         <div class="lg:col-span-2">
                             <div class="flex items-start gap-4">
                                 <div class="w-16 h-16 rounded-full bg-white/5 border border-white/10 grid place-items-center text-white font-black text-lg relative overflow-hidden">
