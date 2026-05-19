@@ -48,9 +48,15 @@ class CopyTradingController extends Controller
             'top_roi' => 0,
         ];
 
+        $availableUsdt = (float) auth()->user()
+            ->tradingAccounts()
+            ->whereIn('account_type', ['futures', 'margin'])
+            ->where('currency', 'USDT')
+            ->sum('balance');
+
         $mode = 'landing';
 
-        return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'mode', 'stats', 'topLeaders', 'myPro'));
+        return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'mode', 'stats', 'topLeaders', 'myPro', 'availableUsdt'));
     }
 
     public function leaders()
@@ -75,9 +81,15 @@ class CopyTradingController extends Controller
             ->where('user_id', auth()->id())
             ->first();
 
+        $availableUsdt = (float) auth()->user()
+            ->tradingAccounts()
+            ->whereIn('account_type', ['futures', 'margin'])
+            ->where('currency', 'USDT')
+            ->sum('balance');
+
         $mode = 'leaders';
 
-        return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'mode', 'pros', 'myRelationships', 'myPro'));
+        return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'mode', 'pros', 'myRelationships', 'myPro', 'availableUsdt'));
     }
 
     public function profile(int $id)
@@ -167,9 +179,15 @@ class CopyTradingController extends Controller
             'capacity_max' => $capacityMax,
         ];
 
+        $availableUsdt = (float) auth()->user()
+            ->tradingAccounts()
+            ->whereIn('account_type', ['futures', 'margin'])
+            ->where('currency', 'USDT')
+            ->sum('balance');
+
         $mode = 'profile';
 
-        return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'mode', 'pro', 'myRelationship', 'stats', 'profile'));
+        return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'mode', 'pro', 'myRelationship', 'stats', 'profile', 'availableUsdt'));
     }
 
     public function requestLeader(Request $request)
@@ -209,12 +227,24 @@ class CopyTradingController extends Controller
     {
         $request->validate([
             'pro_trader_id' => 'required|exists:copy_trading_pro_traders,id',
-            'market_type' => 'required|in:futures,margin,both',
-            'allocation_type' => 'required|in:fixed,percent',
-            'allocation_value' => 'required|numeric|min:0',
-            'max_leverage' => 'required|integer|min:1|max:100',
-            'margin_order_mode' => 'required|in:normal,borrow',
+            'amount' => 'nullable|numeric|min:0',
+            'stop_loss_percent' => 'nullable|numeric|min:0|max:95',
+            'market_type' => 'nullable|in:futures,margin,both',
+            'allocation_type' => 'nullable|in:fixed,percent',
+            'allocation_value' => 'nullable|numeric|min:0',
+            'max_leverage' => 'nullable|integer|min:1|max:100',
+            'margin_order_mode' => 'nullable|in:normal,borrow',
         ]);
+
+        $amount = $request->filled('amount') ? (float) $request->amount : 0.0;
+        $allocationType = $request->filled('amount') ? 'fixed' : (string) ($request->allocation_type ?? 'fixed');
+        $allocationValue = $request->filled('amount') ? $amount : (float) ($request->allocation_value ?? 0);
+        if ($allocationValue <= 0) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('Please enter an amount'),
+            ], 422);
+        }
 
         $relationship = CopyTradingRelationship::updateOrCreate(
             [
@@ -222,11 +252,12 @@ class CopyTradingController extends Controller
                 'follower_id' => auth()->id(),
             ],
             [
-                'market_type' => $request->market_type,
-                'allocation_type' => $request->allocation_type,
-                'allocation_value' => (float) $request->allocation_value,
-                'max_leverage' => (int) $request->max_leverage,
-                'margin_order_mode' => $request->margin_order_mode,
+                'market_type' => (string) ($request->market_type ?? 'both'),
+                'allocation_type' => $allocationType,
+                'allocation_value' => $allocationValue,
+                'stop_loss_percent' => $request->filled('stop_loss_percent') ? (float) $request->stop_loss_percent : null,
+                'max_leverage' => (int) ($request->max_leverage ?? 50),
+                'margin_order_mode' => (string) ($request->margin_order_mode ?? 'normal'),
                 'status' => 'active',
             ]
         );

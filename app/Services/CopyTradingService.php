@@ -172,7 +172,7 @@ class CopyTradingService
                 'price' => null,
                 'leverage' => $leverage,
                 'take_profit' => (float) ($source->take_profit ?? 0),
-                'stop_loss' => (float) ($source->stop_loss ?? 0),
+                'stop_loss' => 0,
             ], [
                 'is_copy' => true,
                 'copied_from_user_id' => $source->user_id,
@@ -187,6 +187,9 @@ class CopyTradingService
             return;
         }
 
+        $entryRef = $source->type === 'market' ? $current_price : (float) $source->price;
+        $stopLoss = $this->resolveStopLossPrice((float) ($source->stop_loss ?? 0), $relationship, $entryRef, (string) $source->side);
+
         $this->executeFuturesForUser($follower, [
             'ticker' => $source->ticker,
             'type' => $source->type,
@@ -195,7 +198,7 @@ class CopyTradingService
             'price' => $source->type === 'limit' ? (float) $source->price : null,
             'leverage' => $leverage,
             'take_profit' => (float) ($source->take_profit ?? 0),
-            'stop_loss' => (float) ($source->stop_loss ?? 0),
+            'stop_loss' => $stopLoss,
         ], [
             'is_copy' => true,
             'copied_from_user_id' => $source->user_id,
@@ -252,7 +255,7 @@ class CopyTradingService
                 'leverage' => $leverage,
                 'order_mode' => $relationship->margin_order_mode,
                 'take_profit' => (float) ($source->take_profit ?? 0),
-                'stop_loss' => (float) ($source->stop_loss ?? 0),
+                'stop_loss' => 0,
             ], [
                 'is_copy' => true,
                 'copied_from_user_id' => $source->user_id,
@@ -267,6 +270,9 @@ class CopyTradingService
             return;
         }
 
+        $entryRef = $source->type === 'market' ? $current_price : (float) $source->price;
+        $stopLoss = $this->resolveStopLossPrice((float) ($source->stop_loss ?? 0), $relationship, $entryRef, (string) $source->side);
+
         $this->executeMarginForUser($follower, [
             'ticker' => $source->ticker,
             'type' => $source->type,
@@ -276,13 +282,28 @@ class CopyTradingService
             'leverage' => $leverage,
             'order_mode' => $relationship->margin_order_mode,
             'take_profit' => (float) ($source->take_profit ?? 0),
-            'stop_loss' => (float) ($source->stop_loss ?? 0),
+            'stop_loss' => $stopLoss,
         ], [
             'is_copy' => true,
             'copied_from_user_id' => $source->user_id,
             'copied_from_order_id' => $source->id,
             'copy_relationship_id' => $relationship->id,
         ]);
+    }
+
+    protected function resolveStopLossPrice(float $sourceStopLoss, CopyTradingRelationship $relationship, float $entryPrice, string $side): float
+    {
+        $pct = (float) ($relationship->stop_loss_percent ?? 0);
+        if ($pct <= 0 || $entryPrice <= 0) {
+            return $sourceStopLoss;
+        }
+
+        $pct = max(0, min($pct, 95));
+        if ($side === 'sell') {
+            return $entryPrice * (1 + ($pct / 100));
+        }
+
+        return max(0, $entryPrice * (1 - ($pct / 100)));
     }
 
     protected function calculateFollowerQuoteAmount(float $availableBalance, CopyTradingRelationship $relationship): float

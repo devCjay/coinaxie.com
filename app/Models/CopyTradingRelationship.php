@@ -12,9 +12,15 @@ class CopyTradingRelationship extends Model
         'market_type',
         'allocation_type',
         'allocation_value',
+        'stop_loss_percent',
         'max_leverage',
         'margin_order_mode',
         'status',
+    ];
+
+    protected $casts = [
+        'allocation_value' => 'float',
+        'stop_loss_percent' => 'float',
     ];
 
     public function proTrader()

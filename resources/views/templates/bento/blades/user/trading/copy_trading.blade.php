@@ -596,6 +596,8 @@
                         $name = $pro->display_name ?: ($pro->user->username ?? $pro->user->first_name ?? 'Trader');
                         $followers = (int) ($pro->followers_count ?? 0);
                         $searchHay = strtolower($name);
+                        $rel = $myRelationships[$pro->id] ?? null;
+                        $isCopying = (bool) $rel;
                     @endphp
                     <div class="leader-card" data-search="{{ $searchHay }}">
                         <div class="relative overflow-hidden bg-secondary border border-white/5 rounded-3xl p-5 md:p-6">
@@ -688,6 +690,23 @@
                                             d="M9 5l7 7-7 7"></path>
                                     </svg>
                                 </a>
+                            </div>
+
+                            <div class="mt-5">
+                                @if ($isCopying)
+                                    <button type="button" data-pro-id="{{ $pro->id }}"
+                                        class="btn-unfollow w-full bg-red-500/15 border border-red-500/25 text-red-200 rounded-2xl px-6 py-3 text-sm font-black hover:bg-red-500/20 transition inline-flex items-center justify-center gap-2">
+                                        {{ __('Stop Copying') }}
+                                    </button>
+                                @else
+                                    <button type="button" data-pro-id="{{ $pro->id }}" data-pro-name="{{ $name }}"
+                                        class="btn-follow w-full bg-white text-black rounded-2xl px-6 py-3 text-sm font-black hover:bg-white/90 transition inline-flex items-center justify-center gap-3">
+                                        <svg class="w-4 h-4 text-black/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-7 7h8a2 2 0 002-2V7a2 2 0 00-2-2H8a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                        </svg>
+                                        {{ __('Start Copying') }}
+                                    </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -1057,6 +1076,52 @@
                 </div>
             </div>
         @endif
+
+        <div id="copyTraderModal" class="modal" data-available-usdt="{{ (float) ($availableUsdt ?? 0) }}">
+            <div class="modal-content max-w-md">
+                <div class="flex items-center justify-between gap-4">
+                    <div class="text-white font-black text-xl">{{ __('Copy Trader') }}</div>
+                    <button type="button" id="closeCopyTraderModal"
+                        class="text-white/60 hover:text-white transition text-2xl leading-none">&times;</button>
+                </div>
+
+                <form id="copyTraderForm" class="mt-6">
+                    <input type="hidden" id="copyTraderProId" name="pro_trader_id" value="" />
+
+                    <label class="text-sm font-black text-white/70 block">
+                        {{ __('Amount') }}
+                        <span class="text-accent-primary font-black">
+                            ({{ __('Available:') }} <span id="copyTraderAvailable">0</span> {{ __('USDT') }})
+                        </span>
+                        <span class="text-red-400">*</span>
+                    </label>
+
+                    <div class="mt-2 flex items-stretch rounded-2xl overflow-hidden border border-white/10 bg-white/5">
+                        <input id="copyTraderAmount" name="amount" type="number" step="0.01" min="0"
+                            class="flex-1 bg-transparent px-4 py-3 text-white/90 outline-none text-sm"
+                            placeholder="0.00" />
+                        <div class="px-4 py-3 text-white/70 text-sm border-l border-white/10 bg-white/5">
+                            {{ __('USDT') }}
+                        </div>
+                    </div>
+
+                    <label class="mt-6 text-sm font-black text-white/70 block">{{ __('Stop Loss') }}</label>
+                    <div class="mt-2 flex items-stretch rounded-2xl overflow-hidden border border-white/10 bg-white/5">
+                        <input id="copyTraderStopLossPercent" name="stop_loss_percent" type="number" step="0.1" min="0" max="95"
+                            class="flex-1 bg-transparent px-4 py-3 text-white/90 outline-none text-sm"
+                            placeholder="0 - 95" />
+                        <div class="px-4 py-3 text-white/70 text-sm border-l border-white/10 bg-white/5">
+                            %
+                        </div>
+                    </div>
+
+                    <button type="submit" id="copyTraderSubmit"
+                        class="mt-7 w-full bg-accent-primary text-white rounded-2xl py-3.5 text-sm font-black hover:opacity-95 transition">
+                        {{ __('Submit') }}
+                    </button>
+                </form>
+            </div>
+        </div>
     </div>
 @endsection
 
@@ -1134,12 +1199,58 @@
 
             $(document).on('click', '.btn-follow', function() {
                 const proId = $(this).data('pro-id');
-                const $btn = $(this);
-                const payload = collectSettings(proId);
-                payload._token = "{{ csrf_token() }}";
+                const $modal = $('#copyTraderModal');
+                if ($modal.length === 0) {
+                    return;
+                }
 
-                $btn.prop('disabled', true);
+                const available = parseFloat($modal.data('available-usdt') || 0);
+                $('#copyTraderAvailable').text(available.toFixed(2));
+                $('#copyTraderProId').val(proId);
+                $('#copyTraderAmount').val('');
+                $('#copyTraderStopLossPercent').val('');
+                $modal.show();
+            });
 
+            $('#closeCopyTraderModal').on('click', function() {
+                $('#copyTraderModal').hide();
+            });
+
+            $(window).on('click', function(e) {
+                const $modal = $('#copyTraderModal');
+                if ($modal.length && e.target === $modal[0]) {
+                    $modal.hide();
+                }
+            });
+
+            $('#copyTraderForm').on('submit', function(e) {
+                e.preventDefault();
+
+                const $submit = $('#copyTraderSubmit');
+                const proId = $('#copyTraderProId').val();
+                const amount = parseFloat($('#copyTraderAmount').val() || 0);
+                const sl = $('#copyTraderStopLossPercent').val();
+                const slNum = sl === '' ? null : parseFloat(sl);
+
+                if (!proId || amount <= 0) {
+                    toastNotification("{{ __('Please enter an amount') }}", 'error');
+                    return;
+                }
+
+                if (slNum !== null && (isNaN(slNum) || slNum < 0 || slNum > 95)) {
+                    toastNotification("{{ __('Stop loss must be between 0 and 95') }}", 'error');
+                    return;
+                }
+
+                const payload = {
+                    _token: "{{ csrf_token() }}",
+                    pro_trader_id: proId,
+                    amount: amount,
+                    stop_loss_percent: slNum,
+                    market_type: 'both',
+                };
+
+                $submit.prop('disabled', true);
                 $.ajax({
                     url: "{{ route('user.trading.copy-trading.follow') }}",
                     method: 'POST',
@@ -1153,12 +1264,11 @@
                         }
                     },
                     error: function(xhr) {
-                        const message = xhr.responseJSON ? xhr.responseJSON.message :
-                            "{{ __('An error occurred') }}";
+                        const message = xhr.responseJSON ? xhr.responseJSON.message : "{{ __('An error occurred') }}";
                         toastNotification(message, 'error');
                     },
                     complete: function() {
-                        $btn.prop('disabled', false);
+                        $submit.prop('disabled', false);
                     }
                 });
             });
