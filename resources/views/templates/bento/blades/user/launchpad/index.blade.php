@@ -128,8 +128,12 @@
                         $sold = (float) $project->sold_quote;
                         $fundedPct = $hardCap > 0 ? min(100.0, ($sold / $hardCap) * 100.0) : 0.0;
                         $isFunded = ($hardCap > 0 && $sold >= $hardCap) || in_array($project->status, ['ended', 'launched'], true);
-                        $chipClass = $isFunded ? 'bg-green-500/15 border border-green-500/25 text-green-400' : 'bg-white/5 border border-white/10 text-white/55';
-                        $chipText = $isFunded ? __('Funded') : __('Active');
+                        $chipClass = $isFunded
+                            ? 'bg-green-500/15 border border-green-500/25 text-green-400'
+                            : ((string) $project->status === 'draft'
+                                ? 'bg-indigo-500/15 border border-indigo-500/25 text-indigo-300'
+                                : 'bg-white/5 border border-white/10 text-white/55');
+                        $chipText = $isFunded ? __('Funded') : (((string) $project->status === 'draft') ? __('Upcoming') : __('Active'));
                         $durationDays = null;
                         if ($project->sale_start_at && $project->sale_end_at) {
                             $durationDays = $project->sale_start_at->diffInDays($project->sale_end_at);

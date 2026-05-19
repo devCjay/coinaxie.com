@@ -20,7 +20,7 @@ class LaunchpadController extends Controller
         $projectsQuery = LaunchpadProject::query()
             ->where('approval_status', 'approved')
             ->where('is_visible', true)
-            ->whereIn('status', ['live', 'ended', 'launched']);
+            ->where('status', '!=', 'canceled');
 
         $projects = (clone $projectsQuery)->latest()->get();
 
