@@ -177,7 +177,7 @@
                     {{ __('Start copy trading in minutes with our streamlined process') }}
                 </p>
 
-                <div class="mt-7 md:mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 text-left">
+                <div class="pb-5 pt-5 mt-7 md:mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 text-left">
                     <div class="bg-secondary border border-white/5 rounded-3xl p-6">
                         <div class="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 grid place-items-center">
                             <svg class="w-6 h-6 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,7 +247,7 @@
                     </a>
                 </div>
 
-                <div class="mt-7 md:mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                <div class="pb-5 bt-5 mt-7 md:mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                     @forelse ($topLeaders as $pro)
                         @php
                             $name = $pro->display_name ?: ($pro->user->username ?? $pro->user->first_name ?? 'Trader');
