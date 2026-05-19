@@ -534,7 +534,7 @@
             @endphp
 
             <div class="ct-hero bg-secondary border border-white/5 rounded-[2.5rem] overflow-hidden relative">
-                <div class="px-5 md:px-8 py-7 md:py-10">
+                <div class="px-5 md:px-8 pt-9 pb-10 md:pt-12 md:pb-12">
                     <a href="{{ route('user.trading.copy-trading.leaders') }}"
                         class="inline-flex items-center gap-2 text-white/70 hover:text-white transition text-sm font-bold">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -543,7 +543,7 @@
                         {{ __('Back to Leaders') }}
                     </a>
 
-                    <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-6 items-start">
+                    <div class="mt-7 md:mt-8 grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-6 items-start">
                         <div class="lg:col-span-2">
                             <div class="flex items-start gap-4">
                                 <div class="w-16 h-16 rounded-full bg-white/5 border border-white/10 grid place-items-center text-white font-black text-lg relative overflow-hidden">
@@ -573,9 +573,9 @@
                             </div>
                         </div>
 
-                        <div class="bg-white/5 border border-white/10 rounded-3xl p-5 md:p-6 relative overflow-hidden">
+                        <div class="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-7 relative overflow-hidden">
                             <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-white/0 via-white/20 to-white/0"></div>
-                            <div class="text-center">
+                            <div class="text-center pt-1">
                                 <div class="inline-flex items-center gap-2 text-[11px] font-black uppercase tracking-widest text-white/55">
                                     <span class="w-6 h-6 rounded-lg bg-white/5 border border-white/10 grid place-items-center text-white/55 font-black">%</span>
                                     {{ __('Profit Share') }}
@@ -607,7 +607,7 @@
                                 </div>
                             </div>
 
-                            <div class="mt-6">
+                            <div class="mt-7 pb-1">
                                 <select class="copy-market hidden" data-pro-id="{{ $pro->id }}">
                                     <option value="both" selected></option>
                                 </select>
@@ -636,7 +636,7 @@
                                     </button>
                                 @endif
                                 <a href="{{ route('user.trading.copy-trading.leaders') }}"
-                                    class="mt-3 block text-center text-xs font-black uppercase tracking-widest text-white/55 hover:text-white transition">
+                                    class="mt-4 block text-center text-xs font-black uppercase tracking-widest text-white/55 hover:text-white transition">
                                     {{ __('Advanced settings') }}
                                 </a>
                             </div>
