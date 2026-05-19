@@ -577,13 +577,15 @@
 
             <div class="ct-hero ct-profile bg-secondary border border-white/5 rounded-[2.5rem] overflow-hidden relative">
                 <div class="px-5 md:px-8 pt-9 pb-10 md:pt-12 md:pb-12">
-                    <a href="{{ route('user.trading.copy-trading.leaders') }}"
-                        class="inline-flex items-center gap-2 text-white/70 hover:text-white transition text-sm font-bold">
+                    <div class="pt-1 md:pt-0 pb-2 md:pb-3">
+                        <a href="{{ route('user.trading.copy-trading.leaders') }}"
+                            class="inline-flex items-center gap-2 text-white/70 hover:text-white transition text-sm font-bold">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
                         </svg>
                         {{ __('Back to Leaders') }}
-                    </a>
+                        </a>
+                    </div>
 
                     <div class="mt-7 md:mt-8 grid grid-cols-1 lg:grid-cols-3 gap-5 md:gap-6 items-start">
                         <div class="lg:col-span-2">
