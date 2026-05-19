@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class LaunchpadProject extends Model
 {
     protected $fillable = [
+        'created_by_user_id',
         'slug',
         'name',
         'token_symbol',
@@ -25,7 +26,14 @@ class LaunchpadProject extends Model
         'sale_end_at',
         'launch_at',
         'status',
+        'approval_status',
+        'is_visible',
         'trading_enabled',
+        'launch_fee_currency',
+        'launch_fee_amount',
+        'launch_fee_paid_at',
+        'admin_approved_at',
+        'admin_approved_by',
     ];
 
     protected function casts(): array
@@ -41,6 +49,10 @@ class LaunchpadProject extends Model
             'sale_end_at' => 'datetime',
             'launch_at' => 'datetime',
             'trading_enabled' => 'boolean',
+            'is_visible' => 'boolean',
+            'launch_fee_amount' => 'decimal:8',
+            'launch_fee_paid_at' => 'datetime',
+            'admin_approved_at' => 'datetime',
         ];
     }
 
@@ -54,4 +66,3 @@ class LaunchpadProject extends Model
         return $this->hasOne(LaunchpadMarket::class, 'project_id');
     }
 }
-

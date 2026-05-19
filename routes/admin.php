@@ -246,6 +246,9 @@ Route::middleware(['auth:admin', 'admin.otp.verified', 'sandbox'])->group(functi
         Route::post('/update', [LaunchpadController::class, 'update'])->name('update')->withoutMiddleware('sandbox');
         Route::post('/finalize', [LaunchpadController::class, 'finalize'])->name('finalize')->withoutMiddleware('sandbox');
         Route::post('/enable-trading', [LaunchpadController::class, 'enableTrading'])->name('enable-trading')->withoutMiddleware('sandbox');
+        Route::post('/approve', [LaunchpadController::class, 'approve'])->name('approve')->withoutMiddleware('sandbox');
+        Route::post('/reject', [LaunchpadController::class, 'reject'])->name('reject')->withoutMiddleware('sandbox');
+        Route::post('/launch-fee', [LaunchpadController::class, 'updateLaunchFee'])->name('launch-fee')->withoutMiddleware('sandbox');
     });
 
 

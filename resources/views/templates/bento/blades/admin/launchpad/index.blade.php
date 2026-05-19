@@ -161,6 +161,21 @@
                             </a>
                         @endif
 
+                        @php
+                            $lpFeeAmount = (float) getSetting('launchpad_launch_fee_amount', 0);
+                            $lpFeeCurrency = strtoupper((string) getSetting('launchpad_launch_fee_currency', 'USDT'));
+                            $lpFeeText = $lpFeeAmount > 0 ? ($fmt8($lpFeeAmount) . ' ' . $lpFeeCurrency) : __('Free');
+                        @endphp
+
+                        <button type="button" onclick="openModal('launchFeeModal')"
+                            class="h-12 px-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-text-secondary hover:text-white flex items-center gap-2 transition-all font-bold text-xs uppercase tracking-widest shadow-lg">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            {{ __('Launch Fee') }}: {{ $lpFeeText }}
+                        </button>
+
                         <button type="button" onclick="openModal('createLaunchpadModal')"
                             class="h-12 px-6 rounded-2xl bg-accent-primary text-white flex items-center gap-2 transition-all font-black text-xs uppercase tracking-widest shadow-lg hover:opacity-90 active:scale-95">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -287,6 +302,12 @@
                                     <span class="text-xs px-2 py-1 rounded-full inline-block {{ $badgeClass }}">
                                         {{ ucfirst($p->status) }}
                                     </span>
+                                    @if (($p->approval_status ?? 'approved') !== 'approved')
+                                        <div class="text-white/55 text-xs mt-2">
+                                            {{ __('Approval') }}:
+                                            <span class="text-white font-semibold">{{ ucfirst((string) $p->approval_status) }}</span>
+                                        </div>
+                                    @endif
                                 </td>
                                 <td class="px-8 py-5 text-right text-sm text-white/70">
                                     <div class="font-mono">{{ $p->created_at ? $p->created_at->format('Y-m-d') : '—' }}</div>
@@ -298,6 +319,23 @@
                                             data-project='@json($projectPayload)'>
                                             {{ __('Edit') }}
                                         </button>
+
+                                        @if (($p->approval_status ?? 'approved') === 'pending')
+                                            <form action="{{ route('admin.launchpad.approve') }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="id" value="{{ $p->id }}">
+                                                <button class="bg-green-500/15 border border-green-500/25 text-green-300 rounded-xl px-4 py-2 font-semibold hover:bg-green-500/20 transition">
+                                                    {{ __('Approve') }}
+                                                </button>
+                                            </form>
+                                            <form action="{{ route('admin.launchpad.reject') }}" method="POST">
+                                                @csrf
+                                                <input type="hidden" name="id" value="{{ $p->id }}">
+                                                <button class="bg-red-500/15 border border-red-500/25 text-red-300 rounded-xl px-4 py-2 font-semibold hover:bg-red-500/20 transition">
+                                                    {{ __('Reject') }}
+                                                </button>
+                                            </form>
+                                        @endif
 
                                         <form action="{{ route('admin.launchpad.finalize') }}" method="POST">
                                             @csrf
@@ -559,6 +597,44 @@
                     <button type="submit"
                         class="px-8 py-3 bg-accent-primary text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-all flex items-center gap-2">
                         {{ __('Save Changes') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="launchFeeModal" class="modal">
+        <div class="modal-content">
+            <div class="flex items-center justify-between mb-8">
+                <h3 class="text-2xl font-bold text-white">{{ __('Launch Fee') }}</h3>
+                <button onclick="closeModal('launchFeeModal')" class="text-slate-500 hover:text-white transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <form action="{{ route('admin.launchpad.launch-fee') }}" method="POST">
+                @csrf
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">{{ __('Fee Amount') }}</label>
+                        <input type="number" step="0.00000001" min="0" name="fee_amount" value="{{ (float) getSetting('launchpad_launch_fee_amount', 0) }}"
+                            class="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent-primary transition-all">
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">{{ __('Fee Currency') }}</label>
+                        <input type="text" name="fee_currency" value="{{ strtoupper((string) getSetting('launchpad_launch_fee_currency', 'USDT')) }}"
+                            class="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent-primary transition-all">
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4 border-t border-white/5 gap-3">
+                    <button type="button" onclick="closeModal('launchFeeModal')"
+                        class="px-6 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition-all">{{ __('Cancel') }}</button>
+                    <button type="submit"
+                        class="px-8 py-3 bg-accent-primary text-white text-xs font-bold uppercase tracking-widest rounded-xl hover:opacity-90 transition-all">
+                        {{ __('Save') }}
                     </button>
                 </div>
             </form>

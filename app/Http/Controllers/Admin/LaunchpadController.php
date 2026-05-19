@@ -177,4 +177,51 @@ class LaunchpadController extends Controller
 
         return back()->with('success', __('Trading enabled'));
     }
+
+    public function approve(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer|exists:launchpad_projects,id',
+        ]);
+
+        $project = LaunchpadProject::findOrFail((int) $request->id);
+        $project->update([
+            'approval_status' => 'approved',
+            'is_visible' => true,
+            'admin_approved_at' => now(),
+            'admin_approved_by' => auth()->guard('admin')->id(),
+        ]);
+
+        return back()->with('success', __('Project approved'));
+    }
+
+    public function reject(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer|exists:launchpad_projects,id',
+        ]);
+
+        $project = LaunchpadProject::findOrFail((int) $request->id);
+        $project->update([
+            'approval_status' => 'rejected',
+            'is_visible' => false,
+            'admin_approved_at' => null,
+            'admin_approved_by' => null,
+        ]);
+
+        return back()->with('success', __('Project rejected'));
+    }
+
+    public function updateLaunchFee(Request $request)
+    {
+        $request->validate([
+            'fee_amount' => 'required|numeric|min:0',
+            'fee_currency' => 'required|string|max:16',
+        ]);
+
+        updateSetting('launchpad_launch_fee_amount', (float) $request->fee_amount);
+        updateSetting('launchpad_launch_fee_currency', strtoupper((string) $request->fee_currency));
+
+        return back()->with('success', __('Launch fee updated'));
+    }
 }

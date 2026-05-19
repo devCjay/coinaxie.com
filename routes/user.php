@@ -134,6 +134,7 @@ Route::prefix('user')->middleware(['auth', 'otp.verified', 'user.status', 'user.
         Route::get('/', [LaunchpadController::class, 'index'])->name('index');
         Route::get('/{slug}', [LaunchpadController::class, 'show'])->name('show');
         Route::post('/buy', [LaunchpadController::class, 'buy'])->name('buy');
+        Route::post('/submit', [LaunchpadController::class, 'submit'])->name('submit');
         Route::get('/{slug}/trade', [LaunchpadTradeController::class, 'index'])->name('trade');
         Route::post('/trade/order', [LaunchpadTradeController::class, 'placeOrder'])->name('trade.order');
         Route::post('/trade/cancel', [LaunchpadTradeController::class, 'cancelOrder'])->name('trade.cancel');

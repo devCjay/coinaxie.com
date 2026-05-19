@@ -36,10 +36,15 @@ class AppServiceProvider extends ServiceProvider
         //Support for  older MySQL / MariaDB
         Schema::defaultStringLength(191);
 
-        if (Schema::hasTable('menu_items')) {
-            $created = false;
+        $this->app->booted(function () {
+            if (!Schema::hasTable('menu_items')) {
+                return;
+            }
 
-            if (Route::has('user.launchpad.index') && !MenuItem::where('type', 'user')->where('route_name', 'user.launchpad.index')->exists()) {
+            $touched = false;
+
+            $userItem = MenuItem::where('type', 'user')->where('route_name', 'user.launchpad.index')->first();
+            if (!$userItem) {
                 MenuItem::create([
                     'label' => 'Launchpad',
                     'route_name' => 'user.launchpad.index',
@@ -51,10 +56,26 @@ class AppServiceProvider extends ServiceProvider
                     'is_active' => true,
                     'parent_id' => null,
                 ]);
-                $created = true;
+                $touched = true;
+            } else {
+                $updates = [];
+                if (!$userItem->is_active) {
+                    $updates['is_active'] = true;
+                }
+                if ($userItem->parent_id !== null) {
+                    $updates['parent_id'] = null;
+                }
+                if (($userItem->route_wildcard ?? '') !== 'user.launchpad.*') {
+                    $updates['route_wildcard'] = 'user.launchpad.*';
+                }
+                if (!empty($updates)) {
+                    $userItem->update($updates);
+                    $touched = true;
+                }
             }
 
-            if (Route::has('admin.launchpad.index') && !MenuItem::where('type', 'admin')->where('route_name', 'admin.launchpad.index')->exists()) {
+            $adminItem = MenuItem::where('type', 'admin')->where('route_name', 'admin.launchpad.index')->first();
+            if (!$adminItem) {
                 MenuItem::create([
                     'label' => 'Launchpad',
                     'route_name' => 'admin.launchpad.index',
@@ -66,14 +87,29 @@ class AppServiceProvider extends ServiceProvider
                     'is_active' => true,
                     'parent_id' => null,
                 ]);
-                $created = true;
+                $touched = true;
+            } else {
+                $updates = [];
+                if (!$adminItem->is_active) {
+                    $updates['is_active'] = true;
+                }
+                if ($adminItem->parent_id !== null) {
+                    $updates['parent_id'] = null;
+                }
+                if (($adminItem->route_wildcard ?? '') !== 'admin.launchpad.*') {
+                    $updates['route_wildcard'] = 'admin.launchpad.*';
+                }
+                if (!empty($updates)) {
+                    $adminItem->update($updates);
+                    $touched = true;
+                }
             }
 
-            if ($created) {
+            if ($touched) {
                 Cache::forget('admin_menu_items');
                 Cache::forget('user_menu_items');
             }
-        }
+        });
 
         // Sharing variables only to the user layouts
         View::composer('templates.*.blades.layouts.user', function ($view) {
