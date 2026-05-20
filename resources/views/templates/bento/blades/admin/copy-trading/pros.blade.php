@@ -1,192 +1,308 @@
 @extends('templates.bento.blades.admin.layouts.admin')
 
 @section('content')
-    <div class="space-y-6">
-        <div class="bg-secondary border border-white/5 rounded-2xl p-5">
-            <h2 class="text-white font-semibold text-lg">{{ __('Copy Trading Settings') }}</h2>
+    @php
+        $fmt2 = fn($v) => number_format((float) $v, 2, '.', '');
+        $fmt8 = fn($v) => rtrim(rtrim(number_format((float) $v, 8, '.', ''), '0'), '.');
+        $minCopyAmount = (float) ($minCopyAmount ?? 0);
+        $stats = $stats ?? [];
+    @endphp
 
-            <form action="{{ route('admin.copy-trading.settings.min-amount') }}" method="POST" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                @csrf
-                <div>
-                    <label class="text-sm text-text-secondary">{{ __('Minimum Copy Amount (USDT)') }}</label>
-                    <input type="number" name="min_copy_amount" step="0.01" min="0"
-                        value="{{ number_format((float) ($minCopyAmount ?? 0), 2, '.', '') }}"
-                        class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80"
-                        placeholder="0.00">
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 90;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background: rgba(2, 6, 23, 0.75);
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin: 5% auto;
+            padding: 28px;
+            width: 92%;
+            max-width: 900px;
+            border-radius: 24px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.55);
+        }
+    </style>
+
+    <div class="space-y-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            <div class="bg-secondary border border-white/5 rounded-3xl p-6 relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0Z"></path>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-black text-white leading-none">{{ number_format((int) ($stats['pro_traders'] ?? 0)) }}</div>
+                    <div class="text-[10px] text-text-secondary font-bold uppercase tracking-widest mt-2 opacity-60">
+                        {{ __('Pro Traders') }}</div>
                 </div>
-                <div class="md:col-span-2">
-                    <button class="bg-accent-primary text-white rounded-xl px-6 py-3 font-semibold hover:opacity-90 transition">
-                        {{ __('Update') }}
-                    </button>
+            </div>
+
+            <div class="bg-secondary border border-white/5 rounded-3xl p-6 relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-black text-white leading-none">{{ number_format((int) ($stats['active_pro_traders'] ?? 0)) }}</div>
+                    <div class="text-[10px] text-text-secondary font-bold uppercase tracking-widest mt-2 opacity-60">
+                        {{ __('Active Pros') }}</div>
                 </div>
-            </form>
+            </div>
+
+            <div class="bg-secondary border border-white/5 rounded-3xl p-6 relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-br from-violet-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-2xl bg-violet-500/10 flex items-center justify-center text-violet-400 mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0Z"></path>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-black text-white leading-none">{{ number_format((int) ($stats['active_relationships'] ?? 0)) }}</div>
+                    <div class="text-[10px] text-text-secondary font-bold uppercase tracking-widest mt-2 opacity-60">
+                        {{ __('Active Followers') }}</div>
+                </div>
+            </div>
+
+            <div class="bg-secondary border border-white/5 rounded-3xl p-6 relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-400 mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3v18h18"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 14l3-3 2 2 5-5"></path>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-black text-white leading-none">{{ number_format((int) ($stats['total_followers'] ?? 0)) }}</div>
+                    <div class="text-[10px] text-text-secondary font-bold uppercase tracking-widest mt-2 opacity-60">
+                        {{ __('Total Followers') }}</div>
+                </div>
+            </div>
+
+            <div class="bg-secondary border border-white/5 rounded-3xl p-6 relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-br from-accent-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div class="relative z-10">
+                    <div class="w-12 h-12 rounded-2xl bg-accent-primary/10 flex items-center justify-center text-accent-primary mb-4">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-black text-white leading-none">{{ $fmt2($minCopyAmount) }}</div>
+                    <div class="text-[10px] text-text-secondary font-bold uppercase tracking-widest mt-2 opacity-60">
+                        {{ __('Min Copy (USDT)') }}</div>
+                </div>
+            </div>
         </div>
 
-        <div class="bg-secondary border border-white/5 rounded-2xl p-5">
-            <h2 class="text-white font-semibold text-lg">{{ __('Add / Update Pro Trader') }}</h2>
+        <div class="bg-secondary border border-white/5 rounded-[2rem] overflow-hidden shadow-2xl relative">
+            <div class="bg-secondary/30 border-b border-white/5 p-4 lg:p-6 relative">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-text-secondary border border-white/10 shadow-inner">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-white font-bold tracking-tight">{{ __('Pro Traders') }}</h4>
+                            <p class="text-[10px] text-text-secondary uppercase font-bold tracking-widest mt-0.5 opacity-50">
+                                {{ __('Create, manage and approve traders for copy trading') }}</p>
+                        </div>
+                    </div>
 
-            <form action="{{ route('admin.copy-trading.pros.store') }}" method="POST" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                @csrf
-                <div>
-                    <label class="text-sm text-text-secondary">{{ __('User') }}</label>
-                    <select name="user_id"
-                        class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80">
-                        @foreach ($users as $user)
-                            <option value="{{ $user->id }}">{{ $user->username ?? $user->email }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="text-sm text-text-secondary">{{ __('Status') }}</label>
-                    <select name="status"
-                        class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80">
-                        <option value="active">{{ __('Active') }}</option>
-                        <option value="inactive">{{ __('Inactive') }}</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="text-sm text-text-secondary">{{ __('Display Name') }}</label>
-                    <input type="text" name="display_name"
-                        class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80"
-                        placeholder="{{ __('Optional') }}">
-                </div>
-                <div>
-                    <label class="text-sm text-text-secondary">{{ __('Bio') }}</label>
-                    <input type="text" name="bio"
-                        class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80"
-                        placeholder="{{ __('Optional') }}">
-                </div>
-                <div>
-                    <label class="text-sm text-text-secondary">{{ __('Style') }}</label>
-                    <input type="text" name="style"
-                        class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80"
-                        placeholder="SWING">
-                </div>
-                <div>
-                    <label class="text-sm text-text-secondary">{{ __('Risk Level') }}</label>
-                    <input type="text" name="risk_level"
-                        class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80"
-                        placeholder="Conservative">
-                </div>
-                <div>
-                    <label class="text-sm text-text-secondary">{{ __('Profit Share (%)') }}</label>
-                    <input type="number" name="profit_share_percent" step="0.01" min="0" max="100"
-                        value="0"
-                        class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80"
-                        placeholder="0">
-                </div>
-                <div>
-                    <label class="text-sm text-text-secondary">{{ __('Min. Investment Amount') }}</label>
-                    <input type="number" name="min_investment_amount" step="0.00000001" min="0"
-                        value="0"
-                        class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80"
-                        placeholder="0.00">
-                </div>
-                <div>
-                    <label class="text-sm text-text-secondary">{{ __('Min. Investment Currency') }}</label>
-                    <input type="text" name="min_investment_currency"
-                        value="USDT"
-                        class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80"
-                        placeholder="USDT">
-                </div>
-                <div class="md:col-span-2">
-                    <button
-                        class="bg-accent-primary text-white rounded-xl px-6 py-3 font-semibold hover:opacity-90 transition">
-                        {{ __('Save') }}
-                    </button>
-                </div>
-            </form>
-        </div>
+                    <div class="flex-1 max-w-2xl flex flex-wrap gap-3 lg:justify-end">
+                        <div class="relative flex-1 group min-w-[200px]">
+                            <input type="text" id="proSearch" placeholder="{{ __('Search by user, display name or status...') }}"
+                                class="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-5 text-sm font-medium text-white focus:border-accent-primary focus:ring-1 focus:ring-accent-primary transition-all outline-none placeholder:text-text-secondary/30">
+                            <button type="button" id="clearProSearch"
+                                class="hidden absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded-xl text-text-secondary transition-colors group-hover:text-accent-primary">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
 
-        <div class="bg-secondary border border-white/5 rounded-2xl overflow-hidden">
-            <div class="p-5 flex items-center justify-between">
-                <h3 class="text-white font-semibold">{{ __('Pro Traders') }}</h3>
-                <a href="{{ route('admin.copy-trading.relationships.index') }}"
-                    class="text-sm text-accent-primary hover:underline">{{ __('View Relationships') }}</a>
+                        <button type="button" onclick="openModal('minCopyAmountModal')"
+                            class="h-12 px-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-text-secondary hover:text-white flex items-center gap-2 transition-all font-bold text-xs uppercase tracking-widest shadow-lg">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            {{ __('Min Copy') }}: {{ $fmt2($minCopyAmount) }} {{ __('USDT') }}
+                        </button>
+
+                        <a href="{{ route('admin.copy-trading.relationships.index') }}"
+                            class="h-12 px-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-text-secondary hover:text-white flex items-center gap-2 transition-all font-bold text-xs uppercase tracking-widest shadow-lg">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                    d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                    d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                    d="M12 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0Z"></path>
+                            </svg>
+                            {{ __('Relationships') }}
+                        </a>
+
+                        <button type="button" onclick="openModal('createProModal')"
+                            class="h-12 px-6 rounded-2xl bg-accent-primary text-white flex items-center gap-2 transition-all font-black text-xs uppercase tracking-widest shadow-lg hover:opacity-90 active:scale-95">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                    d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            {{ __('Add Pro Trader') }}
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="min-w-full text-sm">
-                    <thead class="bg-primary-dark/50 text-text-secondary">
-                        <tr>
-                            <th class="text-left px-5 py-3">{{ __('User') }}</th>
-                            <th class="text-left px-5 py-3">{{ __('Display Name') }}</th>
-                            <th class="text-left px-5 py-3">{{ __('Followers') }}</th>
-                            <th class="text-left px-5 py-3">{{ __('Status') }}</th>
-                            <th class="text-right px-5 py-3">{{ __('Action') }}</th>
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white/[0.02]">
+                            <th class="px-8 py-6 text-left">
+                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('Trader') }}</span>
+                            </th>
+                            <th class="px-8 py-6 text-left">
+                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('Quick Info') }}</span>
+                            </th>
+                            <th class="px-8 py-6 text-right">
+                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('Followers') }}</span>
+                            </th>
+                            <th class="px-8 py-6 text-left">
+                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('Status') }}</span>
+                            </th>
+                            <th class="px-8 py-6 text-right">
+                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('Created') }}</span>
+                            </th>
+                            <th class="px-8 py-6 text-right">
+                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('Action') }}</span>
+                            </th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="divide-y divide-white/5" id="prosTbody">
                         @forelse ($pros as $pro)
-                            <tr class="border-t border-white/5">
-                                <td class="px-5 py-4 text-white">
-                                    {{ $pro->user->username ?? $pro->user->email }}
-                                </td>
-                                <td class="px-5 py-4 text-white/80">
-                                    <form action="{{ route('admin.copy-trading.pros.update') }}" method="POST"
-                                        class="flex flex-col gap-2">
-                                        @csrf
-                                        <input type="hidden" name="id" value="{{ $pro->id }}">
-                                        <input type="text" name="display_name" value="{{ $pro->display_name }}"
-                                            class="w-full bg-primary-dark border border-white/10 rounded-xl px-3 py-2 text-white/80">
-                                        <input type="text" name="bio" value="{{ $pro->bio }}"
-                                            class="w-full bg-primary-dark border border-white/10 rounded-xl px-3 py-2 text-white/80">
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                            <input type="text" name="style" value="{{ $pro->style }}"
-                                                class="w-full bg-primary-dark border border-white/10 rounded-xl px-3 py-2 text-white/80"
-                                                placeholder="Style">
-                                            <input type="text" name="risk_level" value="{{ $pro->risk_level }}"
-                                                class="w-full bg-primary-dark border border-white/10 rounded-xl px-3 py-2 text-white/80"
-                                                placeholder="Risk Level">
-                                            <input type="number" name="profit_share_percent" step="0.01" min="0" max="100" value="{{ number_format((float) ($pro->profit_share_percent ?? 0), 2, '.', '') }}"
-                                                class="w-full bg-primary-dark border border-white/10 rounded-xl px-3 py-2 text-white/80"
-                                                placeholder="Profit Share (%)">
-                                            <input type="number" name="min_investment_amount" step="0.00000001" min="0" value="{{ number_format((float) ($pro->min_investment_amount ?? 0), 8, '.', '') }}"
-                                                class="w-full bg-primary-dark border border-white/10 rounded-xl px-3 py-2 text-white/80"
-                                                placeholder="Min Investment">
-                                            <input type="text" name="min_investment_currency" value="{{ $pro->min_investment_currency ?? 'USDT' }}"
-                                                class="w-full bg-primary-dark border border-white/10 rounded-xl px-3 py-2 text-white/80 md:col-span-2"
-                                                placeholder="Currency">
+                            @php
+                                $userLabel = $pro->user->username ?? $pro->user->email ?? ('#' . $pro->user_id);
+                                $initials = strtoupper(substr((string) $userLabel, 0, 2));
+                                $displayName = (string) ($pro->display_name ?: $userLabel);
+                                $searchHay = strtolower($displayName . ' ' . $userLabel . ' ' . (string) $pro->status);
+                                $badgeClass = $pro->status === 'active'
+                                    ? 'bg-green-500/15 border border-green-500/25 text-green-400'
+                                    : 'bg-white/5 border border-white/10 text-white/55';
+                                $payload = [
+                                    'id' => (int) $pro->id,
+                                    'user_label' => $userLabel,
+                                    'display_name' => (string) ($pro->display_name ?? ''),
+                                    'bio' => (string) ($pro->bio ?? ''),
+                                    'style' => (string) ($pro->style ?? ''),
+                                    'risk_level' => (string) ($pro->risk_level ?? ''),
+                                    'profit_share_percent' => (float) ($pro->profit_share_percent ?? 0),
+                                    'min_investment_amount' => (float) ($pro->min_investment_amount ?? 0),
+                                    'min_investment_currency' => (string) ($pro->min_investment_currency ?? 'USDT'),
+                                    'status' => (string) ($pro->status ?? 'inactive'),
+                                ];
+                            @endphp
+
+                            <tr class="pro-row" data-search="{{ e($searchHay) }}">
+                                <td class="px-8 py-6">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 grid place-items-center text-white/70 font-black text-sm">
+                                            {{ $initials }}
                                         </div>
-                                        <div class="flex items-center gap-2">
-                                            <select name="status"
-                                                class="bg-primary-dark border border-white/10 rounded-xl px-3 py-2 text-white/80">
-                                                <option value="active" {{ $pro->status === 'active' ? 'selected' : '' }}>
-                                                    {{ __('Active') }}</option>
-                                                <option value="inactive"
-                                                    {{ $pro->status === 'inactive' ? 'selected' : '' }}>
-                                                    {{ __('Inactive') }}</option>
-                                            </select>
-                                            <button
-                                                class="bg-accent-primary/20 border border-accent-primary/30 text-white rounded-xl px-4 py-2 font-semibold hover:bg-accent-primary/25 transition">
-                                                {{ __('Update') }}
-                                            </button>
+                                        <div class="min-w-[180px]">
+                                            <div class="text-white font-bold tracking-tight">{{ $displayName }}</div>
+                                            <div class="text-xs text-text-secondary mt-1">{{ $userLabel }}</div>
                                         </div>
-                                    </form>
+                                    </div>
                                 </td>
-                                <td class="px-5 py-4 text-white/80">
-                                    {{ number_format($pro->followers_count ?? 0) }}
+
+                                <td class="px-8 py-6">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-[320px]">
+                                        <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
+                                            <div class="text-[10px] uppercase tracking-widest text-text-secondary font-bold opacity-60">{{ __('Style') }}</div>
+                                            <div class="text-sm text-white font-black mt-1">{{ strtoupper((string) ($pro->style ?? 'SWING')) }}</div>
+                                        </div>
+                                        <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
+                                            <div class="text-[10px] uppercase tracking-widest text-text-secondary font-bold opacity-60">{{ __('Risk Level') }}</div>
+                                            <div class="text-sm text-emerald-300 font-black mt-1">{{ (string) ($pro->risk_level ?? 'Conservative') }}</div>
+                                        </div>
+                                        <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
+                                            <div class="text-[10px] uppercase tracking-widest text-text-secondary font-bold opacity-60">{{ __('Profit Share') }}</div>
+                                            <div class="text-sm text-white font-black mt-1">{{ $fmt2($pro->profit_share_percent ?? 0) }}%</div>
+                                        </div>
+                                        <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
+                                            <div class="text-[10px] uppercase tracking-widest text-text-secondary font-bold opacity-60">{{ __('Min. Investment') }}</div>
+                                            <div class="text-sm text-white font-black mt-1">{{ $fmt8($pro->min_investment_amount ?? 0) }} {{ strtoupper((string) ($pro->min_investment_currency ?? 'USDT')) }}</div>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td class="px-5 py-4">
-                                    <span
-                                        class="text-xs px-2 py-1 rounded-full {{ $pro->status === 'active' ? 'bg-green-500/15 border border-green-500/25 text-green-400' : 'bg-white/5 border border-white/10 text-white/55' }}">
-                                        {{ ucfirst($pro->status) }}
+
+                                <td class="px-8 py-6 text-right">
+                                    <div class="text-white font-black">{{ number_format((int) ($pro->followers_count ?? 0)) }}</div>
+                                </td>
+
+                                <td class="px-8 py-6">
+                                    <span class="text-xs px-3 py-1.5 rounded-full {{ $badgeClass }}">
+                                        {{ ucfirst((string) $pro->status) }}
                                     </span>
                                 </td>
-                                <td class="px-5 py-4 text-right">
-                                    <form action="{{ route('admin.copy-trading.pros.delete') }}" method="POST">
-                                        @csrf
-                                        <input type="hidden" name="id" value="{{ $pro->id }}">
-                                        <button
-                                            class="bg-red-500/15 border border-red-500/25 text-red-300 rounded-xl px-4 py-2 font-semibold hover:bg-red-500/20 transition">
-                                            {{ __('Delete') }}
+
+                                <td class="px-8 py-6 text-right">
+                                    <div class="text-xs text-white/60 font-bold">{{ optional($pro->created_at)->format('Y-m-d') }}</div>
+                                </td>
+
+                                <td class="px-8 py-6 text-right">
+                                    <div class="flex items-center justify-end gap-2">
+                                        <button type="button" data-pro='@json($payload)' onclick="openEditPro(this)"
+                                            class="h-10 px-5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black text-xs uppercase tracking-widest transition-all active:scale-95">
+                                            {{ __('Edit') }}
                                         </button>
-                                    </form>
+                                        <form action="{{ route('admin.copy-trading.pros.delete') }}" method="POST" onsubmit="return confirm('{{ __('Delete this pro trader?') }}')">
+                                            @csrf
+                                            <input type="hidden" name="id" value="{{ $pro->id }}">
+                                            <button
+                                                class="h-10 px-5 rounded-2xl bg-red-500/15 border border-red-500/25 text-red-300 font-black text-xs uppercase tracking-widest hover:bg-red-500/20 transition-all active:scale-95">
+                                                {{ __('Delete') }}
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-5 py-10 text-center text-text-secondary">
+                                <td colspan="6" class="px-8 py-16 text-center text-text-secondary">
                                     {{ __('No pro traders yet.') }}
                                 </td>
                             </tr>
@@ -196,5 +312,225 @@
             </div>
         </div>
     </div>
+
+    <div id="minCopyAmountModal" class="modal">
+        <div class="modal-content max-w-md">
+            <div class="flex items-center justify-between gap-4">
+                <div class="text-white font-black text-xl">{{ __('Copy Trading Settings') }}</div>
+                <button type="button" onclick="closeModal('minCopyAmountModal')"
+                    class="text-white/60 hover:text-white transition text-2xl leading-none">&times;</button>
+            </div>
+            <form action="{{ route('admin.copy-trading.settings.min-amount') }}" method="POST" class="mt-6 grid grid-cols-1 gap-4">
+                @csrf
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Minimum Copy Amount (USDT)') }}</label>
+                    <input type="number" name="min_copy_amount" step="0.01" min="0"
+                        value="{{ $fmt2($minCopyAmount) }}"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
+                </div>
+                <button class="mt-2 h-12 px-6 rounded-2xl bg-accent-primary text-white font-black text-xs uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all">
+                    {{ __('Update') }}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="createProModal" class="modal">
+        <div class="modal-content">
+            <div class="flex items-center justify-between gap-4">
+                <div class="text-white font-black text-xl">{{ __('Add Pro Trader') }}</div>
+                <button type="button" onclick="closeModal('createProModal')"
+                    class="text-white/60 hover:text-white transition text-2xl leading-none">&times;</button>
+            </div>
+
+            <form action="{{ route('admin.copy-trading.pros.store') }}" method="POST" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                @csrf
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('User') }}</label>
+                    <select name="user_id"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
+                        @foreach ($users as $user)
+                            <option value="{{ $user->id }}">{{ $user->username ?? $user->email }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Status') }}</label>
+                    <select name="status"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
+                        <option value="active">{{ __('Active') }}</option>
+                        <option value="inactive">{{ __('Inactive') }}</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Display Name') }}</label>
+                    <input type="text" name="display_name"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                        placeholder="{{ __('Optional') }}">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Bio') }}</label>
+                    <input type="text" name="bio"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                        placeholder="{{ __('Optional') }}">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Style') }}</label>
+                    <input type="text" name="style"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                        placeholder="SWING">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Risk Level') }}</label>
+                    <input type="text" name="risk_level"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                        placeholder="Conservative">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Profit Share (%)') }}</label>
+                    <input type="number" name="profit_share_percent" step="0.01" min="0" max="100" value="0"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Min. Investment Amount') }}</label>
+                    <input type="number" name="min_investment_amount" step="0.00000001" min="0" value="0"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Min. Investment Currency') }}</label>
+                    <input type="text" name="min_investment_currency" value="USDT"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
+                </div>
+                <div class="md:col-span-2">
+                    <button
+                        class="mt-2 h-12 px-6 rounded-2xl bg-accent-primary text-white font-black text-xs uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all">
+                        {{ __('Save') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="editProModal" class="modal">
+        <div class="modal-content">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <div class="text-white font-black text-xl">{{ __('Edit Pro Trader') }}</div>
+                    <div class="text-xs text-text-secondary mt-1" id="editProUserLabel"></div>
+                </div>
+                <button type="button" onclick="closeModal('editProModal')"
+                    class="text-white/60 hover:text-white transition text-2xl leading-none">&times;</button>
+            </div>
+
+            <form action="{{ route('admin.copy-trading.pros.update') }}" method="POST" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                @csrf
+                <input type="hidden" name="id" id="editProId">
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Display Name') }}</label>
+                    <input type="text" name="display_name" id="editProDisplayName"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                        placeholder="{{ __('Optional') }}">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Bio') }}</label>
+                    <input type="text" name="bio" id="editProBio"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                        placeholder="{{ __('Optional') }}">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Style') }}</label>
+                    <input type="text" name="style" id="editProStyle"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                        placeholder="SWING">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Risk Level') }}</label>
+                    <input type="text" name="risk_level" id="editProRiskLevel"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                        placeholder="Conservative">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Profit Share (%)') }}</label>
+                    <input type="number" name="profit_share_percent" id="editProProfitShare" step="0.01" min="0" max="100"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Min. Investment Amount') }}</label>
+                    <input type="number" name="min_investment_amount" id="editProMinInvestmentAmount" step="0.00000001" min="0"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Min. Investment Currency') }}</label>
+                    <input type="text" name="min_investment_currency" id="editProMinInvestmentCurrency"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Status') }}</label>
+                    <select name="status" id="editProStatus"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
+                        <option value="active">{{ __('Active') }}</option>
+                        <option value="inactive">{{ __('Inactive') }}</option>
+                    </select>
+                </div>
+                <div class="md:col-span-2">
+                    <button
+                        class="mt-2 h-12 px-6 rounded-2xl bg-accent-primary text-white font-black text-xs uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all">
+                        {{ __('Update') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+@endsection
+
+@section('scripts')
+    <script>
+        function openModal(id) {
+            $('#' + id).show();
+        }
+
+        function closeModal(id) {
+            $('#' + id).hide();
+        }
+
+        function openEditPro(btn) {
+            const data = $(btn).data('pro');
+            if (!data) return;
+
+            $('#editProId').val(data.id || '');
+            $('#editProUserLabel').text(data.user_label || '');
+            $('#editProDisplayName').val(data.display_name || '');
+            $('#editProBio').val(data.bio || '');
+            $('#editProStyle').val(data.style || '');
+            $('#editProRiskLevel').val(data.risk_level || '');
+            $('#editProProfitShare').val((data.profit_share_percent ?? 0).toString());
+            $('#editProMinInvestmentAmount').val((data.min_investment_amount ?? 0).toString());
+            $('#editProMinInvestmentCurrency').val(data.min_investment_currency || 'USDT');
+            $('#editProStatus').val(data.status || 'inactive');
+
+            openModal('editProModal');
+        }
+
+        $(document).ready(function() {
+            $('#proSearch').on('input', function() {
+                const q = ($(this).val() || '').toString().trim().toLowerCase();
+                $('#clearProSearch').toggleClass('hidden', !q);
+                $('.pro-row').each(function() {
+                    const hay = ($(this).data('search') || '').toString();
+                    $(this).toggle(!q || hay.includes(q));
+                });
+            });
+
+            $('#clearProSearch').on('click', function() {
+                $('#proSearch').val('').trigger('input');
+            });
+
+            $(window).on('click', function(e) {
+                if ($(e.target).hasClass('modal')) {
+                    $(e.target).hide();
+                }
+            });
+        });
+    </script>
 @endsection
 

@@ -25,7 +25,14 @@ class CopyTradingController extends Controller
 
         $users = User::latest()->take(50)->get();
 
-        return view("templates.{$template}.blades.admin.copy-trading.pros", compact('page_title', 'pros', 'users', 'minCopyAmount'));
+        $stats = [
+            'pro_traders' => (int) $pros->count(),
+            'active_pro_traders' => (int) $pros->where('status', 'active')->count(),
+            'active_relationships' => (int) CopyTradingRelationship::query()->where('status', 'active')->count(),
+            'total_followers' => (int) $pros->sum('followers_count'),
+        ];
+
+        return view("templates.{$template}.blades.admin.copy-trading.pros", compact('page_title', 'pros', 'users', 'minCopyAmount', 'stats'));
     }
 
     public function storePro(Request $request)
