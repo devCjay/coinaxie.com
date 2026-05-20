@@ -3,6 +3,26 @@
 @section('content')
     <div class="space-y-6">
         <div class="bg-secondary border border-white/5 rounded-2xl p-5">
+            <h2 class="text-white font-semibold text-lg">{{ __('Copy Trading Settings') }}</h2>
+
+            <form action="{{ route('admin.copy-trading.settings.min-amount') }}" method="POST" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                @csrf
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Minimum Copy Amount (USDT)') }}</label>
+                    <input type="number" name="min_copy_amount" step="0.01" min="0"
+                        value="{{ number_format((float) ($minCopyAmount ?? 0), 2, '.', '') }}"
+                        class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80"
+                        placeholder="0.00">
+                </div>
+                <div class="md:col-span-2">
+                    <button class="bg-accent-primary text-white rounded-xl px-6 py-3 font-semibold hover:opacity-90 transition">
+                        {{ __('Update') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="bg-secondary border border-white/5 rounded-2xl p-5">
             <h2 class="text-white font-semibold text-lg">{{ __('Add / Update Pro Trader') }}</h2>
 
             <form action="{{ route('admin.copy-trading.pros.store') }}" method="POST" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -35,6 +55,39 @@
                     <input type="text" name="bio"
                         class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80"
                         placeholder="{{ __('Optional') }}">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Style') }}</label>
+                    <input type="text" name="style"
+                        class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80"
+                        placeholder="SWING">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Risk Level') }}</label>
+                    <input type="text" name="risk_level"
+                        class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80"
+                        placeholder="Conservative">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Profit Share (%)') }}</label>
+                    <input type="number" name="profit_share_percent" step="0.01" min="0" max="100"
+                        value="0"
+                        class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80"
+                        placeholder="0">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Min. Investment Amount') }}</label>
+                    <input type="number" name="min_investment_amount" step="0.00000001" min="0"
+                        value="0"
+                        class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80"
+                        placeholder="0.00">
+                </div>
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Min. Investment Currency') }}</label>
+                    <input type="text" name="min_investment_currency"
+                        value="USDT"
+                        class="mt-1 w-full bg-primary-dark border border-white/10 rounded-xl px-4 py-3 text-white/80"
+                        placeholder="USDT">
                 </div>
                 <div class="md:col-span-2">
                     <button
@@ -78,6 +131,23 @@
                                             class="w-full bg-primary-dark border border-white/10 rounded-xl px-3 py-2 text-white/80">
                                         <input type="text" name="bio" value="{{ $pro->bio }}"
                                             class="w-full bg-primary-dark border border-white/10 rounded-xl px-3 py-2 text-white/80">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                            <input type="text" name="style" value="{{ $pro->style }}"
+                                                class="w-full bg-primary-dark border border-white/10 rounded-xl px-3 py-2 text-white/80"
+                                                placeholder="Style">
+                                            <input type="text" name="risk_level" value="{{ $pro->risk_level }}"
+                                                class="w-full bg-primary-dark border border-white/10 rounded-xl px-3 py-2 text-white/80"
+                                                placeholder="Risk Level">
+                                            <input type="number" name="profit_share_percent" step="0.01" min="0" max="100" value="{{ number_format((float) ($pro->profit_share_percent ?? 0), 2, '.', '') }}"
+                                                class="w-full bg-primary-dark border border-white/10 rounded-xl px-3 py-2 text-white/80"
+                                                placeholder="Profit Share (%)">
+                                            <input type="number" name="min_investment_amount" step="0.00000001" min="0" value="{{ number_format((float) ($pro->min_investment_amount ?? 0), 8, '.', '') }}"
+                                                class="w-full bg-primary-dark border border-white/10 rounded-xl px-3 py-2 text-white/80"
+                                                placeholder="Min Investment">
+                                            <input type="text" name="min_investment_currency" value="{{ $pro->min_investment_currency ?? 'USDT' }}"
+                                                class="w-full bg-primary-dark border border-white/10 rounded-xl px-3 py-2 text-white/80 md:col-span-2"
+                                                placeholder="Currency">
+                                        </div>
                                         <div class="flex items-center gap-2">
                                             <select name="status"
                                                 class="bg-primary-dark border border-white/10 rounded-xl px-3 py-2 text-white/80">

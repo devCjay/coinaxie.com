@@ -14,6 +14,7 @@ class CopyTradingController extends Controller
     {
         $page_title = __('Copy Trading - Pro Traders');
         $template = config('site.template');
+        $minCopyAmount = (float) getSetting('copy_trading_min_amount', 10);
 
         $pros = CopyTradingProTrader::with('user')
             ->withCount(['relationships as followers_count' => function ($q) {
@@ -24,7 +25,7 @@ class CopyTradingController extends Controller
 
         $users = User::latest()->take(50)->get();
 
-        return view("templates.{$template}.blades.admin.copy-trading.pros", compact('page_title', 'pros', 'users'));
+        return view("templates.{$template}.blades.admin.copy-trading.pros", compact('page_title', 'pros', 'users', 'minCopyAmount'));
     }
 
     public function storePro(Request $request)
@@ -33,6 +34,11 @@ class CopyTradingController extends Controller
             'user_id' => 'required|exists:users,id',
             'display_name' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:2000',
+            'style' => 'nullable|string|max:50',
+            'risk_level' => 'nullable|string|max:50',
+            'profit_share_percent' => 'nullable|numeric|min:0|max:100',
+            'min_investment_amount' => 'nullable|numeric|min:0',
+            'min_investment_currency' => 'nullable|string|max:10',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -41,6 +47,11 @@ class CopyTradingController extends Controller
             [
                 'display_name' => $request->display_name,
                 'bio' => $request->bio,
+                'style' => $request->style,
+                'risk_level' => $request->risk_level,
+                'profit_share_percent' => $request->profit_share_percent ?? 0,
+                'min_investment_amount' => $request->min_investment_amount ?? 0,
+                'min_investment_currency' => $request->min_investment_currency ?? 'USDT',
                 'status' => $request->status,
             ]
         );
@@ -54,6 +65,11 @@ class CopyTradingController extends Controller
             'id' => 'required|exists:copy_trading_pro_traders,id',
             'display_name' => 'nullable|string|max:255',
             'bio' => 'nullable|string|max:2000',
+            'style' => 'nullable|string|max:50',
+            'risk_level' => 'nullable|string|max:50',
+            'profit_share_percent' => 'nullable|numeric|min:0|max:100',
+            'min_investment_amount' => 'nullable|numeric|min:0',
+            'min_investment_currency' => 'nullable|string|max:10',
             'status' => 'required|in:active,inactive',
         ]);
 
@@ -61,6 +77,11 @@ class CopyTradingController extends Controller
         $pro->update([
             'display_name' => $request->display_name,
             'bio' => $request->bio,
+            'style' => $request->style,
+            'risk_level' => $request->risk_level,
+            'profit_share_percent' => $request->profit_share_percent ?? 0,
+            'min_investment_amount' => $request->min_investment_amount ?? 0,
+            'min_investment_currency' => $request->min_investment_currency ?? 'USDT',
             'status' => $request->status,
         ]);
 
@@ -77,6 +98,17 @@ class CopyTradingController extends Controller
         $pro->delete();
 
         return back()->with('success', __('Pro trader deleted'));
+    }
+
+    public function updateMinAmount(Request $request)
+    {
+        $request->validate([
+            'min_copy_amount' => 'required|numeric|min:0',
+        ]);
+
+        updateSetting('copy_trading_min_amount', (float) $request->min_copy_amount);
+
+        return back()->with('success', __('Minimum copy amount updated'));
     }
 
     public function relationships()

@@ -10,7 +10,17 @@ class CopyTradingProTrader extends Model
         'user_id',
         'display_name',
         'bio',
+        'style',
+        'risk_level',
+        'profit_share_percent',
+        'min_investment_amount',
+        'min_investment_currency',
         'status',
+    ];
+
+    protected $casts = [
+        'profit_share_percent' => 'float',
+        'min_investment_amount' => 'float',
     ];
 
     public function user()

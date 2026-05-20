@@ -171,11 +171,11 @@ class CopyTradingController extends Controller
         ];
 
         $profile = [
-            'style' => 'SWING',
-            'risk_level' => 'Conservative',
-            'profit_share_percent' => 0,
-            'min_investment_amount' => 100,
-            'min_investment_currency' => 'USDT',
+            'style' => $pro->style ?? 'SWING',
+            'risk_level' => $pro->risk_level ?? 'Conservative',
+            'profit_share_percent' => (float) ($pro->profit_share_percent ?? 0),
+            'min_investment_amount' => (float) ($pro->min_investment_amount ?? 100),
+            'min_investment_currency' => $pro->min_investment_currency ?? 'USDT',
             'capacity_max' => $capacityMax,
         ];
 
@@ -243,6 +243,16 @@ class CopyTradingController extends Controller
             return response()->json([
                 'status' => 'error',
                 'message' => __('Please enter an amount'),
+            ], 422);
+        }
+
+        $minCopyAmount = (float) getSetting('copy_trading_min_amount', 10);
+        if ($allocationType === 'fixed' && $minCopyAmount > 0 && $allocationValue < $minCopyAmount) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('Minimum copy amount is :amount USDT', [
+                    'amount' => number_format($minCopyAmount, 2, '.', ''),
+                ]),
             ], 422);
         }
 

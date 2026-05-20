@@ -1077,7 +1077,8 @@
             </div>
         @endif
 
-        <div id="copyTraderModal" class="modal" data-available-usdt="{{ (float) ($availableUsdt ?? 0) }}">
+        @php($minCopyAmount = (float) getSetting('copy_trading_min_amount', 10))
+        <div id="copyTraderModal" class="modal" data-available-usdt="{{ (float) ($availableUsdt ?? 0) }}" data-min-copy-amount="{{ $minCopyAmount }}">
             <div class="modal-content max-w-md">
                 <div class="flex items-center justify-between gap-4">
                     <div class="text-white font-black text-xl">{{ __('Copy Trader') }}</div>
@@ -1092,6 +1093,9 @@
                         {{ __('Amount') }}
                         <span class="text-accent-primary font-black">
                             ({{ __('Available:') }} <span id="copyTraderAvailable">0</span> {{ __('USDT') }})
+                        </span>
+                        <span class="text-white/60 font-semibold">
+                            ({{ __('Min:') }} {{ number_format($minCopyAmount, 2) }} {{ __('USDT') }})
                         </span>
                         <span class="text-red-400">*</span>
                     </label>
@@ -1211,6 +1215,12 @@
                 $('#copyTraderProId').val(proId);
                 $('#copyTraderAmount').val('');
                 $('#copyTraderStopLossPercent').val('');
+                const minCopy = parseFloat($modal.data('min-copy-amount') || 0);
+                if (!isNaN(minCopy) && minCopy > 0) {
+                    $('#copyTraderAmount').attr('min', minCopy);
+                } else {
+                    $('#copyTraderAmount').attr('min', 0);
+                }
                 $modal.show();
             });
 
@@ -1233,9 +1243,15 @@
                 const amount = parseFloat($('#copyTraderAmount').val() || 0);
                 const sl = $('#copyTraderStopLossPercent').val();
                 const slNum = sl === '' ? null : parseFloat(sl);
+                const minCopy = parseFloat($('#copyTraderModal').data('min-copy-amount') || 0);
 
                 if (!proId || amount <= 0) {
                     toastNotification("{{ __('Please enter an amount') }}", 'error');
+                    return;
+                }
+
+                if (!isNaN(minCopy) && minCopy > 0 && amount < minCopy) {
+                    toastNotification("{{ __('Minimum copy amount is') }} " + minCopy.toFixed(2) + " {{ __('USDT') }}", 'error');
                     return;
                 }
 
