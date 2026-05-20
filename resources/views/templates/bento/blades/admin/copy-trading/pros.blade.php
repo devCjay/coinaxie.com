@@ -194,9 +194,6 @@
                             <th class="px-8 py-6 text-left">
                                 <span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('Trader') }}</span>
                             </th>
-                            <th class="px-8 py-6 text-left">
-                                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('Quick Info') }}</span>
-                            </th>
                             <th class="px-8 py-6 text-right">
                                 <span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('Followers') }}</span>
                             </th>
@@ -248,27 +245,6 @@
                                     </div>
                                 </td>
 
-                                <td class="px-8 py-6">
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-[320px]">
-                                        <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
-                                            <div class="text-[10px] uppercase tracking-widest text-text-secondary font-bold opacity-60">{{ __('Style') }}</div>
-                                            <div class="text-sm text-white font-black mt-1">{{ strtoupper((string) ($pro->style ?? 'SWING')) }}</div>
-                                        </div>
-                                        <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
-                                            <div class="text-[10px] uppercase tracking-widest text-text-secondary font-bold opacity-60">{{ __('Risk Level') }}</div>
-                                            <div class="text-sm text-emerald-300 font-black mt-1">{{ (string) ($pro->risk_level ?? 'Conservative') }}</div>
-                                        </div>
-                                        <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
-                                            <div class="text-[10px] uppercase tracking-widest text-text-secondary font-bold opacity-60">{{ __('Profit Share') }}</div>
-                                            <div class="text-sm text-white font-black mt-1">{{ $fmt2($pro->profit_share_percent ?? 0) }}%</div>
-                                        </div>
-                                        <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
-                                            <div class="text-[10px] uppercase tracking-widest text-text-secondary font-bold opacity-60">{{ __('Min. Investment') }}</div>
-                                            <div class="text-sm text-white font-black mt-1">{{ $fmt8($pro->min_investment_amount ?? 0) }} {{ strtoupper((string) ($pro->min_investment_currency ?? 'USDT')) }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-
                                 <td class="px-8 py-6 text-right">
                                     <div class="text-white font-black">{{ number_format((int) ($pro->followers_count ?? 0)) }}</div>
                                 </td>
@@ -302,7 +278,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="px-8 py-16 text-center text-text-secondary">
+                                <td colspan="5" class="px-8 py-16 text-center text-text-secondary">
                                     {{ __('No pro traders yet.') }}
                                 </td>
                             </tr>
