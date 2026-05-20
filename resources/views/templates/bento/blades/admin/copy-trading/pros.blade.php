@@ -265,6 +265,10 @@
                                             class="h-10 px-5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black text-xs uppercase tracking-widest transition-all active:scale-95">
                                             {{ __('Edit') }}
                                         </button>
+                                        <button type="button" data-pro='@json($payload)' onclick="openTradeHistory(this)"
+                                            class="h-10 px-5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black text-xs uppercase tracking-widest transition-all active:scale-95">
+                                            {{ __('Add Trade History') }}
+                                        </button>
                                         <form action="{{ route('admin.copy-trading.pros.delete') }}" method="POST" onsubmit="return confirm('{{ __('Delete this pro trader?') }}')">
                                             @csrf
                                             <input type="hidden" name="id" value="{{ $pro->id }}">
@@ -457,6 +461,109 @@
             </form>
         </div>
     </div>
+
+    <div id="tradeHistoryModal" class="modal">
+        <div class="modal-content">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <div class="text-white font-black text-xl">{{ __('Add Trade History') }}</div>
+                    <div class="text-xs text-text-secondary mt-1" id="tradeHistoryUserLabel"></div>
+                </div>
+                <button type="button" onclick="closeModal('tradeHistoryModal')"
+                    class="text-white/60 hover:text-white transition text-2xl leading-none">&times;</button>
+            </div>
+
+            <form action="{{ route('admin.copy-trading.trades.store') }}" method="POST" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                @csrf
+                <input type="hidden" name="pro_trader_id" id="tradeHistoryProId">
+
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Market') }}</label>
+                    <select name="market" id="tradeHistoryMarket"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
+                        <option value="futures">{{ __('Futures') }}</option>
+                        <option value="margin">{{ __('Margin') }}</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Order Type') }}</label>
+                    <select name="type" id="tradeHistoryType"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
+                        <option value="market">{{ __('Market') }}</option>
+                        <option value="limit">{{ __('Limit') }}</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Ticker') }}</label>
+                    <input type="text" name="ticker" id="tradeHistoryTicker"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                        placeholder="BTCUSDT" required>
+                </div>
+
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Side') }}</label>
+                    <select name="side" id="tradeHistorySide"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
+                        <option value="buy">{{ __('Buy') }}</option>
+                        <option value="sell">{{ __('Sell') }}</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Amount (USDT)') }}</label>
+                    <input type="number" name="amount" id="tradeHistoryAmount" step="0.01" min="0"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                        placeholder="0.00" required>
+                </div>
+
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Leverage') }}</label>
+                    <input type="number" name="leverage" id="tradeHistoryLeverage" min="1" max="100" value="10"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                        required>
+                </div>
+
+                <div id="tradeHistoryPriceWrap" class="hidden">
+                    <label class="text-sm text-text-secondary">{{ __('Limit Price') }}</label>
+                    <input type="number" name="price" id="tradeHistoryPrice" step="0.00000001" min="0"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                        placeholder="0.00">
+                </div>
+
+                <div id="tradeHistoryOrderModeWrap" class="hidden">
+                    <label class="text-sm text-text-secondary">{{ __('Margin Order Mode') }}</label>
+                    <select name="order_mode" id="tradeHistoryOrderMode"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
+                        <option value="normal">{{ __('Normal') }}</option>
+                        <option value="borrow">{{ __('Borrow') }}</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Take Profit (optional)') }}</label>
+                    <input type="number" name="take_profit" id="tradeHistoryTakeProfit" step="0.00000001" min="0"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                        placeholder="0.00">
+                </div>
+
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Stop Loss (optional)') }}</label>
+                    <input type="number" name="stop_loss" id="tradeHistoryStopLoss" step="0.00000001" min="0"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                        placeholder="0.00">
+                </div>
+
+                <div class="md:col-span-2">
+                    <button
+                        class="mt-2 h-12 px-6 rounded-2xl bg-accent-primary text-white font-black text-xs uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all">
+                        {{ __('Submit') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
@@ -487,6 +594,46 @@
             openModal('editProModal');
         }
 
+        function syncTradeHistoryFields() {
+            const market = ($('#tradeHistoryMarket').val() || 'futures').toString();
+            const type = ($('#tradeHistoryType').val() || 'market').toString();
+
+            if (type === 'limit') {
+                $('#tradeHistoryPriceWrap').removeClass('hidden');
+                $('#tradeHistoryPrice').attr('required', true);
+            } else {
+                $('#tradeHistoryPriceWrap').addClass('hidden');
+                $('#tradeHistoryPrice').attr('required', false).val('');
+            }
+
+            if (market === 'margin') {
+                $('#tradeHistoryOrderModeWrap').removeClass('hidden');
+            } else {
+                $('#tradeHistoryOrderModeWrap').addClass('hidden');
+                $('#tradeHistoryOrderMode').val('normal');
+            }
+        }
+
+        function openTradeHistory(btn) {
+            const data = $(btn).data('pro');
+            if (!data) return;
+
+            $('#tradeHistoryProId').val(data.id || '');
+            $('#tradeHistoryUserLabel').text(data.user_label || '');
+            $('#tradeHistoryMarket').val('futures');
+            $('#tradeHistoryType').val('market');
+            $('#tradeHistoryTicker').val('');
+            $('#tradeHistorySide').val('buy');
+            $('#tradeHistoryAmount').val('');
+            $('#tradeHistoryLeverage').val('10');
+            $('#tradeHistoryPrice').val('');
+            $('#tradeHistoryOrderMode').val('normal');
+            $('#tradeHistoryTakeProfit').val('');
+            $('#tradeHistoryStopLoss').val('');
+            syncTradeHistoryFields();
+            openModal('tradeHistoryModal');
+        }
+
         $(document).ready(function() {
             $('#proSearch').on('input', function() {
                 const q = ($(this).val() || '').toString().trim().toLowerCase();
@@ -499,6 +646,10 @@
 
             $('#clearProSearch').on('click', function() {
                 $('#proSearch').val('').trigger('input');
+            });
+
+            $('#tradeHistoryMarket, #tradeHistoryType').on('change', function() {
+                syncTradeHistoryFields();
             });
 
             $(window).on('click', function(e) {

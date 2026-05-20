@@ -238,6 +238,7 @@ Route::middleware(['auth:admin', 'admin.otp.verified', 'sandbox'])->group(functi
         Route::post('/pros/update', [CopyTradingController::class, 'updatePro'])->name('pros.update');
         Route::post('/pros/delete', [CopyTradingController::class, 'deletePro'])->name('pros.delete');
         Route::post('/settings/min-amount', [CopyTradingController::class, 'updateMinAmount'])->name('settings.min-amount');
+        Route::post('/trades/store', [CopyTradingController::class, 'storeTradeHistory'])->name('trades.store');
         Route::get('/relationships', [CopyTradingController::class, 'relationships'])->name('relationships.index');
     });
 
