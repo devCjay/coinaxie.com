@@ -170,6 +170,67 @@ class CopyTradingController extends Controller
             'max_drawdown' => null,
         ];
 
+        $futuresPositions = FuturesTradingPositions::query()
+            ->where('user_id', $userId)
+            ->get();
+
+        $marginPositions = MarginTradingPosition::query()
+            ->where('user_id', $userId)
+            ->where('status', 'open')
+            ->get();
+
+        $tradeHistory = collect()
+            ->concat($futuresPositions->map(function ($p) {
+                $entry = (float) $p->entry_price;
+                $mark = (float) $p->current_price;
+                $size = (float) $p->size;
+                $pnl = (float) $p->unrealized_pnl;
+                if ($pnl == 0 && $entry > 0 && $mark > 0 && $size > 0) {
+                    $pnl = $p->side === 'buy' ? (($mark - $entry) * $size) : (($entry - $mark) * $size);
+                }
+                $margin = (float) $p->margin;
+                $roe = $margin > 0 ? ($pnl / $margin) * 100 : 0;
+                return [
+                    'market' => 'futures',
+                    'ticker' => (string) $p->ticker,
+                    'side' => (string) $p->side,
+                    'size' => $size,
+                    'entry_price' => $entry,
+                    'mark_price' => $mark,
+                    'pnl' => $pnl,
+                    'roe' => $roe,
+                    'leverage' => (float) $p->leverage,
+                    'timestamp' => (int) $p->timestamp,
+                ];
+            }))
+            ->concat($marginPositions->map(function ($p) {
+                $entry = (float) $p->entry_price;
+                $mark = (float) $p->current_price;
+                $size = (float) $p->size;
+                $pnl = (float) $p->unrealized_pnl;
+                if ($pnl == 0 && $entry > 0 && $mark > 0 && $size > 0) {
+                    $pnl = $p->side === 'buy' ? (($mark - $entry) * $size) : (($entry - $mark) * $size);
+                }
+                $margin = (float) $p->margin;
+                $roe = $margin > 0 ? ($pnl / $margin) * 100 : 0;
+                return [
+                    'market' => 'margin',
+                    'ticker' => (string) $p->ticker,
+                    'side' => (string) $p->side,
+                    'size' => $size,
+                    'entry_price' => $entry,
+                    'mark_price' => $mark,
+                    'pnl' => $pnl,
+                    'roe' => $roe,
+                    'leverage' => (float) $p->leverage,
+                    'timestamp' => (int) $p->timestamp,
+                ];
+            }))
+            ->sortByDesc('timestamp')
+            ->take(10)
+            ->values()
+            ->all();
+
         $profile = [
             'style' => $pro->style ?? 'SWING',
             'risk_level' => $pro->risk_level ?? 'Conservative',
@@ -187,7 +248,7 @@ class CopyTradingController extends Controller
 
         $mode = 'profile';
 
-        return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'mode', 'pro', 'myRelationship', 'stats', 'profile', 'availableUsdt'));
+        return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'mode', 'pro', 'myRelationship', 'stats', 'profile', 'availableUsdt', 'tradeHistory'));
     }
 
     public function requestLeader(Request $request)

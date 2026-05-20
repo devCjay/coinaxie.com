@@ -555,6 +555,13 @@
                         placeholder="0.00">
                 </div>
 
+                <div id="tradeHistoryPnlWrap">
+                    <label class="text-sm text-text-secondary">{{ __('PnL (optional)') }}</label>
+                    <input type="number" name="pnl" id="tradeHistoryPnl" step="0.01"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                        placeholder="0.00">
+                </div>
+
                 <div class="md:col-span-2">
                     <button
                         class="mt-2 h-12 px-6 rounded-2xl bg-accent-primary text-white font-black text-xs uppercase tracking-widest hover:opacity-90 active:scale-95 transition-all">
@@ -601,9 +608,12 @@
             if (type === 'limit') {
                 $('#tradeHistoryPriceWrap').removeClass('hidden');
                 $('#tradeHistoryPrice').attr('required', true);
+                $('#tradeHistoryPnlWrap').addClass('hidden');
+                $('#tradeHistoryPnl').val('');
             } else {
                 $('#tradeHistoryPriceWrap').addClass('hidden');
                 $('#tradeHistoryPrice').attr('required', false).val('');
+                $('#tradeHistoryPnlWrap').removeClass('hidden');
             }
 
             if (market === 'margin') {
@@ -630,6 +640,7 @@
             $('#tradeHistoryOrderMode').val('normal');
             $('#tradeHistoryTakeProfit').val('');
             $('#tradeHistoryStopLoss').val('');
+            $('#tradeHistoryPnl').val('');
             syncTradeHistoryFields();
             openModal('tradeHistoryModal');
         }

@@ -140,6 +140,7 @@ class CopyTradingController extends Controller
             'order_mode' => 'nullable|in:normal,borrow',
             'take_profit' => 'nullable|numeric|min:0',
             'stop_loss' => 'nullable|numeric|min:0',
+            'pnl' => 'nullable|numeric',
         ]);
 
         $pro = CopyTradingProTrader::with('user')->findOrFail((int) $request->pro_trader_id);
@@ -169,6 +170,8 @@ class CopyTradingController extends Controller
             return back()->with('error', __('Invalid entry price'));
         }
 
+        $pnlOverride = $request->filled('pnl') ? (float) $request->pnl : null;
+
         if ($tp > 0 && $side === 'buy' && $tp <= $entryPrice) {
             return back()->with('error', __('Take profit should be greater than entry price'));
         }
@@ -189,6 +192,18 @@ class CopyTradingController extends Controller
         $baseAmount = $quoteAmount / $entryPrice;
         if ($baseAmount <= 0) {
             return back()->with('error', __('Invalid trade amount'));
+        }
+
+        if ($type === 'market' && $pnlOverride !== null) {
+            $markPrice = $entryPrice;
+            if ($side === 'buy') {
+                $markPrice = $entryPrice + ($pnlOverride / $baseAmount);
+            } else {
+                $markPrice = $entryPrice - ($pnlOverride / $baseAmount);
+            }
+            if ($markPrice > 0) {
+                $currentPrice = $markPrice;
+            }
         }
 
         try {
@@ -318,6 +333,13 @@ class CopyTradingController extends Controller
                         }
                     }
                 });
+                if ($type === 'market' && $pnlOverride !== null) {
+                    FuturesTradingPositions::where('user_id', $user->id)->where('ticker', $ticker)->update([
+                        'current_price' => $currentPrice,
+                        'unrealized_pnl' => $pnlOverride,
+                        'timestamp' => (string) now()->valueOf(),
+                    ]);
+                }
             } else {
                 $orderMode = (string) ($request->order_mode ?? 'normal');
                 $tradingAccount = $user->tradingAccounts()
@@ -419,6 +441,13 @@ class CopyTradingController extends Controller
                         $tradingAccount->decrement('balance', (float) $lockedMargin);
                     }
                 });
+                if ($type === 'market' && $pnlOverride !== null) {
+                    MarginTradingPosition::where('user_id', $user->id)->where('ticker', $ticker)->where('status', 'open')->update([
+                        'current_price' => $currentPrice,
+                        'unrealized_pnl' => $pnlOverride,
+                        'timestamp' => (string) now()->valueOf(),
+                    ]);
+                }
             }
 
             return back()->with('success', __('Trade history added'));
