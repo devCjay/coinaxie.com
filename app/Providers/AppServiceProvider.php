@@ -109,6 +109,40 @@ class AppServiceProvider extends ServiceProvider
                 Cache::forget('admin_menu_items');
                 Cache::forget('user_menu_items');
             }
+
+            $copyItem = MenuItem::where('type', 'user')->where('route_name', 'user.trading.copy-trading')->first();
+            if ($copyItem) {
+                $activityItem = MenuItem::where('type', 'user')->where('route_name', 'user.trading.copy-trading.activity')->first();
+                if (!$activityItem) {
+                    MenuItem::create([
+                        'label' => 'Copy Activity',
+                        'route_name' => 'user.trading.copy-trading.activity',
+                        'route_wildcard' => 'user.trading.copy-trading.activity',
+                        'url' => null,
+                        'icon' => null,
+                        'type' => 'user',
+                        'sort_order' => 1,
+                        'is_active' => true,
+                        'parent_id' => $copyItem->id,
+                    ]);
+                    Cache::forget('user_menu_items');
+                } else {
+                    $updates = [];
+                    if (!$activityItem->is_active) {
+                        $updates['is_active'] = true;
+                    }
+                    if ((int) $activityItem->parent_id !== (int) $copyItem->id) {
+                        $updates['parent_id'] = $copyItem->id;
+                    }
+                    if (($activityItem->route_wildcard ?? '') !== 'user.trading.copy-trading.activity') {
+                        $updates['route_wildcard'] = 'user.trading.copy-trading.activity';
+                    }
+                    if (!empty($updates)) {
+                        $activityItem->update($updates);
+                        Cache::forget('user_menu_items');
+                    }
+                }
+            }
         });
 
         // Sharing variables only to the user layouts

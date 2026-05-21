@@ -93,6 +93,125 @@ class CopyTradingController extends Controller
         return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'mode', 'pros', 'myRelationships', 'myPro', 'availableUsdt'));
     }
 
+    public function activity(Request $request)
+    {
+        $page_title = __('Copy Trading Activity');
+        $template = config('site.template');
+
+        $user = auth()->user();
+        $relationships = CopyTradingRelationship::with(['proTrader.user'])
+            ->where('follower_id', $user->id)
+            ->latest()
+            ->get();
+
+        $activeRelationships = $relationships->where('status', 'active');
+        $leadersCount = (int) $relationships->pluck('pro_trader_id')->unique()->count();
+        $activeLeadersCount = (int) $activeRelationships->pluck('pro_trader_id')->unique()->count();
+
+        $futures = FuturesTradingOrders::query()
+            ->where('user_id', $user->id)
+            ->where('is_copy', true)
+            ->orderByDesc('timestamp')
+            ->limit(300)
+            ->get();
+
+        $margin = MarginTradingOrder::query()
+            ->where('user_id', $user->id)
+            ->where('is_copy', true)
+            ->orderByDesc('timestamp')
+            ->limit(300)
+            ->get();
+
+        $rows = collect()
+            ->concat($futures->map(function ($o) {
+                return [
+                    'market' => 'futures',
+                    'ticker' => (string) $o->ticker,
+                    'type' => (string) $o->type,
+                    'side' => (string) $o->side,
+                    'size' => (float) $o->size,
+                    'price' => (float) $o->price,
+                    'status' => (string) $o->status,
+                    'timestamp' => (int) $o->timestamp,
+                    'copy_relationship_id' => (int) ($o->copy_relationship_id ?? 0),
+                    'copied_from_user_id' => (int) ($o->copied_from_user_id ?? 0),
+                    'copied_from_order_id' => (int) ($o->copied_from_order_id ?? 0),
+                ];
+            }))
+            ->concat($margin->map(function ($o) {
+                return [
+                    'market' => 'margin',
+                    'ticker' => (string) $o->ticker,
+                    'type' => (string) $o->type,
+                    'side' => (string) $o->side,
+                    'size' => (float) $o->size,
+                    'price' => (float) $o->price,
+                    'status' => (string) $o->status,
+                    'timestamp' => (int) $o->timestamp,
+                    'order_mode' => (string) ($o->order_mode ?? 'normal'),
+                    'copy_relationship_id' => (int) ($o->copy_relationship_id ?? 0),
+                    'copied_from_user_id' => (int) ($o->copied_from_user_id ?? 0),
+                    'copied_from_order_id' => (int) ($o->copied_from_order_id ?? 0),
+                ];
+            }))
+            ->map(function (array $r) {
+                $r['quote'] = ((float) ($r['size'] ?? 0)) * ((float) ($r['price'] ?? 0));
+                return $r;
+            })
+            ->sortByDesc('timestamp')
+            ->values();
+
+        $relMap = $relationships->keyBy('id');
+        $rows = $rows->map(function (array $r) use ($relMap) {
+            $relId = (int) ($r['copy_relationship_id'] ?? 0);
+            $leaderName = null;
+            if ($relId > 0 && $relMap->has($relId)) {
+                $leader = $relMap[$relId]->proTrader?->user;
+                $leaderName = $leader?->username ?? $leader?->email;
+            }
+            $r['leader_name'] = $leaderName ?: __('Leader');
+            return $r;
+        });
+
+        $q = strtolower(trim((string) $request->get('q', '')));
+        if ($q !== '') {
+            $rows = $rows->filter(function (array $r) use ($q) {
+                $hay = strtolower(
+                    ($r['ticker'] ?? '') . ' ' .
+                    ($r['leader_name'] ?? '') . ' ' .
+                    ($r['side'] ?? '') . ' ' .
+                    ($r['status'] ?? '') . ' ' .
+                    ($r['market'] ?? '')
+                );
+                return str_contains($hay, $q);
+            })->values();
+        }
+
+        $perPage = 20;
+        $page = (int) $request->get('activity_page', 1);
+        $page = max(1, $page);
+        $total = (int) $rows->count();
+        $items = $rows->slice(($page - 1) * $perPage, $perPage)->values();
+
+        $activityHistory = new LengthAwarePaginator($items, $total, $perPage, $page, [
+            'pageName' => 'activity_page',
+        ]);
+        $activityHistory->setPath(url()->current());
+        $activityHistory->appends($request->except('activity_page'));
+
+        $activityStats = [
+            'leaders' => $leadersCount,
+            'active_leaders' => $activeLeadersCount,
+            'active_copies' => (int) $activeRelationships->count(),
+            'total_copied_trades' => (int) $rows->count(),
+            'total_copied_volume' => (float) $rows->sum('quote'),
+        ];
+
+        $mode = 'activity';
+
+        return view("templates.{$template}.blades.user.trading.copy_trading", compact('page_title', 'mode', 'activityStats', 'activityHistory', 'relationships'));
+    }
+
     public function profile(int $id)
     {
         $page_title = __('Copy Trading');
