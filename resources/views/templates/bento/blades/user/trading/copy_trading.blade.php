@@ -924,8 +924,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 7h6v6"></path>
                                 </svg>
                             </div>
-                            @php($roi = (float) ($stats['roi'] ?? 0))
-                            <div class="mt-4 text-emerald-300 font-black text-xl">{{ $roi >= 0 ? '+' : '' }}{{ number_format($roi, 2) }}%</div>
+                            <div class="mt-4 text-emerald-300 font-black text-xl">{{ ((float) ($stats['roi'] ?? 0)) >= 0 ? '+' : '' }}{{ number_format((float) ($stats['roi'] ?? 0), 2) }}%</div>
                             <div class="mt-1 text-white/45 text-xs font-bold">{{ __('Total ROI') }}</div>
                         </div>
 
