@@ -1012,8 +1012,7 @@
                         
                         </div>
 
-                        @php($tradeHistory = $tradeHistory ?? [])
-                        @if (count($tradeHistory) === 0)
+                        @if (empty($tradeHistory))
                             <div class="mt-6 bg-secondary border border-white/5 rounded-3xl p-10 md:p-16 text-center">
                                 <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 mx-auto grid place-items-center">
                                     <svg class="w-8 h-8 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1039,7 +1038,7 @@
                                             </tr>
                                         </thead>
                                         <tbody class="divide-y divide-white/5">
-                                            @foreach ($tradeHistory as $t)
+                                            @foreach ((isset($tradeHistory) ? $tradeHistory : []) as $t)
                                                 @php
                                                     $ticker = strtoupper((string) ($t['ticker'] ?? ''));
                                                     $side = (string) ($t['side'] ?? 'buy');
@@ -1141,7 +1140,9 @@
             </div>
         @endif
 
-        @php($minCopyAmount = (float) getSetting('copy_trading_min_amount', 10))
+        @php
+            $minCopyAmount = (float) getSetting('copy_trading_min_amount', 10);
+        @endphp
         <div id="copyTraderModal" class="modal" data-available-usdt="{{ (float) ($availableUsdt ?? 0) }}" data-min-copy-amount="{{ $minCopyAmount }}">
             <div class="modal-content max-w-md">
                 <div class="flex items-center justify-between gap-4">
