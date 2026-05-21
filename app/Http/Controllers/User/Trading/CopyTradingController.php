@@ -473,6 +473,21 @@ class CopyTradingController extends Controller
             'margin_order_mode' => 'nullable|in:normal,borrow',
         ]);
 
+        $pro = CopyTradingProTrader::query()->where('id', (int) $request->pro_trader_id)->first();
+        if (!$pro || ($pro->status ?? null) !== 'active') {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('Leader not available'),
+            ], 422);
+        }
+
+        if ((int) $pro->user_id === (int) auth()->id()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('You cannot copy your own trades'),
+            ], 422);
+        }
+
         $amount = $request->filled('amount') ? (float) $request->amount : 0.0;
         $allocationType = $request->filled('amount') ? 'fixed' : (string) ($request->allocation_type ?? 'fixed');
         $allocationValue = $request->filled('amount') ? $amount : (float) ($request->allocation_value ?? 0);
@@ -495,7 +510,7 @@ class CopyTradingController extends Controller
 
         $relationship = CopyTradingRelationship::updateOrCreate(
             [
-                'pro_trader_id' => (int) $request->pro_trader_id,
+                'pro_trader_id' => (int) $pro->id,
                 'follower_id' => auth()->id(),
             ],
             [

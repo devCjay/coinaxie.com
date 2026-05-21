@@ -698,6 +698,11 @@
                                         class="btn-unfollow w-full bg-red-500/15 border border-red-500/25 text-red-200 rounded-2xl px-6 py-3 text-sm font-black hover:bg-red-500/20 transition inline-flex items-center justify-center gap-2">
                                         {{ __('Stop Copying') }}
                                     </button>
+                                @elseif ((int) ($pro->user_id ?? 0) === (int) auth()->id())
+                                    <button type="button"
+                                        class="w-full bg-white/5 border border-white/10 text-white/60 rounded-2xl px-6 py-3 text-sm font-black cursor-not-allowed inline-flex items-center justify-center">
+                                        {{ __('This is you') }}
+                                    </button>
                                 @else
                                     <button type="button" data-pro-id="{{ $pro->id }}" data-pro-name="{{ $name }}"
                                         class="btn-follow w-full bg-white text-black rounded-2xl px-6 py-3 text-sm font-black hover:bg-white/90 transition inline-flex items-center justify-center gap-3">
@@ -1047,6 +1052,11 @@
                                     <button type="button" data-pro-id="{{ $pro->id }}"
                                         class="btn-unfollow w-full bg-red-500/15 border border-red-500/25 text-red-200 rounded-2xl px-6 py-4 text-sm font-black hover:bg-red-500/20 transition inline-flex items-center justify-center gap-2">
                                         {{ __('Stop Copying') }}
+                                    </button>
+                                @elseif ((int) ($pro->user_id ?? 0) === (int) auth()->id())
+                                    <button type="button"
+                                        class="w-full bg-white/5 border border-white/10 text-white/60 rounded-2xl px-6 py-4 text-sm font-black cursor-not-allowed inline-flex items-center justify-center">
+                                        {{ __('This is you') }}
                                     </button>
                                 @else
                                     <button type="button" data-pro-id="{{ $pro->id }}"
