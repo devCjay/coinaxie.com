@@ -159,12 +159,22 @@ class CopyTradingService
                 return;
             }
 
-            $quote_amount = (float) $position->size * $current_price;
+            $quote_amount = 0.0;
+            $proPosition = FuturesTradingPositions::where('user_id', $source->user_id)->where('ticker', $source->ticker)->first();
+            if ($proPosition) {
+                $proOldSize = (float) $proPosition->size + (float) $source->size;
+                $fraction = $proOldSize > 0 ? ((float) $source->size / $proOldSize) : 1.0;
+                $fraction = max(0.0, min(1.0, $fraction));
+                $closeBase = (float) $position->size * $fraction;
+                $quote_amount = $closeBase * $current_price;
+            } else {
+                $quote_amount = (float) $position->size * $current_price;
+            }
             if ($quote_amount <= 0) {
                 return;
             }
 
-            $this->executeFuturesForUser($follower, [
+            $copied = $this->executeFuturesForUser($follower, [
                 'ticker' => $source->ticker,
                 'type' => 'market',
                 'side' => $source->side,
@@ -179,6 +189,9 @@ class CopyTradingService
                 'copied_from_order_id' => $source->id,
                 'copy_relationship_id' => $relationship->id,
             ]);
+            if ($copied) {
+                $this->notifyCopyTrade($source, $relationship, $follower, $copied, 'futures', 'close');
+            }
             return;
         }
 
@@ -190,7 +203,7 @@ class CopyTradingService
         $entryRef = $source->type === 'market' ? $current_price : (float) $source->price;
         $stopLoss = $this->resolveStopLossPrice((float) ($source->stop_loss ?? 0), $relationship, $entryRef, (string) $source->side);
 
-        $this->executeFuturesForUser($follower, [
+        $copied = $this->executeFuturesForUser($follower, [
             'ticker' => $source->ticker,
             'type' => $source->type,
             'side' => $source->side,
@@ -205,6 +218,9 @@ class CopyTradingService
             'copied_from_order_id' => $source->id,
             'copy_relationship_id' => $relationship->id,
         ]);
+        if ($copied) {
+            $this->notifyCopyTrade($source, $relationship, $follower, $copied, 'futures', 'open');
+        }
     }
 
     protected function copyMarginOrderToFollower(MarginTradingOrder $source, CopyTradingRelationship $relationship): void
@@ -241,12 +257,22 @@ class CopyTradingService
                 return;
             }
 
-            $quote_amount = (float) $position->size * $current_price;
+            $quote_amount = 0.0;
+            $proPosition = MarginTradingPosition::where('user_id', $source->user_id)->where('ticker', $source->ticker)->first();
+            if ($proPosition) {
+                $proOldSize = (float) $proPosition->size + (float) $source->size;
+                $fraction = $proOldSize > 0 ? ((float) $source->size / $proOldSize) : 1.0;
+                $fraction = max(0.0, min(1.0, $fraction));
+                $closeBase = (float) $position->size * $fraction;
+                $quote_amount = $closeBase * $current_price;
+            } else {
+                $quote_amount = (float) $position->size * $current_price;
+            }
             if ($quote_amount <= 0) {
                 return;
             }
 
-            $this->executeMarginForUser($follower, [
+            $copied = $this->executeMarginForUser($follower, [
                 'ticker' => $source->ticker,
                 'type' => 'market',
                 'side' => $source->side,
@@ -262,6 +288,9 @@ class CopyTradingService
                 'copied_from_order_id' => $source->id,
                 'copy_relationship_id' => $relationship->id,
             ]);
+            if ($copied) {
+                $this->notifyCopyTrade($source, $relationship, $follower, $copied, 'margin', 'close');
+            }
             return;
         }
 
@@ -273,7 +302,7 @@ class CopyTradingService
         $entryRef = $source->type === 'market' ? $current_price : (float) $source->price;
         $stopLoss = $this->resolveStopLossPrice((float) ($source->stop_loss ?? 0), $relationship, $entryRef, (string) $source->side);
 
-        $this->executeMarginForUser($follower, [
+        $copied = $this->executeMarginForUser($follower, [
             'ticker' => $source->ticker,
             'type' => $source->type,
             'side' => $source->side,
@@ -289,6 +318,66 @@ class CopyTradingService
             'copied_from_order_id' => $source->id,
             'copy_relationship_id' => $relationship->id,
         ]);
+        if ($copied) {
+            $this->notifyCopyTrade($source, $relationship, $follower, $copied, 'margin', 'open');
+        }
+    }
+
+    protected function notifyCopyTrade($sourceOrder, CopyTradingRelationship $relationship, User $follower, $copiedOrder, string $market, string $action): void
+    {
+        try {
+            $leader = User::find((int) $sourceOrder->user_id);
+            if (!$leader) {
+                return;
+            }
+
+            $leaderName = $leader->username ?? $leader->email ?? __('Leader');
+            $followerName = $follower->username ?? $follower->email ?? __('Follower');
+            $ticker = strtoupper((string) ($sourceOrder->ticker ?? $copiedOrder->ticker ?? ''));
+            $side = strtoupper((string) ($sourceOrder->side ?? $copiedOrder->side ?? ''));
+            $type = strtoupper((string) ($copiedOrder->type ?? $sourceOrder->type ?? ''));
+            $status = strtoupper((string) ($copiedOrder->status ?? ''));
+            $quote = 0.0;
+            if (isset($copiedOrder->size, $copiedOrder->price)) {
+                $quote = (float) $copiedOrder->size * (float) $copiedOrder->price;
+            }
+            $quoteText = $quote > 0 ? number_format($quote, 2) . ' USDT' : '';
+            $marketText = $market === 'margin' ? __('Margin') : __('Futures');
+            $actionText = $action === 'close' ? __('Close') : __('Open');
+
+            $titleFollower = $status === 'FILLED' ? __('Copy trade executed') : __('Copy trade placed');
+            $bodyFollower = __('Leader :leader :action a :market trade (:type) on :ticker (:side).', [
+                'leader' => $leaderName,
+                'action' => strtolower((string) $actionText),
+                'market' => strtolower((string) $marketText),
+                'type' => $type,
+                'ticker' => $ticker,
+                'side' => $side,
+            ]);
+            if ($quoteText !== '') {
+                $bodyFollower .= ' ' . __('Amount: :amount', ['amount' => $quoteText]);
+            }
+
+            recordNotificationMessage($follower, $titleFollower, $bodyFollower);
+            sendRichTextEmail($titleFollower, nl2br(e($bodyFollower)), $follower);
+
+            $titleLeader = $status === 'FILLED' ? __('Trade copied') : __('Copy order placed');
+            $bodyLeader = __('Your :market trade (:type) on :ticker (:side) was copied for follower :follower.', [
+                'market' => strtolower((string) $marketText),
+                'type' => $type,
+                'ticker' => $ticker,
+                'side' => $side,
+                'follower' => $followerName,
+            ]);
+            if ($quoteText !== '') {
+                $bodyLeader .= ' ' . __('Amount: :amount', ['amount' => $quoteText]);
+            }
+
+            recordNotificationMessage($leader, $titleLeader, $bodyLeader);
+            sendRichTextEmail($titleLeader, nl2br(e($bodyLeader)), $leader);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+        }
     }
 
     protected function resolveStopLossPrice(float $sourceStopLoss, CopyTradingRelationship $relationship, float $entryPrice, string $side): float
@@ -320,11 +409,11 @@ class CopyTradingService
         return max(0, $availableBalance * ($value / 100));
     }
 
-    protected function executeFuturesForUser(User $user, array $data, array $copyMeta = []): void
+    protected function executeFuturesForUser(User $user, array $data, array $copyMeta = []): ?FuturesTradingOrders
     {
         $trading_account = $user->tradingAccounts()->where('account_type', 'futures')->first();
         if (!$trading_account || $trading_account->account_status !== 'active') {
-            return;
+            return null;
         }
 
         $ticker = (string) $data['ticker'];
@@ -335,18 +424,18 @@ class CopyTradingService
 
         $ticker_info = $this->lozandServices->futureTicker($ticker);
         if (!is_array($ticker_info) || ($ticker_info['status'] ?? null) !== 'success') {
-            return;
+            return null;
         }
 
         $current_price = (float) ($ticker_info['data']['current_price'] ?? 0);
         $entry_price = $type === 'market' ? $current_price : (float) ($data['price'] ?? 0);
         if ($entry_price <= 0) {
-            return;
+            return null;
         }
 
         $quote_amount = (float) ($data['amount'] ?? 0);
         if ($quote_amount <= 0) {
-            return;
+            return null;
         }
 
         $base_amount = $quote_amount / $entry_price;
@@ -368,14 +457,14 @@ class CopyTradingService
         if ($locked_margin > 0 && (float) $trading_account->balance < $locked_margin) {
             $max_base = ((float) $trading_account->balance * $leverage) / $entry_price;
             if ($max_base <= 0) {
-                return;
+                return null;
             }
             $base_amount = min((float) $base_amount, $max_base);
             $locked_margin = ($base_amount * $entry_price) / $leverage;
             $quote_amount = $base_amount * $entry_price;
         }
 
-        DB::transaction(function () use ($user, $trading_account, $ticker, $type, $side, $leverage, $entry_price, $current_price, $base_amount, $position, $locked_margin, $data, $copyMeta) {
+        return DB::transaction(function () use ($user, $trading_account, $ticker, $type, $side, $leverage, $entry_price, $current_price, $base_amount, $position, $locked_margin, $data, $copyMeta) {
             $order = FuturesTradingOrders::create([
                 'user_id' => $user->id,
                 'type' => $type,
@@ -478,11 +567,11 @@ class CopyTradingService
         });
     }
 
-    protected function executeMarginForUser(User $user, array $data, array $copyMeta = []): void
+    protected function executeMarginForUser(User $user, array $data, array $copyMeta = []): ?MarginTradingOrder
     {
         $trading_account = $user->tradingAccounts()->where('account_type', 'margin')->first();
         if (!$trading_account || $trading_account->account_status !== 'active') {
-            return;
+            return null;
         }
 
         $ticker = (string) $data['ticker'];
@@ -497,18 +586,18 @@ class CopyTradingService
 
         $ticker_info = $this->lozandServices->margin($ticker);
         if (!is_array($ticker_info) || ($ticker_info['status'] ?? null) !== 'success') {
-            return;
+            return null;
         }
 
         $current_price = (float) ($ticker_info['data']['current_price'] ?? 0);
         $entry_price = $type === 'market' ? $current_price : (float) ($data['price'] ?? 0);
         if ($entry_price <= 0) {
-            return;
+            return null;
         }
 
         $quote_amount = (float) ($data['amount'] ?? 0);
         if ($quote_amount <= 0) {
-            return;
+            return null;
         }
 
         $base_amount = $quote_amount / $entry_price;
@@ -523,14 +612,14 @@ class CopyTradingService
         if ((float) $trading_account->balance < $locked_margin) {
             $max_base = ((float) $trading_account->balance * $leverage) / $entry_price;
             if ($max_base <= 0) {
-                return;
+                return null;
             }
             $base_amount = min((float) $base_amount, $max_base);
             $locked_margin = ($base_amount * $entry_price) / $leverage;
             $quote_amount = $base_amount * $entry_price;
         }
 
-        DB::transaction(function () use ($user, $trading_account, $ticker, $type, $side, $leverage, $entry_price, $current_price, $base_amount, $locked_margin, $order_mode, $data, $copyMeta) {
+        return DB::transaction(function () use ($user, $trading_account, $ticker, $type, $side, $leverage, $entry_price, $current_price, $base_amount, $locked_margin, $order_mode, $data, $copyMeta) {
             $order = MarginTradingOrder::create([
                 'user_id' => $user->id,
                 'type' => $type,

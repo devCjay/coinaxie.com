@@ -10,6 +10,7 @@ use App\Models\FuturesTradingPositions;
 use App\Models\MarginTradingOrder;
 use App\Models\MarginTradingPosition;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class CopyTradingController extends Controller
 {
@@ -159,17 +160,6 @@ class CopyTradingController extends Controller
         $followers = (int) ($pro->followers_count ?? 0);
         $capacityMax = 100;
 
-        $stats = [
-            'roi' => 0,
-            'win_rate' => $winRate,
-            'followers' => $followers,
-            'total_trades' => $totalTrades,
-            'total_profit' => $totalProfit,
-            'total_volume' => 0,
-            'avg_profit_per_trade' => $totalTrades > 0 ? ($totalProfit / $totalTrades) : 0,
-            'max_drawdown' => null,
-        ];
-
         $futuresPositions = FuturesTradingPositions::query()
             ->where('user_id', $userId)
             ->get();
@@ -179,7 +169,63 @@ class CopyTradingController extends Controller
             ->where('status', 'open')
             ->get();
 
-        $tradeHistory = collect()
+        $futuresVolume = (float) FuturesTradingOrders::query()
+            ->where('user_id', $userId)
+            ->where('is_copy', false)
+            ->where('status', 'filled')
+            ->selectRaw('COALESCE(SUM(size * price), 0) as v')
+            ->value('v');
+
+        $marginVolume = (float) MarginTradingOrder::query()
+            ->where('user_id', $userId)
+            ->where('is_copy', false)
+            ->where('status', 'filled')
+            ->selectRaw('COALESCE(SUM(size * price), 0) as v')
+            ->value('v');
+
+        $usedMargin = (float) $futuresPositions->sum('margin') + (float) $marginPositions->sum('margin');
+        $openPnl = 0.0;
+        $minOpenPnl = null;
+        $openWins = 0;
+        $openLosses = 0;
+
+        $allOpenPositions = $futuresPositions->concat($marginPositions);
+        foreach ($allOpenPositions as $p) {
+            $entry = (float) ($p->entry_price ?? 0);
+            $mark = (float) ($p->current_price ?? 0);
+            $size = (float) ($p->size ?? 0);
+            $side = (string) ($p->side ?? 'buy');
+            $pnl = (float) ($p->unrealized_pnl ?? 0);
+            if ($pnl == 0.0 && $entry > 0 && $mark > 0 && $size > 0) {
+                $pnl = $side === 'buy' ? (($mark - $entry) * $size) : (($entry - $mark) * $size);
+            }
+            $openPnl += $pnl;
+            $minOpenPnl = $minOpenPnl === null ? $pnl : min($minOpenPnl, $pnl);
+            if ($pnl > 0) {
+                $openWins++;
+            } elseif ($pnl < 0) {
+                $openLosses++;
+            }
+        }
+
+        $openDecisions = $openWins + $openLosses;
+        $winRate = $openDecisions > 0 ? ($openWins / $openDecisions) * 100 : $winRate;
+        $roi = $usedMargin > 0 ? ($openPnl / $usedMargin) * 100 : 0;
+        $totalVolume = $futuresVolume + $marginVolume;
+        $maxDrawdown = ($usedMargin > 0 && $minOpenPnl !== null && $minOpenPnl < 0) ? (abs($minOpenPnl) / $usedMargin) * 100 : null;
+
+        $stats = [
+            'roi' => $roi,
+            'win_rate' => $winRate,
+            'followers' => $followers,
+            'total_trades' => $totalTrades,
+            'total_profit' => $openPnl,
+            'total_volume' => $totalVolume,
+            'avg_profit_per_trade' => $totalTrades > 0 ? ($openPnl / $totalTrades) : 0,
+            'max_drawdown' => $maxDrawdown,
+        ];
+
+        $tradeHistoryCollection = collect()
             ->concat($futuresPositions->map(function ($p) {
                 $entry = (float) $p->entry_price;
                 $mark = (float) $p->current_price;
@@ -227,9 +273,20 @@ class CopyTradingController extends Controller
                 ];
             }))
             ->sortByDesc('timestamp')
-            ->take(10)
-            ->values()
-            ->all();
+            ->take(50)
+            ->values();
+
+        $perPage = 5;
+        $page = (int) request('trades_page', 1);
+        $page = max(1, $page);
+        $total = (int) $tradeHistoryCollection->count();
+        $items = $tradeHistoryCollection->slice(($page - 1) * $perPage, $perPage)->values();
+
+        $tradeHistory = new LengthAwarePaginator($items, $total, $perPage, $page, [
+            'pageName' => 'trades_page',
+        ]);
+        $tradeHistory->setPath(url()->current());
+        $tradeHistory->appends(request()->except('trades_page'));
 
         $profile = [
             'style' => $pro->style ?? 'SWING',

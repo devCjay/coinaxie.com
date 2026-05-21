@@ -924,7 +924,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 7h6v6"></path>
                                 </svg>
                             </div>
-                            <div class="mt-4 text-emerald-300 font-black text-xl">+{{ number_format((float) ($stats['roi'] ?? 0), 2) }}%</div>
+                            @php($roi = (float) ($stats['roi'] ?? 0))
+                            <div class="mt-4 text-emerald-300 font-black text-xl">{{ $roi >= 0 ? '+' : '' }}{{ number_format($roi, 2) }}%</div>
                             <div class="mt-1 text-white/45 text-xs font-bold">{{ __('Total ROI') }}</div>
                         </div>
 
@@ -1005,87 +1006,6 @@
                             <div class="mt-1 text-white/45 text-xs font-bold">{{ __('Max Drawdown') }}</div>
                         </div>
                     </div>
-
-                    <div class="mt-6">
-                        <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-3 py-2 text-xs font-black text-white/70">
-                            <span class="bg-white/10 rounded-xl px-3 py-1">{{ __('Recent Trades') }}</span>
-                        
-                        </div>
-
-                        @if (empty($tradeHistory))
-                            <div class="mt-6 bg-secondary border border-white/5 rounded-3xl p-10 md:p-16 text-center">
-                                <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 mx-auto grid place-items-center">
-                                    <svg class="w-8 h-8 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M3 12h2l3 7 4-14 3 7h6"></path>
-                                    </svg>
-                                </div>
-                                <div class="mt-5 text-white font-black text-xl">{{ __('No Recent Trades') }}</div>
-                                <div class="mt-2 text-white/55">{{ __("This leader hasn't completed any trades yet.") }}</div>
-                            </div>
-                        @else
-                            <div class="mt-6 bg-secondary border border-white/5 rounded-3xl overflow-hidden">
-                                <div class="overflow-x-auto">
-                                    <table class="min-w-full text-sm">
-                                        <thead class="bg-primary-dark/50 text-text-secondary">
-                                            <tr>
-                                                <th class="text-left px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Asset') }}</th>
-                                                <th class="text-left px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Side') }}</th>
-                                                <th class="text-right px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Size') }}</th>
-                                                <th class="text-right px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Entry Price') }}</th>
-                                                <th class="text-right px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Mark Price') }}</th>
-                                                <th class="text-right px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('PnL (ROE%)') }}</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody class="divide-y divide-white/5">
-                                            @foreach ((isset($tradeHistory) ? $tradeHistory : []) as $t)
-                                                @php
-                                                    $ticker = strtoupper((string) ($t['ticker'] ?? ''));
-                                                    $side = (string) ($t['side'] ?? 'buy');
-                                                    $isLong = $side === 'buy';
-                                                    $size = (float) ($t['size'] ?? 0);
-                                                    $entry = (float) ($t['entry_price'] ?? 0);
-                                                    $mark = (float) ($t['mark_price'] ?? 0);
-                                                    $pnl = (float) ($t['pnl'] ?? 0);
-                                                    $roe = (float) ($t['roe'] ?? 0);
-                                                    $lev = (float) ($t['leverage'] ?? 0);
-                                                    $market = (string) ($t['market'] ?? 'futures');
-                                                    $sub = $market === 'margin' ? __('Margin') : __('Perpetual');
-                                                    $sub .= $lev > 0 ? (' ' . rtrim(rtrim(number_format($lev, 0, '.', ''), '0'), '.') . 'x') : '';
-                                                    $pnlClass = $pnl >= 0 ? 'text-emerald-300' : 'text-red-300';
-                                                @endphp
-                                                <tr class="bg-white/[0.02]">
-                                                    <td class="px-6 py-5">
-                                                        <div class="flex items-center gap-4">
-                                                            <div class="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 grid place-items-center text-amber-300 font-black text-sm">
-                                                                {{ substr($ticker, 0, 1) ?: '•' }}
-                                                            </div>
-                                                            <div>
-                                                                <div class="text-white font-black">{{ $ticker }}</div>
-                                                                <div class="text-xs text-white/45">{{ $sub }}</div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td class="px-6 py-5">
-                                                        <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-black {{ $isLong ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-200' : 'bg-red-500/10 border border-red-500/20 text-red-200' }}">
-                                                            {{ $isLong ? __('Long') : __('Short') }}
-                                                        </span>
-                                                    </td>
-                                                    <td class="px-6 py-5 text-right text-white font-mono">{{ number_format($size, 4) }}</td>
-                                                    <td class="px-6 py-5 text-right text-white/80 font-mono">${{ number_format($entry, 2) }}</td>
-                                                    <td class="px-6 py-5 text-right text-white/80 font-mono">${{ number_format($mark, 2) }}</td>
-                                                    <td class="px-6 py-5 text-right">
-                                                        <div class="{{ $pnlClass }} font-black font-mono">{{ $pnl >= 0 ? '+' : '' }}{{ number_format($pnl, 2) }}</div>
-                                                        <div class="{{ $pnlClass }} text-xs font-bold font-mono">{{ $roe >= 0 ? '+' : '' }}{{ number_format($roe, 2) }}%</div>
-                                                    </td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        @endif
-                    </div>
                 </div>
 
                 <div class="bg-secondary border border-white/5 rounded-3xl p-6 md:p-7 h-fit relative overflow-hidden">
@@ -1137,6 +1057,104 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="mt-6">
+                <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-3 py-2 text-xs font-black text-white/70">
+                    <span class="bg-white/10 rounded-xl px-3 py-1">{{ __('Recent Trades') }}</span>
+                </div>
+
+                @if (!isset($tradeHistory) || $tradeHistory->count() === 0)
+                    <div class="mt-6 bg-secondary border border-white/5 rounded-3xl p-10 md:p-16 text-center">
+                        <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 mx-auto grid place-items-center">
+                            <svg class="w-8 h-8 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 12h2l3 7 4-14 3 7h6"></path>
+                            </svg>
+                        </div>
+                        <div class="mt-5 text-white font-black text-xl">{{ __('No Recent Trades') }}</div>
+                        <div class="mt-2 text-white/55">{{ __("This leader hasn't completed any trades yet.") }}</div>
+                    </div>
+                @else
+                    <div class="mt-6 bg-secondary border border-white/5 rounded-3xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-primary-dark/50 text-text-secondary">
+                                    <tr>
+                                        <th class="text-left px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Asset') }}</th>
+                                        <th class="text-left px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Side') }}</th>
+                                        <th class="text-right px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Size') }}</th>
+                                        <th class="text-right px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Entry Price') }}</th>
+                                        <th class="text-right px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Mark Price') }}</th>
+                                        <th class="text-right px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('PnL (ROE%)') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-white/5">
+                                    @foreach ($tradeHistory as $t)
+                                        @php
+                                            $ticker = strtoupper((string) ($t['ticker'] ?? ''));
+                                            $side = (string) ($t['side'] ?? 'buy');
+                                            $isLong = $side === 'buy';
+                                            $size = (float) ($t['size'] ?? 0);
+                                            $entry = (float) ($t['entry_price'] ?? 0);
+                                            $mark = (float) ($t['mark_price'] ?? 0);
+                                            $pnl = (float) ($t['pnl'] ?? 0);
+                                            $roe = (float) ($t['roe'] ?? 0);
+                                            $lev = (float) ($t['leverage'] ?? 0);
+                                            $market = (string) ($t['market'] ?? 'futures');
+                                            $sub = $market === 'margin' ? __('Margin') : __('Perpetual');
+                                            $sub .= $lev > 0 ? (' ' . rtrim(rtrim(number_format($lev, 0, '.', ''), '0'), '.') . 'x') : '';
+                                            $pnlClass = $pnl >= 0 ? 'text-emerald-300' : 'text-red-300';
+                                        @endphp
+                                        <tr class="bg-white/[0.02]">
+                                            <td class="px-6 py-5">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 grid place-items-center text-amber-300 font-black text-sm">
+                                                        {{ substr($ticker, 0, 1) ?: '•' }}
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-white font-black">{{ $ticker }}</div>
+                                                        <div class="text-xs text-white/45">{{ $sub }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-5">
+                                                <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-black {{ $isLong ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-200' : 'bg-red-500/10 border border-red-500/20 text-red-200' }}">
+                                                    {{ $isLong ? __('Long') : __('Short') }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-5 text-right text-white font-mono">{{ number_format($size, 4) }}</td>
+                                            <td class="px-6 py-5 text-right text-white/80 font-mono">${{ number_format($entry, 2) }}</td>
+                                            <td class="px-6 py-5 text-right text-white/80 font-mono">${{ number_format($mark, 2) }}</td>
+                                            <td class="px-6 py-5 text-right">
+                                                <div class="{{ $pnlClass }} font-black font-mono">{{ $pnl >= 0 ? '+' : '' }}{{ number_format($pnl, 2) }}</div>
+                                                <div class="{{ $pnlClass }} text-xs font-bold font-mono">{{ $roe >= 0 ? '+' : '' }}{{ number_format($roe, 2) }}%</div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    @if ($tradeHistory->lastPage() > 1)
+                        <div class="mt-5 flex items-center justify-between gap-4">
+                            <a href="{{ $tradeHistory->previousPageUrl() ?: 'javascript:void(0)' }}"
+                                class="h-10 px-5 rounded-2xl border border-white/10 bg-white/5 text-white/80 font-black text-xs uppercase tracking-widest inline-flex items-center justify-center {{ $tradeHistory->onFirstPage() ? 'opacity-40 pointer-events-none' : 'hover:bg-white/10' }}">
+                                {{ __('Prev') }}
+                            </a>
+
+                            <div class="text-xs text-white/55 font-bold">
+                                {{ __('Page') }} {{ $tradeHistory->currentPage() }} {{ __('of') }} {{ $tradeHistory->lastPage() }}
+                            </div>
+
+                            <a href="{{ $tradeHistory->nextPageUrl() ?: 'javascript:void(0)' }}"
+                                class="h-10 px-5 rounded-2xl border border-white/10 bg-white/5 text-white/80 font-black text-xs uppercase tracking-widest inline-flex items-center justify-center {{ $tradeHistory->hasMorePages() ? 'hover:bg-white/10' : 'opacity-40 pointer-events-none' }}">
+                                {{ __('Next') }}
+                            </a>
+                        </div>
+                    @endif
+                @endif
             </div>
         @endif
 
