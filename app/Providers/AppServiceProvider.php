@@ -110,44 +110,113 @@ class AppServiceProvider extends ServiceProvider
                 Cache::forget('user_menu_items');
             }
 
-            $copyItem = MenuItem::where('type', 'user')->where('route_name', 'user.trading.copy-trading')->first();
-            if ($copyItem) {
-                $activityItem = MenuItem::where('type', 'user')->where('route_name', 'user.trading.copy-trading.activity')->first();
-                if (!$activityItem) {
-                    MenuItem::create([
-                        'label' => 'Copy Activity',
-                        'route_name' => 'user.trading.copy-trading.activity',
-                        'route_wildcard' => 'user.trading.copy-trading.activity',
-                        'url' => null,
-                        'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
-                        'type' => 'user',
-                        'sort_order' => (int) ($copyItem->sort_order ?? 10) + 1,
-                        'is_active' => true,
-                        'parent_id' => null,
-                    ]);
+            $copyTradingLeaf = MenuItem::where('type', 'user')->where('route_name', 'user.trading.copy-trading')->first();
+            if (!$copyTradingLeaf) {
+                $copyTradingLeaf = MenuItem::create([
+                    'label' => 'Copy Trading',
+                    'route_name' => 'user.trading.copy-trading',
+                    'route_wildcard' => 'user.trading.copy-trading*',
+                    'url' => null,
+                    'type' => 'user',
+                    'sort_order' => 8,
+                    'is_active' => true,
+                    'parent_id' => null,
+                    'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 6a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4"/><path d="M21 10v7a3 3 0 0 1-3 3h-7"/><path d="M8 12h6"/><path d="M8 8h4"/></svg>',
+                ]);
+                Cache::forget('user_menu_items');
+            }
+
+            $parentLabel = 'Copy Trades';
+            $parent = MenuItem::where('type', 'user')
+                ->whereNull('route_name')
+                ->where('label', $parentLabel)
+                ->first();
+
+            if (!$parent) {
+                $parent = MenuItem::create([
+                    'label' => $parentLabel,
+                    'route_name' => null,
+                    'route_wildcard' => 'user.trading.copy-trading*',
+                    'url' => '#',
+                    'icon' => $copyTradingLeaf->icon,
+                    'type' => 'user',
+                    'sort_order' => (int) ($copyTradingLeaf->sort_order ?? 8),
+                    'is_active' => true,
+                    'parent_id' => null,
+                ]);
+                Cache::forget('user_menu_items');
+            } else {
+                $updates = [];
+                if (!$parent->is_active) {
+                    $updates['is_active'] = true;
+                }
+                if ($parent->parent_id !== null) {
+                    $updates['parent_id'] = null;
+                }
+                if (($parent->route_wildcard ?? '') !== 'user.trading.copy-trading*') {
+                    $updates['route_wildcard'] = 'user.trading.copy-trading*';
+                }
+                if (($parent->url ?? '') !== '#') {
+                    $updates['url'] = '#';
+                }
+                if (!$parent->icon) {
+                    $updates['icon'] = $copyTradingLeaf->icon;
+                }
+                if (!empty($updates)) {
+                    $parent->update($updates);
                     Cache::forget('user_menu_items');
-                } else {
-                    $updates = [];
-                    if (!$activityItem->is_active) {
-                        $updates['is_active'] = true;
-                    }
-                    if ($activityItem->parent_id !== null) {
-                        $updates['parent_id'] = null;
-                    }
-                    if (($activityItem->route_wildcard ?? '') !== 'user.trading.copy-trading.activity') {
-                        $updates['route_wildcard'] = 'user.trading.copy-trading.activity';
-                    }
-                    if (!$activityItem->icon) {
-                        $updates['icon'] = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
-                    }
-                    $desiredSort = (int) ($copyItem->sort_order ?? 10) + 1;
-                    if ((int) $activityItem->sort_order !== $desiredSort) {
-                        $updates['sort_order'] = $desiredSort;
-                    }
-                    if (!empty($updates)) {
-                        $activityItem->update($updates);
-                        Cache::forget('user_menu_items');
-                    }
+                }
+            }
+
+            $leafUpdates = [];
+            if (!$copyTradingLeaf->is_active) {
+                $leafUpdates['is_active'] = true;
+            }
+            if ((int) $copyTradingLeaf->parent_id !== (int) $parent->id) {
+                $leafUpdates['parent_id'] = $parent->id;
+            }
+            if (($copyTradingLeaf->route_wildcard ?? '') !== 'user.trading.copy-trading*') {
+                $leafUpdates['route_wildcard'] = 'user.trading.copy-trading*';
+            }
+            if ((int) $copyTradingLeaf->sort_order !== 1) {
+                $leafUpdates['sort_order'] = 1;
+            }
+            if (!empty($leafUpdates)) {
+                $copyTradingLeaf->update($leafUpdates);
+                Cache::forget('user_menu_items');
+            }
+
+            $activityLeaf = MenuItem::where('type', 'user')->where('route_name', 'user.trading.copy-trading.activity')->first();
+            if (!$activityLeaf) {
+                MenuItem::create([
+                    'label' => 'Copy Activity',
+                    'route_name' => 'user.trading.copy-trading.activity',
+                    'route_wildcard' => 'user.trading.copy-trading.activity',
+                    'url' => null,
+                    'icon' => null,
+                    'type' => 'user',
+                    'sort_order' => 2,
+                    'is_active' => true,
+                    'parent_id' => $parent->id,
+                ]);
+                Cache::forget('user_menu_items');
+            } else {
+                $updates = [];
+                if (!$activityLeaf->is_active) {
+                    $updates['is_active'] = true;
+                }
+                if ((int) $activityLeaf->parent_id !== (int) $parent->id) {
+                    $updates['parent_id'] = $parent->id;
+                }
+                if (($activityLeaf->route_wildcard ?? '') !== 'user.trading.copy-trading.activity') {
+                    $updates['route_wildcard'] = 'user.trading.copy-trading.activity';
+                }
+                if ((int) $activityLeaf->sort_order !== 2) {
+                    $updates['sort_order'] = 2;
+                }
+                if (!empty($updates)) {
+                    $activityLeaf->update($updates);
+                    Cache::forget('user_menu_items');
                 }
             }
         });
