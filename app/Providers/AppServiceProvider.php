@@ -119,11 +119,11 @@ class AppServiceProvider extends ServiceProvider
                         'route_name' => 'user.trading.copy-trading.activity',
                         'route_wildcard' => 'user.trading.copy-trading.activity',
                         'url' => null,
-                        'icon' => null,
+                        'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
                         'type' => 'user',
-                        'sort_order' => 1,
+                        'sort_order' => (int) ($copyItem->sort_order ?? 10) + 1,
                         'is_active' => true,
-                        'parent_id' => $copyItem->id,
+                        'parent_id' => null,
                     ]);
                     Cache::forget('user_menu_items');
                 } else {
@@ -131,11 +131,18 @@ class AppServiceProvider extends ServiceProvider
                     if (!$activityItem->is_active) {
                         $updates['is_active'] = true;
                     }
-                    if ((int) $activityItem->parent_id !== (int) $copyItem->id) {
-                        $updates['parent_id'] = $copyItem->id;
+                    if ($activityItem->parent_id !== null) {
+                        $updates['parent_id'] = null;
                     }
                     if (($activityItem->route_wildcard ?? '') !== 'user.trading.copy-trading.activity') {
                         $updates['route_wildcard'] = 'user.trading.copy-trading.activity';
+                    }
+                    if (!$activityItem->icon) {
+                        $updates['icon'] = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+                    }
+                    $desiredSort = (int) ($copyItem->sort_order ?? 10) + 1;
+                    if ((int) $activityItem->sort_order !== $desiredSort) {
+                        $updates['sort_order'] = $desiredSort;
                     }
                     if (!empty($updates)) {
                         $activityItem->update($updates);
