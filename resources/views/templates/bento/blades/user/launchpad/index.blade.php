@@ -93,7 +93,7 @@
                         $chipText = $isFunded ? __('Funded') : (((string) $project->status === 'draft') ? __('Presale') : __('Active'));
                         $durationDays = null;
                         if ($project->sale_start_at && $project->sale_end_at) {
-                            $durationDays = $project->sale_start_at->diffInDays($project->sale_end_at);
+                            $durationDays = (int) $project->sale_start_at->diffInDays($project->sale_end_at);
                         }
 
                         $countdownLabel = null;
@@ -108,6 +108,7 @@
                             $countdownLabel = __('Launch in');
                             $countdownTargetMs = $project->launch_at->timestamp * 1000;
                         }
+                        $isLaunchCountdown = $countdownLabel === __('Launch in');
                     @endphp
                     <div class="bg-secondary border border-white/5 rounded-3xl p-5 relative overflow-hidden">
                         <div class="flex items-start justify-between gap-3">
@@ -158,7 +159,7 @@
                             </div>
                             <div>
                                 @if (!is_null($durationDays))
-                                    {{ __('Completed in') }} <span class="text-white font-semibold">{{ $durationDays }}</span> {{ __('days') }}
+                                    {{ __('Completed in') }} <span class="text-white font-semibold">{{ number_format((int) $durationDays) }}</span> {{ __('days') }}
                                 @else
                                     <span class="text-white/35">—</span>
                                 @endif
@@ -167,8 +168,8 @@
 
                         @if ($countdownLabel && $countdownTargetMs)
                             <div class="mt-3 text-xs text-white/55">
-                                <span class="font-bold">{{ $countdownLabel }}:</span>
-                                <span class="lp-countdown text-white font-semibold" data-target="{{ (int) $countdownTargetMs }}">—</span>
+                                <span class="font-bold {{ $isLaunchCountdown ? 'text-amber-400' : '' }}">{{ $countdownLabel }}:</span>
+                                <span class="lp-countdown {{ $isLaunchCountdown ? 'text-amber-400' : 'text-white' }} font-semibold" data-target="{{ (int) $countdownTargetMs }}">—</span>
                             </div>
                         @endif
 

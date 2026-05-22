@@ -34,6 +34,7 @@
             $countdownLabel = __('Launch in');
             $countdownTargetMs = $project->launch_at->timestamp * 1000;
         }
+        $isLaunchCountdown = $countdownLabel === __('Launch in');
     @endphp
 
     <div class="min-h-screen px-2 md:px-0">
@@ -105,8 +106,8 @@
                         </div>
                         @if ($countdownLabel && $countdownTargetMs)
                             <div class="text-white/55 text-xs mt-2">
-                                {{ $countdownLabel }}:
-                                <span class="lp-countdown text-white font-semibold" data-target="{{ (int) $countdownTargetMs }}">—</span>
+                                <span class="{{ $isLaunchCountdown ? 'text-amber-400 font-semibold' : '' }}">{{ $countdownLabel }}:</span>
+                                <span class="lp-countdown {{ $isLaunchCountdown ? 'text-amber-400' : 'text-white' }} font-semibold" data-target="{{ (int) $countdownTargetMs }}">—</span>
                             </div>
                         @endif
                     </div>
