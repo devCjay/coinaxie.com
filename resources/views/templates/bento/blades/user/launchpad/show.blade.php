@@ -6,6 +6,14 @@
         $saleStarts = $project->sale_start_at ? $project->sale_start_at->format('Y-m-d H:i') : null;
         $saleEnds = $project->sale_end_at ? $project->sale_end_at->format('Y-m-d H:i') : null;
         $launchAt = $project->launch_at ? $project->launch_at->format('Y-m-d H:i') : null;
+        $statusLabel = match ((string) $project->status) {
+            'draft' => __('Presale'),
+            'live' => __('Live'),
+            'ended' => __('Ended'),
+            'launched' => __('Launched'),
+            'canceled' => __('Canceled'),
+            default => ucfirst((string) $project->status),
+        };
         $isSaleLive =
             $project->status === 'live' &&
             (!$project->sale_start_at || $now->gte($project->sale_start_at)) &&
@@ -83,7 +91,7 @@
 
                     <div class="bg-white/5 border border-white/10 rounded-xl p-4">
                         <div class="text-white/55 text-xs">{{ __('Status') }}</div>
-                        <div class="text-white font-semibold mt-1">{{ ucfirst($project->status) }}</div>
+                        <div class="text-white font-semibold mt-1">{{ $statusLabel }}</div>
                     </div>
 
                     <div class="bg-white/5 border border-white/10 rounded-xl p-4">

@@ -90,7 +90,7 @@
                             : ((string) $project->status === 'draft'
                                 ? 'bg-indigo-500/15 border border-indigo-500/25 text-indigo-300'
                                 : 'bg-white/5 border border-white/10 text-white/55');
-                        $chipText = $isFunded ? __('Funded') : (((string) $project->status === 'draft') ? __('Upcoming') : __('Active'));
+                        $chipText = $isFunded ? __('Funded') : (((string) $project->status === 'draft') ? __('Presale') : __('Active'));
                         $durationDays = null;
                         if ($project->sale_start_at && $project->sale_end_at) {
                             $durationDays = $project->sale_start_at->diffInDays($project->sale_end_at);

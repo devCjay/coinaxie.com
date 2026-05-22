@@ -33,11 +33,11 @@ Route::get('create-storage-link', function () {
 
 // start schedule
 Route::get('cronjob', function () {
+    Artisan::call('lozand:manage-launchpad');
     Artisan::call('lozand:start-schedule');
     return response()->json([
         'status' => 'success',
         'message' => 'Cron job started successfully',
     ]);
 })->name('cronjob');
-
 

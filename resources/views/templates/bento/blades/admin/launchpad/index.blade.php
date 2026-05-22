@@ -243,6 +243,14 @@
                                     'canceled' => 'bg-red-500/15 border border-red-500/25 text-red-300',
                                     default => 'bg-white/5 border border-white/10 text-white/55',
                                 };
+                                $statusLabel = match ((string) $p->status) {
+                                    'draft' => __('Presale'),
+                                    'live' => __('Live'),
+                                    'ended' => __('Ended'),
+                                    'launched' => __('Launched'),
+                                    'canceled' => __('Canceled'),
+                                    default => ucfirst((string) $p->status),
+                                };
                                 $projectPayload = [
                                     'id' => $p->id,
                                     'name' => $p->name,
@@ -300,7 +308,7 @@
                                 </td>
                                 <td class="px-8 py-5">
                                     <span class="text-xs px-2 py-1 rounded-full inline-block {{ $badgeClass }}">
-                                        {{ ucfirst($p->status) }}
+                                        {{ $statusLabel }}
                                     </span>
                                     @if (($p->approval_status ?? 'approved') !== 'approved')
                                         <div class="text-white/55 text-xs mt-2">
@@ -542,7 +550,7 @@
                         <label class="text-xs font-bold text-slate-400 uppercase tracking-widest">{{ __('Status') }}</label>
                         <select name="status" id="edit-status"
                             class="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accent-primary transition-all appearance-none cursor-pointer">
-                            <option value="draft" class="bg-[#0f172a]">{{ __('Draft') }}</option>
+                            <option value="draft" class="bg-[#0f172a]">{{ __('Presale') }}</option>
                             <option value="live" class="bg-[#0f172a]">{{ __('Live') }}</option>
                             <option value="ended" class="bg-[#0f172a]">{{ __('Ended') }}</option>
                             <option value="launched" class="bg-[#0f172a]">{{ __('Launched') }}</option>
