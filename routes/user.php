@@ -138,6 +138,8 @@ Route::prefix('user')->middleware(['auth', 'otp.verified', 'user.status', 'user.
         Route::get('/', [LaunchpadController::class, 'index'])->name('index');
         Route::get('/{slug}', [LaunchpadController::class, 'show'])->name('show');
         Route::post('/buy', [LaunchpadController::class, 'buy'])->name('buy');
+        Route::post('/web3/intent', [LaunchpadController::class, 'web3Intent'])->name('web3.intent');
+        Route::post('/web3/confirm', [LaunchpadController::class, 'web3Confirm'])->name('web3.confirm');
         Route::post('/submit', [LaunchpadController::class, 'submit'])->name('submit');
         Route::get('/{slug}/trade', [LaunchpadTradeController::class, 'index'])->name('trade');
         Route::post('/trade/order', [LaunchpadTradeController::class, 'placeOrder'])->name('trade.order');

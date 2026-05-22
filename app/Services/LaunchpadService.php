@@ -87,6 +87,81 @@ class LaunchpadService
         return $purchase;
     }
 
+    public function buyExternal(User $user, LaunchpadProject $project, float $quoteAmount, \DateTimeInterface $paidAt, string $reference): LaunchpadPurchase
+    {
+        $quoteAmount = (float) $quoteAmount;
+        if ($quoteAmount <= 0) {
+            throw new \InvalidArgumentException('Invalid amount');
+        }
+
+        if (!in_array((string) $project->status, ['live', 'ended'], true)) {
+            throw new \RuntimeException('Sale not available');
+        }
+
+        $paid = \Carbon\Carbon::parse($paidAt);
+        if ($project->sale_start_at && $paid->lt($project->sale_start_at)) {
+            throw new \RuntimeException('Sale not started');
+        }
+        if ($project->sale_end_at && $paid->gt($project->sale_end_at)) {
+            throw new \RuntimeException('Sale ended');
+        }
+
+        $min = (float) $project->min_buy_quote;
+        $max = (float) $project->max_buy_quote;
+        if ($min > 0 && $quoteAmount < $min) {
+            throw new \RuntimeException('Below minimum');
+        }
+
+        $purchase = DB::transaction(function () use ($user, $project, $quoteAmount, $max, $reference) {
+            $project->refresh();
+
+            $existing = LaunchpadPurchase::where('reference', $reference)->first();
+            if ($existing) {
+                return $existing;
+            }
+
+            $userTotal = (float) LaunchpadPurchase::where('project_id', $project->id)
+                ->where('user_id', $user->id)
+                ->whereIn('status', ['reserved', 'allocated'])
+                ->sum('quote_amount');
+
+            if ($max > 0 && ($userTotal + $quoteAmount) > $max) {
+                throw new \RuntimeException('Above maximum');
+            }
+
+            $hardCap = (float) $project->hard_cap_quote;
+            if ($hardCap > 0 && ((float) $project->sold_quote + $quoteAmount) > $hardCap) {
+                throw new \RuntimeException('Hard cap reached');
+            }
+
+            $price = (float) $project->sale_price;
+            if ($price <= 0) {
+                throw new \RuntimeException('Invalid price');
+            }
+
+            $tokenAmount = $quoteAmount / $price;
+
+            $purchase = LaunchpadPurchase::create([
+                'project_id' => $project->id,
+                'user_id' => $user->id,
+                'quote_currency' => $project->quote_currency,
+                'quote_amount' => $quoteAmount,
+                'token_amount' => $tokenAmount,
+                'price' => $price,
+                'status' => 'reserved',
+                'reference' => $reference,
+            ]);
+
+            $project->increment('sold_quote', $quoteAmount);
+            $project->increment('sold_tokens', $tokenAmount);
+
+            return $purchase;
+        });
+
+        $this->notifyPurchase($user, $project, $purchase);
+        return $purchase;
+    }
+
     public function ensureMarket(LaunchpadProject $project): LaunchpadMarket
     {
         $market = LaunchpadMarket::where('project_id', $project->id)->first();

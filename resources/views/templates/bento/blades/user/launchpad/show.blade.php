@@ -148,18 +148,10 @@
             <div class="bg-secondary border border-white/5 rounded-2xl p-5">
                 <h3 class="text-white font-semibold">{{ __('Buy Before Launch') }}</h3>
 
-                <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-4">
-                        <div class="text-white/55 text-xs">{{ __('Your') }} {{ strtoupper($project->quote_currency) }}</div>
-                        <div class="text-white font-semibold mt-1">
-                            {{ rtrim(rtrim(number_format((float) ($quoteAccount->balance ?? 0), 8, '.', ''), '0'), '.') }}
-                        </div>
-                    </div>
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-4">
-                        <div class="text-white/55 text-xs">{{ __('Your') }} {{ strtoupper($project->token_symbol) }}</div>
-                        <div class="text-white font-semibold mt-1">
-                            {{ rtrim(rtrim(number_format((float) ($tokenAccount->balance ?? 0), 8, '.', ''), '0'), '.') }}
-                        </div>
+                <div class="mt-4 bg-white/5 border border-white/10 rounded-xl p-4">
+                    <div class="text-white/55 text-xs">{{ __('Your') }} {{ strtoupper($project->token_symbol) }}</div>
+                    <div class="text-white font-semibold mt-1">
+                        {{ rtrim(rtrim(number_format((float) ($tokenAccount->balance ?? 0), 8, '.', ''), '0'), '.') }}
                     </div>
                 </div>
 
@@ -184,23 +176,33 @@
                 </div>
 
                 <div class="mt-5 flex items-center gap-2">
-                    <button
-                        class="btn-buy flex-1 bg-accent-primary/20 border border-accent-primary/30 text-white rounded-xl px-4 py-2.5 text-sm font-semibold hover:bg-accent-primary/25 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                        {{ $isSaleLive ? '' : 'disabled' }} data-project-id="{{ $project->id }}"
+                    <button type="button"
+                        class="btn-buy-web3 flex-1 bg-accent-primary/20 border border-accent-primary/30 text-white rounded-xl px-4 py-2.5 text-sm font-semibold hover:bg-accent-primary/25 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        {{ ($isSaleLive && (bool) ($web3Config['enabled'] ?? false)) ? '' : 'disabled' }} data-project-id="{{ $project->id }}"
                         data-sale-price="{{ (float) $project->sale_price }}"
                         data-quote-currency="{{ strtoupper($project->quote_currency) }}">
-                        {{ $isSaleLive ? __('Buy') : __('Sale Not Live') }}
+                        {{ $isSaleLive ? __('Buy with WalletConnect') : __('Sale Not Live') }}
                     </button>
                 </div>
+
+                @if (!(bool) ($web3Config['enabled'] ?? false))
+                    <div class="mt-3 text-xs text-white/50">
+                        {{ __('WalletConnect is not configured. Please contact support.') }}
+                    </div>
+                @endif
             </div>
         </div>
     </div>
 @endsection
 
 @section('scripts')
+    <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
+    <script src="https://unpkg.com/web3modal@1.9.12/dist/index.js"></script>
     <script>
         $(document).ready(function() {
-            const salePrice = parseFloat($('.btn-buy').data('sale-price') || 0);
+            const web3Cfg = @json($web3Config ?? []);
+            const salePrice = parseFloat($('.btn-buy-web3').data('sale-price') || 0);
 
             function startCountdowns() {
                 $('.lp-countdown').each(function() {
@@ -239,39 +241,121 @@
                 $('.buy-preview-token').text(fmt8(t));
             });
 
-            $(document).on('click', '.btn-buy', function() {
-                const projectId = $(this).data('project-id');
-                const quoteAmount = parseFloat($('.buy-amount').val() || 0);
-                const $btn = $(this);
+            async function connectAndPay(intent) {
+                const chainId = parseInt(intent.chain_id || 0, 10);
+                const rpcUrl = (intent.rpc_url || '').toString();
+                const receiver = (intent.receiver_address || '').toString();
+                const tokenAddress = (intent.token_address || '').toString();
+                const amountBaseUnits = (intent.amount_base_units || '0').toString();
 
-                if (!projectId || quoteAmount <= 0) {
+                const providerOptions = {
+                    walletconnect: {
+                        package: window.WalletConnectProvider.default,
+                        options: {
+                            rpc: rpcUrl && chainId ? { [chainId]: rpcUrl } : {},
+                            chainId: chainId || undefined,
+                        }
+                    }
+                };
+
+                const web3Modal = new window.Web3Modal.default({
+                    cacheProvider: false,
+                    providerOptions: providerOptions
+                });
+
+                const extProvider = await web3Modal.connect();
+                const ethersProvider = new ethers.providers.Web3Provider(extProvider);
+
+                if (extProvider && extProvider.request && chainId) {
+                    try {
+                        const hexChainId = '0x' + chainId.toString(16);
+                        await extProvider.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: hexChainId }]
+                        });
+                    } catch (e) {
+                    }
+                }
+
+                const signer = ethersProvider.getSigner();
+                const abi = ["function transfer(address to, uint256 value) returns (bool)"];
+                const token = new ethers.Contract(tokenAddress, abi, signer);
+                const tx = await token.transfer(receiver, ethers.BigNumber.from(amountBaseUnits));
+                return tx.hash;
+            }
+
+            function pollConfirm(reference, txHash) {
+                const poll = function() {
+                    $.ajax({
+                        url: "{{ route('user.launchpad.web3.confirm') }}",
+                        method: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            reference: reference,
+                            tx_hash: txHash
+                        },
+                        success: function(res) {
+                            if (res.status === 'success') {
+                                toastNotification(res.message || "{{ __('Purchase confirmed') }}", 'success');
+                                window.location.reload();
+                                return;
+                            }
+                            setTimeout(poll, 6000);
+                        },
+                        error: function(xhr) {
+                            if (xhr.status === 202) {
+                                setTimeout(poll, 6000);
+                                return;
+                            }
+                            const message = xhr.responseJSON ? xhr.responseJSON.message : "{{ __('An error occurred') }}";
+                            toastNotification(message, 'error');
+                        }
+                    });
+                };
+                poll();
+            }
+
+            $(document).on('click', '.btn-buy-web3', function() {
+                const projectId = $(this).data('project-id');
+                const quoteAmount = $('.buy-amount').val() || '0';
+
+                if (!web3Cfg || !web3Cfg.enabled) {
+                    toastNotification("{{ __('WalletConnect is not configured') }}", 'error');
+                    return;
+                }
+
+                const q = parseFloat(quoteAmount || 0);
+                if (!projectId || q <= 0) {
                     toastNotification("{{ __('Invalid amount') }}", 'error');
                     return;
                 }
 
-                $btn.prop('disabled', true);
                 $.ajax({
-                    url: "{{ route('user.launchpad.buy') }}",
+                    url: "{{ route('user.launchpad.web3.intent') }}",
                     method: 'POST',
                     data: {
                         _token: "{{ csrf_token() }}",
                         project_id: projectId,
                         quote_amount: quoteAmount
                     },
-                    success: function(res) {
-                        if (res.status === 'success') {
-                            toastNotification(res.message, 'success');
-                            window.location.reload();
-                        } else {
+                    success: async function(res) {
+                        if (res.status !== 'success' || !res.intent) {
                             toastNotification(res.message || "{{ __('Failed') }}", 'error');
+                            return;
+                        }
+
+                        try {
+                            toastNotification("{{ __('Connecting wallet...') }}", 'success');
+                            const txHash = await connectAndPay(res.intent);
+                            toastNotification("{{ __('Transaction sent') }}: " + txHash, 'success');
+                            pollConfirm(res.intent.reference, txHash);
+                        } catch (e) {
+                            toastNotification((e && e.message) ? e.message : "{{ __('Wallet payment canceled') }}", 'error');
                         }
                     },
                     error: function(xhr) {
                         const message = xhr.responseJSON ? xhr.responseJSON.message : "{{ __('An error occurred') }}";
                         toastNotification(message, 'error');
-                    },
-                    complete: function() {
-                        $btn.prop('disabled', false);
                     }
                 });
             });
