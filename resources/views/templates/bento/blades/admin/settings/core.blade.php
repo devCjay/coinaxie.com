@@ -245,7 +245,9 @@
                                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Active Chain') }}</label>
                                 <select name="launchpad_web3_active_chain" id="lp-web3-active-chain"
                                     class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none appearance-none">
-                                    @php($activeChain = (string) getSetting('launchpad_web3_active_chain', 'bsc'))
+                                    @php
+                                        $activeChain = (string) getSetting('launchpad_web3_active_chain', 'bsc');
+                                    @endphp
                                     <option value="bsc" class="bg-secondary-dark" {{ $activeChain === 'bsc' ? 'selected' : '' }}>
                                         {{ __('BSC (BEP20)') }}
                                     </option>
