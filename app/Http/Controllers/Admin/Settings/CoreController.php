@@ -41,6 +41,27 @@ class CoreController extends Controller
             'offices.*.address' => 'required_with:offices|string',
             'offices.*.email' => 'nullable|email|max:191',
             'offices.*.phone' => 'nullable|string|max:191',
+
+            'launchpad_web3_active_chain' => 'nullable|in:bsc,eth,custom',
+            'launchpad_web3_bsc_rpc_url' => 'nullable|string|max:2048',
+            'launchpad_web3_bsc_receiver_address' => 'nullable|string|max:191',
+            'launchpad_web3_bsc_token_symbol' => 'nullable|string|max:16',
+            'launchpad_web3_bsc_token_decimals' => 'nullable|integer|min:0|max:36',
+            'launchpad_web3_bsc_token_address' => 'nullable|string|max:191',
+
+            'launchpad_web3_eth_rpc_url' => 'nullable|string|max:2048',
+            'launchpad_web3_eth_receiver_address' => 'nullable|string|max:191',
+            'launchpad_web3_eth_token_symbol' => 'nullable|string|max:16',
+            'launchpad_web3_eth_token_decimals' => 'nullable|integer|min:0|max:36',
+            'launchpad_web3_eth_token_address' => 'nullable|string|max:191',
+
+            'launchpad_web3_custom_chain_name' => 'nullable|string|max:64',
+            'launchpad_web3_custom_chain_id' => 'nullable|integer|min:1|max:999999',
+            'launchpad_web3_custom_rpc_url' => 'nullable|string|max:2048',
+            'launchpad_web3_custom_receiver_address' => 'nullable|string|max:191',
+            'launchpad_web3_custom_token_symbol' => 'nullable|string|max:16',
+            'launchpad_web3_custom_token_decimals' => 'nullable|integer|min:0|max:36',
+            'launchpad_web3_custom_token_address' => 'nullable|string|max:191',
         ]);
 
         // General Site Info
@@ -82,6 +103,30 @@ class CoreController extends Controller
             $favicon = $favicon . "?v=" . time();
             updateSetting('favicon', $favicon);
         }
+
+        updateSetting('launchpad_web3_active_chain', $request->launchpad_web3_active_chain ?: 'bsc');
+
+        updateSetting('launchpad_web3_bsc_chain_id', 56);
+        updateSetting('launchpad_web3_bsc_rpc_url', trim((string) ($request->launchpad_web3_bsc_rpc_url ?? '')));
+        updateSetting('launchpad_web3_bsc_receiver_address', trim((string) ($request->launchpad_web3_bsc_receiver_address ?? '')));
+        updateSetting('launchpad_web3_bsc_token_symbol', strtoupper(trim((string) ($request->launchpad_web3_bsc_token_symbol ?? 'USDT'))));
+        updateSetting('launchpad_web3_bsc_token_decimals', (int) ($request->launchpad_web3_bsc_token_decimals ?? 18));
+        updateSetting('launchpad_web3_bsc_token_address', trim((string) ($request->launchpad_web3_bsc_token_address ?? '')));
+
+        updateSetting('launchpad_web3_eth_chain_id', 1);
+        updateSetting('launchpad_web3_eth_rpc_url', trim((string) ($request->launchpad_web3_eth_rpc_url ?? '')));
+        updateSetting('launchpad_web3_eth_receiver_address', trim((string) ($request->launchpad_web3_eth_receiver_address ?? '')));
+        updateSetting('launchpad_web3_eth_token_symbol', strtoupper(trim((string) ($request->launchpad_web3_eth_token_symbol ?? 'USDT'))));
+        updateSetting('launchpad_web3_eth_token_decimals', (int) ($request->launchpad_web3_eth_token_decimals ?? 6));
+        updateSetting('launchpad_web3_eth_token_address', trim((string) ($request->launchpad_web3_eth_token_address ?? '')));
+
+        updateSetting('launchpad_web3_custom_chain_name', trim((string) ($request->launchpad_web3_custom_chain_name ?? '')));
+        updateSetting('launchpad_web3_custom_chain_id', (int) ($request->launchpad_web3_custom_chain_id ?? 0));
+        updateSetting('launchpad_web3_custom_rpc_url', trim((string) ($request->launchpad_web3_custom_rpc_url ?? '')));
+        updateSetting('launchpad_web3_custom_receiver_address', trim((string) ($request->launchpad_web3_custom_receiver_address ?? '')));
+        updateSetting('launchpad_web3_custom_token_symbol', strtoupper(trim((string) ($request->launchpad_web3_custom_token_symbol ?? 'USDT'))));
+        updateSetting('launchpad_web3_custom_token_decimals', (int) ($request->launchpad_web3_custom_token_decimals ?? 6));
+        updateSetting('launchpad_web3_custom_token_address', trim((string) ($request->launchpad_web3_custom_token_address ?? '')));
 
         if ($request->ajax()) {
             return response()->json([

@@ -15,6 +15,86 @@ use Illuminate\Support\Str;
 
 class LaunchpadController extends Controller
 {
+    protected function resolveWeb3Config(): array
+    {
+        $activeChain = strtolower((string) getSetting('launchpad_web3_active_chain', 'bsc'));
+        if (!in_array($activeChain, ['bsc', 'eth', 'custom'], true)) {
+            $activeChain = 'bsc';
+        }
+
+        $cfg = [
+            'enabled' => false,
+            'active_chain' => $activeChain,
+            'chain_name' => '',
+            'chain_id' => 0,
+            'rpc_url' => '',
+            'receiver_address' => '',
+            'token_address' => '',
+            'token_decimals' => 6,
+            'token_symbol' => 'USDT',
+        ];
+
+        if ($activeChain === 'bsc') {
+            $cfg['chain_name'] = 'BSC';
+            $cfg['chain_id'] = (int) getSetting('launchpad_web3_bsc_chain_id', 56);
+            $cfg['rpc_url'] = (string) getSetting('launchpad_web3_bsc_rpc_url', '');
+            $cfg['receiver_address'] = (string) getSetting('launchpad_web3_bsc_receiver_address', '');
+            $cfg['token_address'] = (string) getSetting('launchpad_web3_bsc_token_address', '');
+            $cfg['token_decimals'] = (int) getSetting('launchpad_web3_bsc_token_decimals', 18);
+            $cfg['token_symbol'] = (string) getSetting('launchpad_web3_bsc_token_symbol', 'USDT');
+        } elseif ($activeChain === 'eth') {
+            $cfg['chain_name'] = 'Ethereum';
+            $cfg['chain_id'] = (int) getSetting('launchpad_web3_eth_chain_id', 1);
+            $cfg['rpc_url'] = (string) getSetting('launchpad_web3_eth_rpc_url', '');
+            $cfg['receiver_address'] = (string) getSetting('launchpad_web3_eth_receiver_address', '');
+            $cfg['token_address'] = (string) getSetting('launchpad_web3_eth_token_address', '');
+            $cfg['token_decimals'] = (int) getSetting('launchpad_web3_eth_token_decimals', 6);
+            $cfg['token_symbol'] = (string) getSetting('launchpad_web3_eth_token_symbol', 'USDT');
+        } else {
+            $cfg['chain_name'] = (string) getSetting('launchpad_web3_custom_chain_name', '');
+            $cfg['chain_id'] = (int) getSetting('launchpad_web3_custom_chain_id', 0);
+            $cfg['rpc_url'] = (string) getSetting('launchpad_web3_custom_rpc_url', '');
+            $cfg['receiver_address'] = (string) getSetting('launchpad_web3_custom_receiver_address', '');
+            $cfg['token_address'] = (string) getSetting('launchpad_web3_custom_token_address', '');
+            $cfg['token_decimals'] = (int) getSetting('launchpad_web3_custom_token_decimals', 6);
+            $cfg['token_symbol'] = (string) getSetting('launchpad_web3_custom_token_symbol', 'USDT');
+        }
+
+        $cfg['rpc_url'] = trim((string) $cfg['rpc_url']);
+        $cfg['receiver_address'] = trim((string) $cfg['receiver_address']);
+        $cfg['token_address'] = trim((string) $cfg['token_address']);
+        $cfg['token_symbol'] = strtoupper(trim((string) $cfg['token_symbol']));
+
+        $cfg['enabled'] = (int) $cfg['chain_id'] > 0
+            && $cfg['rpc_url'] !== ''
+            && $cfg['receiver_address'] !== ''
+            && $cfg['token_address'] !== '';
+
+        if (!$cfg['enabled']) {
+            $legacy = [
+                'chain_id' => (int) getSetting('launchpad_web3_chain_id', 0),
+                'rpc_url' => (string) getSetting('launchpad_web3_rpc_url', ''),
+                'receiver_address' => (string) getSetting('launchpad_web3_receiver_address', ''),
+                'token_address' => (string) getSetting('launchpad_web3_token_address', ''),
+                'token_decimals' => (int) getSetting('launchpad_web3_token_decimals', 6),
+                'token_symbol' => (string) getSetting('launchpad_web3_token_symbol', 'USDT'),
+            ];
+            $legacy['rpc_url'] = trim((string) $legacy['rpc_url']);
+            $legacy['receiver_address'] = trim((string) $legacy['receiver_address']);
+            $legacy['token_address'] = trim((string) $legacy['token_address']);
+            $legacy['token_symbol'] = strtoupper(trim((string) $legacy['token_symbol']));
+            $legacyEnabled = $legacy['chain_id'] > 0 && $legacy['rpc_url'] !== '' && $legacy['receiver_address'] !== '' && $legacy['token_address'] !== '';
+
+            if ($legacyEnabled) {
+                $cfg = array_merge($cfg, $legacy);
+                $cfg['active_chain'] = $cfg['active_chain'] ?: 'bsc';
+                $cfg['enabled'] = true;
+            }
+        }
+
+        return $cfg;
+    }
+
     public function index(LaunchpadWalletService $wallet)
     {
         $page_title = __('Launchpad');
@@ -97,17 +177,7 @@ class LaunchpadController extends Controller
             ->sum('quote_amount');
 
         $tokenAccount = $wallet->getOrCreateSpotAccount(auth()->user(), $project->token_symbol);
-
-        $web3Config = [
-            'enabled' => false,
-            'chain_id' => (int) getSetting('launchpad_web3_chain_id', 0),
-            'rpc_url' => (string) getSetting('launchpad_web3_rpc_url', ''),
-            'receiver_address' => (string) getSetting('launchpad_web3_receiver_address', ''),
-            'token_address' => (string) getSetting('launchpad_web3_token_address', ''),
-            'token_decimals' => (int) getSetting('launchpad_web3_token_decimals', 6),
-            'token_symbol' => (string) getSetting('launchpad_web3_token_symbol', 'USDT'),
-        ];
-        $web3Config['enabled'] = $web3Config['chain_id'] > 0 && $web3Config['rpc_url'] !== '' && $web3Config['receiver_address'] !== '' && $web3Config['token_address'] !== '';
+        $web3Config = $this->resolveWeb3Config();
 
         return view("templates.{$template}.blades.user.launchpad.show", compact(
             'page_title',
@@ -176,16 +246,17 @@ class LaunchpadController extends Controller
                 throw new \RuntimeException('Hard cap reached');
             }
 
-            $chainId = (int) getSetting('launchpad_web3_chain_id', 0);
-            $rpcUrl = (string) getSetting('launchpad_web3_rpc_url', '');
-            $receiver = (string) getSetting('launchpad_web3_receiver_address', '');
-            $tokenAddress = (string) getSetting('launchpad_web3_token_address', '');
-            $tokenDecimals = (int) getSetting('launchpad_web3_token_decimals', 6);
-            $tokenSymbol = strtoupper((string) getSetting('launchpad_web3_token_symbol', 'USDT'));
-
-            if ($chainId <= 0 || $rpcUrl === '' || $receiver === '' || $tokenAddress === '') {
+            $web3 = $this->resolveWeb3Config();
+            if (!(bool) ($web3['enabled'] ?? false)) {
                 throw new \RuntimeException('WalletConnect not configured');
             }
+
+            $chainId = (int) ($web3['chain_id'] ?? 0);
+            $rpcUrl = (string) ($web3['rpc_url'] ?? '');
+            $receiver = (string) ($web3['receiver_address'] ?? '');
+            $tokenAddress = (string) ($web3['token_address'] ?? '');
+            $tokenDecimals = (int) ($web3['token_decimals'] ?? 6);
+            $tokenSymbol = strtoupper((string) ($web3['token_symbol'] ?? 'USDT'));
 
             if (strtoupper((string) $project->quote_currency) !== $tokenSymbol) {
                 throw new \RuntimeException('Unsupported quote currency');
@@ -293,17 +364,31 @@ class LaunchpadController extends Controller
             ], 422);
         }
 
-        $chainId = (int) getSetting('launchpad_web3_chain_id', 0);
-        $rpcUrl = (string) getSetting('launchpad_web3_rpc_url', '');
-        $receiver = strtolower((string) getSetting('launchpad_web3_receiver_address', ''));
-        $tokenAddress = strtolower((string) getSetting('launchpad_web3_token_address', ''));
-        $tokenDecimals = (int) getSetting('launchpad_web3_token_decimals', 6);
-        $tokenSymbol = strtoupper((string) getSetting('launchpad_web3_token_symbol', 'USDT'));
-
-        if ($chainId <= 0 || $rpcUrl === '' || $receiver === '' || $tokenAddress === '') {
+        $web3 = $this->resolveWeb3Config();
+        if (!(bool) ($web3['enabled'] ?? false)) {
             return response()->json([
                 'status' => 'error',
                 'message' => __('WalletConnect not configured'),
+            ], 422);
+        }
+
+        $chainId = (int) ($web3['chain_id'] ?? 0);
+        $rpcUrl = (string) ($web3['rpc_url'] ?? '');
+        $receiver = strtolower((string) ($web3['receiver_address'] ?? ''));
+        $tokenAddress = strtolower((string) ($web3['token_address'] ?? ''));
+        $tokenDecimals = (int) ($web3['token_decimals'] ?? 6);
+        $tokenSymbol = strtoupper((string) ($web3['token_symbol'] ?? 'USDT'));
+
+        if ($intent->pay_currency && strtoupper((string) $intent->pay_currency) !== $tokenSymbol) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('Payment settings changed. Please start again.'),
+            ], 422);
+        }
+        if ($intent->pay_address && strtolower((string) $intent->pay_address) !== $receiver) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('Receiver address changed. Please start again.'),
             ], 422);
         }
 
