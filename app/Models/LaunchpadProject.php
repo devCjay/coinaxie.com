@@ -34,6 +34,8 @@ class LaunchpadProject extends Model
         'launch_fee_paid_at',
         'admin_approved_at',
         'admin_approved_by',
+        'sale_finalized_notified_at',
+        'trading_enabled_notified_at',
     ];
 
     protected function casts(): array
@@ -53,6 +55,8 @@ class LaunchpadProject extends Model
             'launch_fee_amount' => 'decimal:8',
             'launch_fee_paid_at' => 'datetime',
             'admin_approved_at' => 'datetime',
+            'sale_finalized_notified_at' => 'datetime',
+            'trading_enabled_notified_at' => 'datetime',
         ];
     }
 

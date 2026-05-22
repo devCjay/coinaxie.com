@@ -13,6 +13,19 @@
         $hardCap = (float) $project->hard_cap_quote;
         $sold = (float) $project->sold_quote;
         $remaining = $hardCap > 0 ? max(0, $hardCap - $sold) : null;
+
+        $countdownLabel = null;
+        $countdownTargetMs = null;
+        if ($project->status === 'draft' && $project->sale_start_at && $now->lt($project->sale_start_at)) {
+            $countdownLabel = __('Sale starts in');
+            $countdownTargetMs = $project->sale_start_at->timestamp * 1000;
+        } elseif ($isSaleLive && $project->sale_end_at && $now->lt($project->sale_end_at)) {
+            $countdownLabel = __('Sale ends in');
+            $countdownTargetMs = $project->sale_end_at->timestamp * 1000;
+        } elseif (!$project->trading_enabled && $project->launch_at && $now->lt($project->launch_at)) {
+            $countdownLabel = __('Launch in');
+            $countdownTargetMs = $project->launch_at->timestamp * 1000;
+        }
     @endphp
 
     <div class="min-h-screen px-2 md:px-0">
@@ -82,6 +95,12 @@
                                 —
                             @endif
                         </div>
+                        @if ($countdownLabel && $countdownTargetMs)
+                            <div class="text-white/55 text-xs mt-2">
+                                {{ $countdownLabel }}:
+                                <span class="lp-countdown text-white font-semibold" data-target="{{ (int) $countdownTargetMs }}">—</span>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="bg-white/5 border border-white/10 rounded-xl p-4">
@@ -175,10 +194,36 @@
         $(document).ready(function() {
             const salePrice = parseFloat($('.btn-buy').data('sale-price') || 0);
 
+            function startCountdowns() {
+                $('.lp-countdown').each(function() {
+                    const $el = $(this);
+                    const target = parseInt($el.data('target') || 0, 10);
+                    if (!target) {
+                        return;
+                    }
+                    const tick = function() {
+                        const now = Date.now();
+                        let diff = Math.max(0, target - now);
+                        const totalSeconds = Math.floor(diff / 1000);
+                        const d = Math.floor(totalSeconds / 86400);
+                        const h = Math.floor((totalSeconds % 86400) / 3600);
+                        const m = Math.floor((totalSeconds % 3600) / 60);
+                        const s = totalSeconds % 60;
+                        const pad = (n) => String(n).padStart(2, '0');
+                        const text = d > 0 ? `${d}d ${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(h)}:${pad(m)}:${pad(s)}`;
+                        $el.text(text);
+                    };
+                    tick();
+                    setInterval(tick, 1000);
+                });
+            }
+
             function fmt8(v) {
                 const n = Number(v || 0);
                 return n.toFixed(8).replace(/\.?0+$/, '');
             }
+
+            startCountdowns();
 
             $(document).on('input', '.buy-amount', function() {
                 const q = parseFloat($(this).val() || 0);

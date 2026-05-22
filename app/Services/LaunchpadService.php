@@ -41,7 +41,7 @@ class LaunchpadService
             throw new \RuntimeException('Below minimum');
         }
 
-        return DB::transaction(function () use ($user, $project, $quoteAmount, $max) {
+        $purchase = DB::transaction(function () use ($user, $project, $quoteAmount, $max) {
             $project->refresh();
 
             $userTotal = (float) LaunchpadPurchase::where('project_id', $project->id)
@@ -83,6 +83,8 @@ class LaunchpadService
 
             return $purchase;
         });
+        $this->notifyPurchase($user, $project, $purchase);
+        return $purchase;
     }
 
     public function ensureMarket(LaunchpadProject $project): LaunchpadMarket
@@ -108,7 +110,10 @@ class LaunchpadService
 
     public function finalizeSale(LaunchpadProject $project): void
     {
-        DB::transaction(function () use ($project) {
+        $notify = [];
+        $shouldNotify = false;
+
+        DB::transaction(function () use ($project, &$notify, &$shouldNotify) {
             $project->refresh();
             if (!in_array($project->status, ['live', 'ended'], true)) {
                 throw new \RuntimeException('Invalid status');
@@ -119,6 +124,8 @@ class LaunchpadService
                 ->lockForUpdate()
                 ->get();
 
+            $shouldNotify = $project->sale_finalized_notified_at === null;
+
             foreach ($purchases as $purchase) {
                 $user = User::find($purchase->user_id);
                 if (!$user) {
@@ -126,24 +133,129 @@ class LaunchpadService
                 }
                 $this->wallet->creditSpot($user, $project->token_symbol, (float) $purchase->token_amount);
                 $purchase->update(['status' => 'allocated']);
+                if ($shouldNotify) {
+                    $notify[] = [
+                        'user_id' => (int) $user->id,
+                        'token_amount' => (float) $purchase->token_amount,
+                        'quote_amount' => (float) $purchase->quote_amount,
+                        'quote_currency' => (string) $purchase->quote_currency,
+                    ];
+                }
             }
 
             $project->update(['status' => 'ended']);
+            if ($shouldNotify) {
+                $project->update(['sale_finalized_notified_at' => now()]);
+            }
             $this->ensureMarket($project);
         });
+
+        if ($shouldNotify) {
+            $this->notifyFinalized($project, $notify);
+        }
     }
 
     public function enableTrading(LaunchpadProject $project): void
     {
-        DB::transaction(function () use ($project) {
+        $buyerIds = [];
+        $shouldNotify = false;
+
+        DB::transaction(function () use ($project, &$buyerIds, &$shouldNotify) {
             $project->refresh();
+            $shouldNotify = $project->trading_enabled_notified_at === null;
             $project->update([
                 'status' => 'launched',
                 'trading_enabled' => true,
             ]);
             $market = $this->ensureMarket($project);
             $market->update(['status' => 'active']);
+            if ($shouldNotify) {
+                $project->update(['trading_enabled_notified_at' => now()]);
+                $buyerIds = LaunchpadPurchase::where('project_id', $project->id)
+                    ->whereIn('status', ['reserved', 'allocated'])
+                    ->distinct()
+                    ->pluck('user_id')
+                    ->map(fn ($v) => (int) $v)
+                    ->all();
+            }
         });
+
+        if ($shouldNotify && !empty($buyerIds)) {
+            $this->notifyTradingEnabled($project, $buyerIds);
+        }
+    }
+
+    protected function notifyPurchase(User $buyer, LaunchpadProject $project, LaunchpadPurchase $purchase): void
+    {
+        try {
+            $title = __('Launchpad purchase successful');
+            $body = __('You purchased :tokenAmount :token for :quoteAmount :quote in :project.', [
+                'tokenAmount' => number_format((float) $purchase->token_amount, 8, '.', ''),
+                'token' => strtoupper((string) $project->token_symbol),
+                'quoteAmount' => number_format((float) $purchase->quote_amount, 8, '.', ''),
+                'quote' => strtoupper((string) $purchase->quote_currency),
+                'project' => (string) $project->name,
+            ]);
+
+            recordNotificationMessage($buyer, $title, $body);
+            sendRichTextEmail($title, nl2br(e($body)), $buyer);
+
+            $creator = User::find((int) $project->created_by_user_id);
+            if ($creator) {
+                $title2 = __('New launchpad purchase');
+                $buyerName = $buyer->username ?? $buyer->email ?? __('Buyer');
+                $body2 = __(':buyer purchased :quoteAmount :quote in :project.', [
+                    'buyer' => $buyerName,
+                    'quoteAmount' => number_format((float) $purchase->quote_amount, 8, '.', ''),
+                    'quote' => strtoupper((string) $purchase->quote_currency),
+                    'project' => (string) $project->name,
+                ]);
+                recordNotificationMessage($creator, $title2, $body2);
+            }
+        } catch (\Throwable $e) {
+        }
+    }
+
+    protected function notifyFinalized(LaunchpadProject $project, array $notify): void
+    {
+        foreach ($notify as $row) {
+            $user = User::find((int) ($row['user_id'] ?? 0));
+            if (!$user) {
+                continue;
+            }
+            try {
+                $title = __('Launchpad allocation completed');
+                $body = __('Your purchase in :project was allocated. You received :tokenAmount :token.', [
+                    'project' => (string) $project->name,
+                    'tokenAmount' => number_format((float) ($row['token_amount'] ?? 0), 8, '.', ''),
+                    'token' => strtoupper((string) $project->token_symbol),
+                ]);
+                recordNotificationMessage($user, $title, $body);
+                sendRichTextEmail($title, nl2br(e($body)), $user);
+            } catch (\Throwable $e) {
+            }
+        }
+    }
+
+    protected function notifyTradingEnabled(LaunchpadProject $project, array $buyerIds): void
+    {
+        $tradeUrl = route('user.launchpad.trade', $project->slug);
+        foreach ($buyerIds as $userId) {
+            $user = User::find((int) $userId);
+            if (!$user) {
+                continue;
+            }
+            try {
+                $title = __('Launchpad trading is now live');
+                $body = __('Trading is enabled for :project (:symbol). You can trade here: :url', [
+                    'project' => (string) $project->name,
+                    'symbol' => strtoupper((string) $project->token_symbol) . '/' . strtoupper((string) $project->quote_currency),
+                    'url' => $tradeUrl,
+                ]);
+                recordNotificationMessage($user, $title, $body);
+                sendRichTextEmail($title, nl2br(e($body)), $user);
+            } catch (\Throwable $e) {
+            }
+        }
     }
 }
-

@@ -79,6 +79,7 @@
             <div class="mt-8 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-6">
                 @forelse ($projects as $project)
                     @php
+                        $now = now();
                         $investors = (int) ($investorsByProject[$project->id] ?? 0);
                         $hardCap = (float) $project->hard_cap_quote;
                         $sold = (float) $project->sold_quote;
@@ -93,6 +94,19 @@
                         $durationDays = null;
                         if ($project->sale_start_at && $project->sale_end_at) {
                             $durationDays = $project->sale_start_at->diffInDays($project->sale_end_at);
+                        }
+
+                        $countdownLabel = null;
+                        $countdownTargetMs = null;
+                        if ((string) $project->status === 'draft' && $project->sale_start_at && $now->lt($project->sale_start_at)) {
+                            $countdownLabel = __('Starts in');
+                            $countdownTargetMs = $project->sale_start_at->timestamp * 1000;
+                        } elseif ((string) $project->status === 'live' && $project->sale_end_at && $now->lt($project->sale_end_at)) {
+                            $countdownLabel = __('Ends in');
+                            $countdownTargetMs = $project->sale_end_at->timestamp * 1000;
+                        } elseif (!(bool) $project->trading_enabled && $project->launch_at && $now->lt($project->launch_at)) {
+                            $countdownLabel = __('Launch in');
+                            $countdownTargetMs = $project->launch_at->timestamp * 1000;
                         }
                     @endphp
                     <div class="bg-secondary border border-white/5 rounded-3xl p-5 relative overflow-hidden">
@@ -150,6 +164,13 @@
                                 @endif
                             </div>
                         </div>
+
+                        @if ($countdownLabel && $countdownTargetMs)
+                            <div class="mt-3 text-xs text-white/55">
+                                <span class="font-bold">{{ $countdownLabel }}:</span>
+                                <span class="lp-countdown text-white font-semibold" data-target="{{ (int) $countdownTargetMs }}">—</span>
+                            </div>
+                        @endif
 
                         <div class="mt-5 flex items-center gap-2">
                             <a href="{{ route('user.launchpad.show', $project->slug) }}"
@@ -340,11 +361,37 @@
         }
 
         $(document).ready(function() {
+            function startCountdowns() {
+                $('.lp-countdown').each(function() {
+                    const $el = $(this);
+                    const target = parseInt($el.data('target') || 0, 10);
+                    if (!target) {
+                        return;
+                    }
+                    const tick = function() {
+                        const now = Date.now();
+                        let diff = Math.max(0, target - now);
+                        const totalSeconds = Math.floor(diff / 1000);
+                        const d = Math.floor(totalSeconds / 86400);
+                        const h = Math.floor((totalSeconds % 86400) / 3600);
+                        const m = Math.floor((totalSeconds % 3600) / 60);
+                        const s = totalSeconds % 60;
+                        const pad = (n) => String(n).padStart(2, '0');
+                        const text = d > 0 ? `${d}d ${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(h)}:${pad(m)}:${pad(s)}`;
+                        $el.text(text);
+                    };
+                    tick();
+                    setInterval(tick, 1000);
+                });
+            }
+
             $(document).on('click', '.modal', function(e) {
                 if ($(e.target).hasClass('modal')) {
                     $('.modal').fadeOut(200);
                 }
             });
+
+            startCountdowns();
 
             $('#launchProjectForm').on('submit', function(e) {
                 e.preventDefault();

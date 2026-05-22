@@ -100,5 +100,6 @@ return Application::configure(basePath: dirname(__DIR__))
         // $schedule->command('queue:work --stop-when-empty')->everyThirtySeconds()->withoutOverlapping()->runInBackground();
         // $schedule->command('lozand:update-expired-deposit-deposit')->everyMinute()->runInBackground();
         // $schedule->command('lozand:update-stock-pnl')->everyMinute()->runInBackground();
+        $schedule->command('lozand:manage-launchpad')->everyMinute()->withoutOverlapping();
     })
     ->create();
