@@ -235,7 +235,7 @@
                     </a>
 
                     {{-- Invest --}}
-                    <a href="{{ route('user.investments.new') }}"
+                    <!--<a href="{{ route('user.investments.new') }}"
                         class="group flex items-center justify-center gap-2 md:gap-3 px-3 md:px-5 py-2.5 md:py-3 bg-purple-500/10 border border-purple-500/20 rounded-xl transition-all hover:bg-purple-500/20 hover:border-purple-500/30 cursor-pointer">
                         <svg class="h-3 md:h-4 w-3 md:w-4 text-purple-400" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor" stroke-width="2.5">
@@ -244,7 +244,7 @@
                         </svg>
                         <span
                             class="text-purple-50 text-[10px] md:text-xs font-bold tracking-widest uppercase">{{ __('Invest') }}</span>
-                    </a>
+                    </a> -->
                 </div>
             </div>
 
