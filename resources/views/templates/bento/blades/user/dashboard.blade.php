@@ -11,7 +11,7 @@
             <div>
                 <h2
                     class="text-2xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-indigo-200 to-indigo-400 tracking-tight leading-tight">
-                    {{ __('Command Center') }}
+                    {{ __('User Dashboard') }}
                 </h2>
                 <p class="text-indigo-200/60 font-mono text-[9px] md:text-sm mt-0.5 md:mt-1 tracking-widest uppercase">
                     {{ __('Real-time Financial Telemetry') }}
