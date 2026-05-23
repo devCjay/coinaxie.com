@@ -214,8 +214,7 @@
                 </div>
             </div>
 
-            <div
-                class="flex-1 flex flex-col items-start lg:items-center justify-center p-6 sm:p-12 md:p-20 overflow-y-auto w-full pt-20 lg:pt-12">
+            <div class="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 md:p-20 overflow-y-auto w-full">
                 <div class="max-w-[420px] w-full mx-auto">
                     {{-- Brand Header --}}
                     <div class="mb-10 text-center">
