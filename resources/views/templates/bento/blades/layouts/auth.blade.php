@@ -50,7 +50,7 @@
         </div>
 
         {{-- Visual Column (Left side on large screens) --}}
-        {{--
+        @if (false)
         <div class="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 z-10">
             <div class="relative z-20 max-w-lg text-center">
                 @php
@@ -173,7 +173,7 @@
                 </div>
             </div>
         </div>
-        --}}
+        @endif
 
         {{-- Content Column (Right side / Full width on mobile) --}}
         <div
