@@ -24,15 +24,33 @@
             <div class="max-w-4xl">
                 <div class="flex flex-col gap-2 mb-10 border-b border-white/5 pb-8">
                     <h2 class="text-3xl font-bold text-white tracking-tight leading-none">
-                        {{ __('Core Platform Settings') }}
+                        @php
+                            $settingsTab = (string) request('tab', 'core');
+                            $settingsTab = in_array($settingsTab, ['core', 'web3'], true) ? $settingsTab : 'core';
+                        @endphp
+                        {{ $settingsTab === 'web3' ? __('Web3 Settings') : __('Core Platform Settings') }}
                     </h2>
                     <p class="text-slate-500 text-xs font-bold uppercase tracking-widest">
-                        {{ __('Manage branding, regional preferences, and financial rules') }}</p>
+                        {{ $settingsTab === 'web3' ? __('Configure RPC, token contract, and receiver wallet per chain') : __('Manage branding, regional preferences, and financial rules') }}
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-2 mb-10">
+                    <a href="{{ route('admin.settings.core') }}"
+                        class="{{ $settingsTab === 'core' ? 'bg-accent-primary/20 border-accent-primary/30' : 'bg-white/5 border-white/10 hover:bg-white/10' }} px-6 py-3 border rounded-2xl text-[10px] font-bold text-white uppercase tracking-widest transition-all">
+                        {{ __('Core Settings') }}
+                    </a>
+                    <a href="{{ route('admin.settings.core') }}?tab=web3"
+                        class="{{ $settingsTab === 'web3' ? 'bg-accent-primary/20 border-accent-primary/30' : 'bg-white/5 border-white/10 hover:bg-white/10' }} px-6 py-3 border rounded-2xl text-[10px] font-bold text-white uppercase tracking-widest transition-all">
+                        {{ __('Web3 Settings') }}
+                    </a>
                 </div>
 
                 <form id="core-settings-form" action="{{ route('admin.settings.core.update') }}" method="POST"
                     enctype="multipart/form-data" class="space-y-12 pb-24">
                     @csrf
+
+                    <div id="core-settings-tab-core" class="{{ $settingsTab === 'web3' ? 'hidden' : '' }} space-y-12">
 
                     {{-- General Site Configuration --}}
                     <section class="space-y-8">
@@ -229,180 +247,6 @@
                         </div>
                     </section>
 
-                    <section class="space-y-8 pt-8 border-t border-white/5">
-                        <div class="flex items-center gap-4">
-                            <div class="w-8 h-8 rounded-lg bg-accent-primary/10 flex items-center justify-center text-accent-primary">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8c1.657 0 3-.895 3-2s-1.343-2-3-2-3 .895-3 2 1.343 2 3 2zM6 20a6 6 0 1112 0H6z" />
-                                </svg>
-                            </div>
-                            <h3 class="text-lg font-bold text-white uppercase tracking-wider">{{ __('Launchpad Web3 (WalletConnect)') }}</h3>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div class="flex flex-col gap-3 md:col-span-2">
-                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Active Chain') }}</label>
-                                <select name="launchpad_web3_active_chain" id="lp-web3-active-chain"
-                                    class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none appearance-none">
-                                    @php
-                                        $activeChain = (string) getSetting('launchpad_web3_active_chain', 'bsc');
-                                    @endphp
-                                    <option value="bsc" class="bg-secondary-dark" {{ $activeChain === 'bsc' ? 'selected' : '' }}>
-                                        {{ __('BSC (BEP20)') }}
-                                    </option>
-                                    <option value="eth" class="bg-secondary-dark" {{ $activeChain === 'eth' ? 'selected' : '' }}>
-                                        {{ __('Ethereum (ERC20)') }}
-                                    </option>
-                                    <option value="custom" class="bg-secondary-dark" {{ $activeChain === 'custom' ? 'selected' : '' }}>
-                                        {{ __('Custom EVM Chain') }}
-                                    </option>
-                                </select>
-                                <p class="text-[10px] text-slate-500 font-bold px-2 italic">
-                                    {{ __('Used by Launchpad “Buy with WalletConnect”. Configure RPC + token contract + receiver wallet per chain.') }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6" id="lp-web3-config-panels">
-                            <div class="lp-web3-panel bg-white/[0.03] border border-white/10 rounded-3xl p-6 space-y-5" data-chain="bsc">
-                                <div class="flex items-center justify-between">
-                                    <div class="text-white font-black">{{ __('BSC') }}</div>
-                                    <div class="text-xs text-white/55 font-bold">Chain ID: 56</div>
-                                </div>
-
-                                <div class="flex flex-col gap-2">
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('RPC URL') }}</label>
-                                    <input type="text" name="launchpad_web3_bsc_rpc_url" value="{{ getSetting('launchpad_web3_bsc_rpc_url', '') }}"
-                                        placeholder="https://bsc-dataseed.binance.org/"
-                                        class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                </div>
-
-                                <div class="flex flex-col gap-2">
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Receiver Wallet') }}</label>
-                                    <input type="text" name="launchpad_web3_bsc_receiver_address" value="{{ getSetting('launchpad_web3_bsc_receiver_address', '') }}"
-                                        placeholder="0x..."
-                                        class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                </div>
-
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div class="flex flex-col gap-2">
-                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Token Symbol') }}</label>
-                                        <input type="text" name="launchpad_web3_bsc_token_symbol" value="{{ getSetting('launchpad_web3_bsc_token_symbol', 'USDT') }}"
-                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Decimals') }}</label>
-                                        <input type="number" min="0" max="36" name="launchpad_web3_bsc_token_decimals" value="{{ (int) getSetting('launchpad_web3_bsc_token_decimals', 18) }}"
-                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                    </div>
-                                </div>
-
-                                <div class="flex flex-col gap-2">
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Token Contract Address') }}</label>
-                                    <input type="text" name="launchpad_web3_bsc_token_address" value="{{ getSetting('launchpad_web3_bsc_token_address', '') }}"
-                                        placeholder="0x..."
-                                        class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                </div>
-                            </div>
-
-                            <div class="lp-web3-panel bg-white/[0.03] border border-white/10 rounded-3xl p-6 space-y-5" data-chain="eth">
-                                <div class="flex items-center justify-between">
-                                    <div class="text-white font-black">{{ __('Ethereum') }}</div>
-                                    <div class="text-xs text-white/55 font-bold">Chain ID: 1</div>
-                                </div>
-
-                                <div class="flex flex-col gap-2">
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('RPC URL') }}</label>
-                                    <input type="text" name="launchpad_web3_eth_rpc_url" value="{{ getSetting('launchpad_web3_eth_rpc_url', '') }}"
-                                        placeholder="https://mainnet.infura.io/v3/..."
-                                        class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                </div>
-
-                                <div class="flex flex-col gap-2">
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Receiver Wallet') }}</label>
-                                    <input type="text" name="launchpad_web3_eth_receiver_address" value="{{ getSetting('launchpad_web3_eth_receiver_address', '') }}"
-                                        placeholder="0x..."
-                                        class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                </div>
-
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div class="flex flex-col gap-2">
-                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Token Symbol') }}</label>
-                                        <input type="text" name="launchpad_web3_eth_token_symbol" value="{{ getSetting('launchpad_web3_eth_token_symbol', 'USDT') }}"
-                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Decimals') }}</label>
-                                        <input type="number" min="0" max="36" name="launchpad_web3_eth_token_decimals" value="{{ (int) getSetting('launchpad_web3_eth_token_decimals', 6) }}"
-                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                    </div>
-                                </div>
-
-                                <div class="flex flex-col gap-2">
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Token Contract Address') }}</label>
-                                    <input type="text" name="launchpad_web3_eth_token_address" value="{{ getSetting('launchpad_web3_eth_token_address', '') }}"
-                                        placeholder="0x..."
-                                        class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                </div>
-                            </div>
-
-                            <div class="lp-web3-panel bg-white/[0.03] border border-white/10 rounded-3xl p-6 space-y-5" data-chain="custom">
-                                <div class="flex items-center justify-between">
-                                    <div class="text-white font-black">{{ __('Custom') }}</div>
-                                    <div class="text-xs text-white/55 font-bold">{{ __('EVM') }}</div>
-                                </div>
-
-                                <div class="flex flex-col gap-2">
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Chain Name') }}</label>
-                                    <input type="text" name="launchpad_web3_custom_chain_name" value="{{ getSetting('launchpad_web3_custom_chain_name', '') }}"
-                                        placeholder="Polygon, Arbitrum..."
-                                        class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                </div>
-
-                                <div class="flex flex-col gap-2">
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Chain ID') }}</label>
-                                    <input type="number" min="1" max="999999" name="launchpad_web3_custom_chain_id" value="{{ (int) getSetting('launchpad_web3_custom_chain_id', 0) }}"
-                                        class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                </div>
-
-                                <div class="flex flex-col gap-2">
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('RPC URL') }}</label>
-                                    <input type="text" name="launchpad_web3_custom_rpc_url" value="{{ getSetting('launchpad_web3_custom_rpc_url', '') }}"
-                                        placeholder="https://..."
-                                        class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                </div>
-
-                                <div class="flex flex-col gap-2">
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Receiver Wallet') }}</label>
-                                    <input type="text" name="launchpad_web3_custom_receiver_address" value="{{ getSetting('launchpad_web3_custom_receiver_address', '') }}"
-                                        placeholder="0x..."
-                                        class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                </div>
-
-                                <div class="grid grid-cols-2 gap-4">
-                                    <div class="flex flex-col gap-2">
-                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Token Symbol') }}</label>
-                                        <input type="text" name="launchpad_web3_custom_token_symbol" value="{{ getSetting('launchpad_web3_custom_token_symbol', 'USDT') }}"
-                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                    </div>
-                                    <div class="flex flex-col gap-2">
-                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Decimals') }}</label>
-                                        <input type="number" min="0" max="36" name="launchpad_web3_custom_token_decimals" value="{{ (int) getSetting('launchpad_web3_custom_token_decimals', 6) }}"
-                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                    </div>
-                                </div>
-
-                                <div class="flex flex-col gap-2">
-                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Token Contract Address') }}</label>
-                                    <input type="text" name="launchpad_web3_custom_token_address" value="{{ getSetting('launchpad_web3_custom_token_address', '') }}"
-                                        placeholder="0x..."
-                                        class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
                     {{-- Office Locations --}}
                     <section
                         class="flex flex-col gap-8 p-10 rounded-[2.5rem] bg-white/[0.03] border border-white/10 backdrop-blur-md relative overflow-hidden mt-10">
@@ -498,6 +342,184 @@
                             @endforelse
                         </div>
                     </section>
+
+                    </div>
+
+                    <div id="core-settings-tab-web3" class="{{ $settingsTab === 'web3' ? '' : 'hidden' }} space-y-12">
+                        <section class="space-y-8">
+                            <div class="flex items-center gap-4">
+                                <div class="w-8 h-8 rounded-lg bg-accent-primary/10 flex items-center justify-center text-accent-primary">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8c1.657 0 3-.895 3-2s-1.343-2-3-2-3 .895-3 2 1.343 2 3 2zM6 20a6 6 0 1112 0H6z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-lg font-bold text-white uppercase tracking-wider">{{ __('Launchpad Web3 (WalletConnect)') }}</h3>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                <div class="flex flex-col gap-3 md:col-span-2">
+                                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Active Chain') }}</label>
+                                    <select name="launchpad_web3_active_chain" id="lp-web3-active-chain"
+                                        class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none appearance-none">
+                                        @php
+                                            $activeChain = (string) getSetting('launchpad_web3_active_chain', 'bsc');
+                                        @endphp
+                                        <option value="bsc" class="bg-secondary-dark" {{ $activeChain === 'bsc' ? 'selected' : '' }}>
+                                            {{ __('BSC (BEP20)') }}
+                                        </option>
+                                        <option value="eth" class="bg-secondary-dark" {{ $activeChain === 'eth' ? 'selected' : '' }}>
+                                            {{ __('Ethereum (ERC20)') }}
+                                        </option>
+                                        <option value="custom" class="bg-secondary-dark" {{ $activeChain === 'custom' ? 'selected' : '' }}>
+                                            {{ __('Custom EVM Chain') }}
+                                        </option>
+                                    </select>
+                                    <p class="text-[10px] text-slate-500 font-bold px-2 italic">
+                                        {{ __('Used by Launchpad “Buy with WalletConnect”. Configure RPC + token contract + receiver wallet per chain.') }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-6 w-full" id="lp-web3-config-panels">
+                                <div class="lp-web3-panel bg-white/[0.03] border border-white/10 rounded-3xl p-6 space-y-5 w-full" data-chain="bsc">
+                                    <div class="flex items-center justify-between">
+                                        <div class="text-white font-black">{{ __('BSC') }}</div>
+                                        <div class="text-xs text-white/55 font-bold">Chain ID: 56</div>
+                                    </div>
+
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('RPC URL') }}</label>
+                                        <input type="text" name="launchpad_web3_bsc_rpc_url" value="{{ getSetting('launchpad_web3_bsc_rpc_url', '') }}"
+                                            placeholder="https://bsc-dataseed.binance.org/"
+                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                    </div>
+
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Receiver Wallet') }}</label>
+                                        <input type="text" name="launchpad_web3_bsc_receiver_address" value="{{ getSetting('launchpad_web3_bsc_receiver_address', '') }}"
+                                            placeholder="0x..."
+                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="flex flex-col gap-2">
+                                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Token Symbol') }}</label>
+                                            <input type="text" name="launchpad_web3_bsc_token_symbol" value="{{ getSetting('launchpad_web3_bsc_token_symbol', 'USDT') }}"
+                                                class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Decimals') }}</label>
+                                            <input type="number" min="0" max="36" name="launchpad_web3_bsc_token_decimals" value="{{ (int) getSetting('launchpad_web3_bsc_token_decimals', 18) }}"
+                                                class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Token Contract Address') }}</label>
+                                        <input type="text" name="launchpad_web3_bsc_token_address" value="{{ getSetting('launchpad_web3_bsc_token_address', '') }}"
+                                            placeholder="0x..."
+                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                    </div>
+                                </div>
+
+                                <div class="lp-web3-panel bg-white/[0.03] border border-white/10 rounded-3xl p-6 space-y-5 w-full" data-chain="eth">
+                                    <div class="flex items-center justify-between">
+                                        <div class="text-white font-black">{{ __('Ethereum') }}</div>
+                                        <div class="text-xs text-white/55 font-bold">Chain ID: 1</div>
+                                    </div>
+
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('RPC URL') }}</label>
+                                        <input type="text" name="launchpad_web3_eth_rpc_url" value="{{ getSetting('launchpad_web3_eth_rpc_url', '') }}"
+                                            placeholder="https://mainnet.infura.io/v3/..."
+                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                    </div>
+
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Receiver Wallet') }}</label>
+                                        <input type="text" name="launchpad_web3_eth_receiver_address" value="{{ getSetting('launchpad_web3_eth_receiver_address', '') }}"
+                                            placeholder="0x..."
+                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="flex flex-col gap-2">
+                                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Token Symbol') }}</label>
+                                            <input type="text" name="launchpad_web3_eth_token_symbol" value="{{ getSetting('launchpad_web3_eth_token_symbol', 'USDT') }}"
+                                                class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Decimals') }}</label>
+                                            <input type="number" min="0" max="36" name="launchpad_web3_eth_token_decimals" value="{{ (int) getSetting('launchpad_web3_eth_token_decimals', 6) }}"
+                                                class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Token Contract Address') }}</label>
+                                        <input type="text" name="launchpad_web3_eth_token_address" value="{{ getSetting('launchpad_web3_eth_token_address', '') }}"
+                                            placeholder="0x..."
+                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                    </div>
+                                </div>
+
+                                <div class="lp-web3-panel bg-white/[0.03] border border-white/10 rounded-3xl p-6 space-y-5 w-full" data-chain="custom">
+                                    <div class="flex items-center justify-between">
+                                        <div class="text-white font-black">{{ __('Custom') }}</div>
+                                        <div class="text-xs text-white/55 font-bold">{{ __('EVM') }}</div>
+                                    </div>
+
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Chain Name') }}</label>
+                                        <input type="text" name="launchpad_web3_custom_chain_name" value="{{ getSetting('launchpad_web3_custom_chain_name', '') }}"
+                                            placeholder="Polygon, Arbitrum..."
+                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                    </div>
+
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Chain ID') }}</label>
+                                        <input type="number" min="1" max="999999" name="launchpad_web3_custom_chain_id" value="{{ (int) getSetting('launchpad_web3_custom_chain_id', 0) }}"
+                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                    </div>
+
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('RPC URL') }}</label>
+                                        <input type="text" name="launchpad_web3_custom_rpc_url" value="{{ getSetting('launchpad_web3_custom_rpc_url', '') }}"
+                                            placeholder="https://..."
+                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                    </div>
+
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Receiver Wallet') }}</label>
+                                        <input type="text" name="launchpad_web3_custom_receiver_address" value="{{ getSetting('launchpad_web3_custom_receiver_address', '') }}"
+                                            placeholder="0x..."
+                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div class="flex flex-col gap-2">
+                                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Token Symbol') }}</label>
+                                            <input type="text" name="launchpad_web3_custom_token_symbol" value="{{ getSetting('launchpad_web3_custom_token_symbol', 'USDT') }}"
+                                                class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                        </div>
+                                        <div class="flex flex-col gap-2">
+                                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Decimals') }}</label>
+                                            <input type="number" min="0" max="36" name="launchpad_web3_custom_token_decimals" value="{{ (int) getSetting('launchpad_web3_custom_token_decimals', 6) }}"
+                                                class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                        </div>
+                                    </div>
+
+                                    <div class="flex flex-col gap-2">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Token Contract Address') }}</label>
+                                        <input type="text" name="launchpad_web3_custom_token_address" value="{{ getSetting('launchpad_web3_custom_token_address', '') }}"
+                                            placeholder="0x..."
+                                            class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    </div>
 
                     {{-- Sticky Submit Bar --}}
                     <div class="pt-10">
