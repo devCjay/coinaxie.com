@@ -50,6 +50,7 @@
         </div>
 
         {{-- Visual Column (Left side on large screens) --}}
+        {{--
         <div class="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 z-10">
             <div class="relative z-20 max-w-lg text-center">
                 @php
@@ -172,10 +173,11 @@
                 </div>
             </div>
         </div>
+        --}}
 
         {{-- Content Column (Right side / Full width on mobile) --}}
         <div
-            class="w-full lg:w-1/2 flex flex-col relative z-20 backdrop-blur-md bg-secondary-dark/30 lg:bg-secondary-dark/50 border-l border-white/5 shadow-2xl h-full">
+            class="w-full flex flex-col relative z-20 backdrop-blur-md bg-secondary-dark/30 lg:bg-secondary-dark/50 shadow-2xl h-full">
 
             {{-- Language Switcher --}}
             <div class="absolute top-6 right-6 z-50">
@@ -214,8 +216,8 @@
                 </div>
             </div>
 
-            <div class="flex-1 flex flex-col items-center justify-center p-6 sm:p-12 md:p-20 overflow-y-auto w-full">
-                <div class="max-w-[420px] w-full mx-auto">
+            <div class="flex-1 flex flex-col items-center justify-center p-4 overflow-y-auto w-full">
+                <div class="max-w-md w-full">
                     {{-- Brand Header --}}
                     <div class="mb-10 text-center">
                         <a href="{{ route('home') }}" class="inline-block mb-6">
