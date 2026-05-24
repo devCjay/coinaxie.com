@@ -69,7 +69,7 @@
             ],
             'icon' =>
                 '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11c1.657 0 3-1.343 3-3S17.657 5 16 5s-3 1.343-3 3 1.343 3 3 3zM8 11c1.657 0 3-1.343 3-3S9.657 5 8 5 5 6.343 5 8s1.343 3 3 3zM16 13c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zM8 13c-2.67 0-8 1.34-8 4v2h6v-2c0-1.54.77-2.87 2.06-3.87C8.04 13.04 8.02 13.02 8 13z"></path></svg>',
-            'image' => 'assets/templates/bento/images/features/copy-trading.svg',
+            'image' => 'assets/templates/bento/images/features/copy_trading.png',
         ], 
         [
             'id' => 'stocks',
@@ -103,7 +103,7 @@
             ],
             'icon' =>
                 '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2l4 7H8l4-7zM4 10h16v10a2 2 0 01-2 2H6a2 2 0 01-2-2V10zM9 14h6M9 17h6"></path></svg>',
-            'image' => 'assets/templates/bento/images/features/launchpad.svg',
+            'image' => 'assets/templates/bento/images/features/launchpad.png',
         ], 
         [
             'id' => 'etfs',
