@@ -29,32 +29,9 @@ return [
             'is_external' => false,
             'is_active' => true
         ],
+       
         [
-            'name' => 'Copy Trading',
-            'route_name' => 'user.trading.copy-trading',
-            'link' => null,
-            'type' => 'link',
-            'is_external' => false,
-            'is_active' => true
-        ],
-        [
-            'name' => 'Stocks',
-            'route_name' => 'user.capital-instruments.stocks',
-            'link' => null,
-            'type' => 'link',
-            'is_external' => false,
-            'is_active' => moduleEnabledFromJson('stock_module')
-        ],
-        [
-            'name' => 'Launchpad',
-            'route_name' => 'user.launchpad.index',
-            'link' => null,
-            'type' => 'link',
-            'is_external' => false,
-            'is_active' => true
-        ],
-        [
-            'name' => 'Self Trading',
+            'name' => 'Crypto Trading',
             'route_name' => '#',
             'link' => '#',
             'type' => 'dropdown',
@@ -73,13 +50,13 @@ return [
                     'is_external' => false,
                     'is_active' => moduleEnabledFromJson('margin_module')
                 ],
-                [
-                    'name' => 'Forex Trading',
-                    'route_name' => 'trading.forex',
-                    'link' => null,
-                    'is_external' => false,
-                    'is_active' => moduleEnabledFromJson('forex_module')
-                ],
+                //[
+                //    'name' => 'Forex Trading',
+                //    'route_name' => 'trading.forex',
+                //    'link' => null,
+                //    'is_external' => false,
+                //    'is_active' => moduleEnabledFromJson('forex_module')
+                //],
                 // [
                 //     'name' => 'Commodity Trading',
                 //     'route_name' => 'trading.commodity',
@@ -91,6 +68,34 @@ return [
             'is_external' => false,
             'is_active' => moduleEnabledFromJson('futures_module') || moduleEnabledFromJson('margin_module') || moduleEnabledFromJson('forex_module')
         ],
+
+         [
+            'name' => 'Copy Trading',
+            'route_name' => 'user.trading.copy-trading',
+            'link' => null,
+            'type' => 'link',
+            'is_external' => false,
+            'is_active' => true
+        ],
+        
+        [
+            'name' => 'Launchpad',
+            'route_name' => 'user.launchpad.index',
+            'link' => null,
+            'type' => 'link',
+            'is_external' => false,
+            'is_active' => true
+        ],
+        
+        [
+            'name' => 'Stocks',
+            'route_name' => 'user.capital-instruments.stocks',
+            'link' => null,
+            'type' => 'link',
+            'is_external' => false,
+            'is_active' => moduleEnabledFromJson('stock_module')
+        ],
+
         [
             'name' => 'Company',
             'route_name' => null,
