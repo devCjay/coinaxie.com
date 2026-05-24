@@ -1,0 +1,155 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#070A12"/>
+      <stop offset="0.55" stop-color="#0B1020"/>
+      <stop offset="1" stop-color="#05060B"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx="30%" cy="30%" r="60%">
+      <stop offset="0" stop-color="#7C3AED" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#7C3AED" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="75%" cy="55%" r="55%">
+      <stop offset="0" stop-color="#22D3EE" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#22D3EE" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="stroke" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0F172A" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#0B1224" stop-opacity="0.75"/>
+    </linearGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7C3AED"/>
+      <stop offset="0.55" stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <filter id="blur60" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="40"/>
+    </filter>
+    <filter id="shadow" x="-100%" y="-100%" width="300%" height="300%">
+      <feDropShadow dx="0" dy="20" stdDeviation="20" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+    <filter id="soft" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="6"/>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+  <circle cx="280" cy="250" r="520" fill="url(#glowA)" filter="url(#blur60)"/>
+  <circle cx="770" cy="560" r="460" fill="url(#glowB)" filter="url(#blur60)"/>
+
+  <g opacity="0.22">
+    <path d="M120 190C220 120 320 120 420 190" fill="none" stroke="#22D3EE" stroke-opacity="0.5" stroke-width="2"/>
+    <path d="M190 860C310 780 430 780 550 860" fill="none" stroke="#7C3AED" stroke-opacity="0.4" stroke-width="2"/>
+    <path d="M720 190C820 120 920 120 1000 190" fill="none" stroke="#6366F1" stroke-opacity="0.35" stroke-width="2"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="96" y="120" width="832" height="784" rx="44" fill="url(#card)" stroke="url(#stroke)" stroke-opacity="0.55"/>
+  </g>
+
+  <g>
+    <rect x="142" y="176" width="740" height="88" rx="22" fill="#0B1224" fill-opacity="0.55" stroke="#FFFFFF" stroke-opacity="0.08"/>
+    <g transform="translate(178 200)">
+      <circle cx="24" cy="24" r="24" fill="#7C3AED" fill-opacity="0.15" stroke="#7C3AED" stroke-opacity="0.55"/>
+      <path d="M24 9l7 13h-14l7-13z" fill="none" stroke="#A78BFA" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M16 26h16" stroke="#A78BFA" stroke-width="2" stroke-linecap="round"/>
+      <path d="M18 32h12" stroke="#22D3EE" stroke-opacity="0.9" stroke-width="2" stroke-linecap="round"/>
+    </g>
+    <g transform="translate(248 196)">
+      <text x="0" y="22" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" fill="#93C5FD" letter-spacing="2" opacity="0.85">LAUNCHPAD</text>
+      <text x="0" y="54" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="26" font-weight="800" fill="#FFFFFF">Token Presale</text>
+    </g>
+    <g transform="translate(730 196)">
+      <rect x="0" y="0" width="132" height="40" rx="16" fill="#0B1224" fill-opacity="0.7" stroke="#FFFFFF" stroke-opacity="0.10"/>
+      <circle cx="22" cy="20" r="8" fill="#22D3EE" fill-opacity="0.25" stroke="#22D3EE" stroke-opacity="0.7"/>
+      <text x="40" y="25" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#E5E7EB">Upcoming</text>
+    </g>
+  </g>
+
+  <g transform="translate(150 300)">
+    <rect x="0" y="0" width="430" height="520" rx="36" fill="#0B1224" fill-opacity="0.55" stroke="#FFFFFF" stroke-opacity="0.08"/>
+    <g transform="translate(36 36)">
+      <text x="0" y="14" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#94A3B8" letter-spacing="2">PROJECT</text>
+      <text x="0" y="48" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="28" font-weight="800" fill="#FFFFFF">Project Alpha</text>
+      <g transform="translate(0 70)">
+        <rect x="0" y="0" width="92" height="26" rx="13" fill="#22D3EE" fill-opacity="0.12" stroke="#22D3EE" stroke-opacity="0.35"/>
+        <text x="14" y="18" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="11" fill="#A5F3FC">VERIFIED</text>
+      </g>
+    </g>
+
+    <g transform="translate(36 160)">
+      <text x="0" y="12" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#94A3B8" letter-spacing="2">SALE PROGRESS</text>
+      <rect x="0" y="28" width="358" height="14" rx="7" fill="#0F172A" fill-opacity="0.85" stroke="#FFFFFF" stroke-opacity="0.08"/>
+      <rect x="0" y="28" width="238" height="14" rx="7" fill="url(#bar)"/>
+      <text x="0" y="74" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#E5E7EB">Soft Cap</text>
+      <text x="288" y="74" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#E5E7EB">65%</text>
+      <text x="0" y="102" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#94A3B8">500,000 USDT</text>
+      <text x="244" y="102" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#94A3B8">Hard Cap 1,000,000 USDT</text>
+    </g>
+
+    <g transform="translate(36 300)">
+      <text x="0" y="12" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#94A3B8" letter-spacing="2">BUY</text>
+      <rect x="0" y="22" width="358" height="56" rx="18" fill="#7C3AED" fill-opacity="0.18" stroke="#7C3AED" stroke-opacity="0.5"/>
+      <g transform="translate(18 36)">
+        <circle cx="14" cy="14" r="14" fill="#7C3AED" fill-opacity="0.22" stroke="#A78BFA" stroke-opacity="0.55"/>
+        <path d="M10 14h8" stroke="#E9D5FF" stroke-width="2" stroke-linecap="round"/>
+        <path d="M14 10v8" stroke="#E9D5FF" stroke-width="2" stroke-linecap="round"/>
+      </g>
+      <text x="66" y="56" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="14" font-weight="700" fill="#FFFFFF">Buy with WalletConnect</text>
+      <text x="66" y="74" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#C7D2FE" opacity="0.9">BSC / ETH / Custom</text>
+    </g>
+
+    <g transform="translate(36 410)">
+      <text x="0" y="12" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#94A3B8" letter-spacing="2">COUNTDOWN</text>
+      <g transform="translate(0 26)">
+        <rect x="0" y="0" width="78" height="62" rx="16" fill="#0F172A" fill-opacity="0.85" stroke="#FFFFFF" stroke-opacity="0.08"/>
+        <rect x="92" y="0" width="78" height="62" rx="16" fill="#0F172A" fill-opacity="0.85" stroke="#FFFFFF" stroke-opacity="0.08"/>
+        <rect x="184" y="0" width="78" height="62" rx="16" fill="#0F172A" fill-opacity="0.85" stroke="#FFFFFF" stroke-opacity="0.08"/>
+        <rect x="276" y="0" width="82" height="62" rx="16" fill="#0F172A" fill-opacity="0.85" stroke="#FFFFFF" stroke-opacity="0.08"/>
+        <text x="22" y="38" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="22" font-weight="800" fill="#FFFFFF">03</text>
+        <text x="112" y="38" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="22" font-weight="800" fill="#FFFFFF">14</text>
+        <text x="204" y="38" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="22" font-weight="800" fill="#FFFFFF">27</text>
+        <text x="300" y="38" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="22" font-weight="800" fill="#FFFFFF">42</text>
+        <text x="22" y="54" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="10" fill="#94A3B8">DAYS</text>
+        <text x="112" y="54" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="10" fill="#94A3B8">HRS</text>
+        <text x="204" y="54" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="10" fill="#94A3B8">MIN</text>
+        <text x="300" y="54" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="10" fill="#94A3B8">SEC</text>
+      </g>
+    </g>
+  </g>
+
+  <g transform="translate(620 330)">
+    <rect x="0" y="0" width="254" height="490" rx="38" fill="#0B1224" fill-opacity="0.40" stroke="#FFFFFF" stroke-opacity="0.08"/>
+    <g transform="translate(22 24)">
+      <text x="0" y="14" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#94A3B8" letter-spacing="2">LIVE STATUS</text>
+      <rect x="0" y="24" width="210" height="38" rx="16" fill="#22D3EE" fill-opacity="0.10" stroke="#22D3EE" stroke-opacity="0.35"/>
+      <circle cx="18" cy="43" r="6" fill="#22D3EE"/>
+      <text x="34" y="47" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" font-weight="700" fill="#E5E7EB">On-chain Verified</text>
+    </g>
+    <g transform="translate(22 110)">
+      <text x="0" y="14" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#94A3B8" letter-spacing="2">TX CONFIRMATION</text>
+      <rect x="0" y="24" width="210" height="112" rx="22" fill="#0F172A" fill-opacity="0.85" stroke="#FFFFFF" stroke-opacity="0.08"/>
+      <text x="16" y="56" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace" font-size="12" fill="#C7D2FE">0x9f1a…b7e2</text>
+      <text x="16" y="80" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace" font-size="12" fill="#93C5FD">Transfer USDT</text>
+      <text x="16" y="104" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace" font-size="12" fill="#A5F3FC">Status: SUCCESS</text>
+    </g>
+    <g transform="translate(22 270)">
+      <text x="0" y="14" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#94A3B8" letter-spacing="2">ALLOCATION</text>
+      <rect x="0" y="24" width="210" height="168" rx="22" fill="#0F172A" fill-opacity="0.85" stroke="#FFFFFF" stroke-opacity="0.08"/>
+      <path d="M26 132c32-54 50-40 70-92 22 58 54 44 86 96" fill="none" stroke="url(#bar)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M26 132h170" stroke="#FFFFFF" stroke-opacity="0.10" stroke-width="2"/>
+      <circle cx="26" cy="132" r="4" fill="#7C3AED"/>
+      <circle cx="96" cy="52" r="4" fill="#6366F1"/>
+      <circle cx="182" cy="136" r="4" fill="#22D3EE"/>
+      <text x="16" y="56" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#E5E7EB">Price</text>
+      <text x="156" y="56" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#E5E7EB">$0.025</text>
+      <text x="16" y="82" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#94A3B8">Your Allocation</text>
+      <text x="136" y="82" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="12" fill="#94A3B8">12,500</text>
+    </g>
+  </g>
+</svg>
+
