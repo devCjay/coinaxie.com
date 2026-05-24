@@ -30,129 +30,28 @@ return [
             'is_active' => true
         ],
         [
-            'name' => 'Investments',
-            'route_name' => '#',
-            'link' => '#',
-            'type' => 'mega',
-            'sections' => [
-                [
-                    'name' => 'Sectors',
-                    'items' => [
-                        [
-                            'name' => 'Stocks & ETFs',
-                            'route_name' => 'sectors.stocks-etfs',
-                            'link' => null,
-                            'is_external' => false,
-                            'is_active' => true
-                        ],
-                        [
-                            'name' => 'Crypto Assets',
-                            'route_name' => 'sectors.crypto-assets',
-                            'link' => null,
-                            'is_external' => false,
-                            'is_active' => true
-                        ],
-                        [
-                            'name' => 'Real Estate',
-                            'route_name' => 'sectors.real-estate',
-                            'link' => null,
-                            'is_external' => false,
-                            'is_active' => true
-                        ],
-                        [
-                            'name' => 'Fixed Income',
-                            'route_name' => 'sectors.fixed-income',
-                            'link' => null,
-                            'is_external' => false,
-                            'is_active' => true
-                        ],
-                        [
-                            'name' => 'Commoditites',
-                            'route_name' => 'sectors.commodities',
-                            'link' => null,
-                            'is_external' => false,
-                            'is_active' => true
-                        ],
-                        [
-                            'name' => 'Business & Startups',
-                            'route_name' => 'sectors.businesses-startups',
-                            'link' => null,
-                            'is_external' => false,
-                            'is_active' => true
-                        ],
-                        [
-                            'name' => 'Arts & Collectibles',
-                            'route_name' => 'sectors.art-collectibles',
-                            'link' => null,
-                            'is_external' => false,
-                            'is_active' => true
-                        ],
-                        [
-                            'name' => 'Gaming & Esports',
-                            'route_name' => 'sectors.gaming-esports',
-                            'link' => null,
-                            'is_external' => false,
-                            'is_active' => true
-                        ],
-                        [
-                            'name' => 'Cash & Savings',
-                            'route_name' => 'sectors.cash-savings',
-                            'link' => null,
-                            'is_external' => false,
-                            'is_active' => true
-                        ],
-                    ]
-                ],
-                [
-                    'name' => 'Capital Instruments',
-                    'items' => [
-                        [
-                            'name' => 'Stocks',
-                            'route_name' => 'capital-instruments.stocks',
-                            'link' => null,
-                            'is_external' => false,
-                            'is_active' => moduleEnabledFromJson('stock_module')
-                        ],
-                        [
-                            'name' => 'Bonds',
-                            'route_name' => 'capital-instruments.bonds',
-                            'link' => null,
-                            'is_external' => false,
-                            'is_active' => moduleEnabledFromJson('bonds_module')
-                        ],
-                        [
-                            'name' => 'Mutual Funds',
-                            'route_name' => 'capital-instruments.mutual-funds',
-                            'link' => null,
-                            'is_external' => false,
-                            'is_active' => moduleEnabledFromJson('mutual_fund_module')
-                        ],
-                        [
-                            'name' => 'ETFs',
-                            'route_name' => 'capital-instruments.etfs',
-                            'link' => null,
-                            'is_external' => false,
-                            'is_active' => moduleEnabledFromJson('etf_module')
-                        ]
-                    ],
-                    'is_active' => moduleEnabledFromJson('stock') || moduleEnabledFromJson('bonds_module') || moduleEnabledFromJson('mutual_fund_module') || moduleEnabledFromJson('etf_module')
-                ],
-                [
-                    'name' => 'Managed Portfolios',
-                    'items' => [
-                        [
-                            'name' => 'Investment Plans',
-                            'route_name' => 'investment-plans',
-                            'link' => null,
-                            'is_external' => false,
-                            'is_active' => moduleEnabledFromJson('investment_module')
-                        ]
-                    ],
-                    'is_active' => moduleEnabledFromJson('investment_module')
-                ]
-            ],
+            'name' => 'Copy Trading',
+            'route_name' => 'user.trading.copy-trading',
+            'link' => null,
+            'type' => 'link',
             'is_external' => false,
-            'is_active' => true,
+            'is_active' => true
+        ],
+        [
+            'name' => 'Stocks',
+            'route_name' => 'user.capital-instruments.stocks',
+            'link' => null,
+            'type' => 'link',
+            'is_external' => false,
+            'is_active' => moduleEnabledFromJson('stock_module')
+        ],
+        [
+            'name' => 'Launchpad',
+            'route_name' => 'user.launchpad.index',
+            'link' => null,
+            'type' => 'link',
+            'is_external' => false,
+            'is_active' => true
         ],
         [
             'name' => 'Self Trading',
