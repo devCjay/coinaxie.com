@@ -1056,7 +1056,7 @@
                                 class="text-transparent bg-clip-text bg-gradient-to-r from-accent-primary to-accent-secondary">{{ __('Your Terminal.') }}</span>
                         </h2>
                         <p class="text-lg text-text-secondary mb-10 leading-relaxed max-w-md">
-                            {{ __('Direct access to high-liquidity markets. Trade Stocks, Forex, and Crypto Futures with up to 100x leverage on our institutional matching engine.') }}
+                            {{ __('Direct access to high-liquidity markets. Trade Stocks, and Crypto Futures with up to 100x leverage on our institutional matching engine.') }}
                         </p>
 
                         <div class="flex flex-col sm:flex-row gap-4">
@@ -1435,40 +1435,10 @@
             </div>
         </div>
     </section>
+
+
     {{-- MARKET DOMINANCE (HEATMAP) --}}
-    <section id="dominance" class="py-24 relative overflow-hidden bg-[#0A0A0C]">
-        {{-- Data Glows --}}
-        <div
-            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-accent-primary/[0.01] rounded-full blur-[150px] -z-10 animate-deep-pulse">
-        </div>
-
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col lg:flex-row justify-between items-end gap-8 mb-16">
-                <div class="max-w-2xl">
-                    <span
-                        class="text-accent-primary font-bold uppercase tracking-[0.3em] text-[10px] block mb-4">{{ __('Asset Architecture') }}</span>
-                    <h2 class="text-4xl md:text-5xl font-black text-white leading-tight">
-                        {{ __('Market Cap') }} <br>
-                        <span
-                            class="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/40">{{ __('Heatmap & Analysis.') }}</span>
-                    </h2>
-                </div>
-                <p class="text-text-secondary text-lg max-w-sm lg:text-right">
-                    {{ __('Visualizing the global digital economy. Monitor sector dominance and capital rotation in real-time.') }}
-                </p>
-            </div>
-
-            <div
-                class="p-8 rounded-[2.5rem] bg-[#0B0F17]/40 border border-white/5 relative overflow-hidden group h-[500px] flex flex-col">
-                <div class="flex-1 w-full rounded-2xl overflow-hidden bg-white/[0.02] border border-white/5">
-                    {{-- TradingView Heatmap Widget --}}
-                    <div class="tradingview-widget-container h-full">
-                        <div class="tradingview-widget-container__widget h-full" id="tv-heatmap"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    
 
     {{-- OUR TEAMS SECTION --}}
     <section id="team" class="py-24 relative overflow-hidden bg-[#050505]">
@@ -2016,8 +1986,8 @@
                 "{{ __('Stocks.') }}",
                 "{{ __('Crypto.') }}",
                 "{{ __('ETFs.') }}",
-                "{{ __('Bonds.') }}",
-                "{{ __('Forex.') }}",
+                "{{ __('Copy Trading.') }}",
+                "{{ __('LaunchPad.') }}",
                 "{{ __('Everything.') }}"
             ];
             const el = document.getElementById('typing-text');
