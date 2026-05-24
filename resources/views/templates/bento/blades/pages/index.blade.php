@@ -36,25 +36,7 @@
     ];
 
     $standoutFeatures = [
-       <!--  [
-            'id' => 'fixed-return',
-            'title' => __('Fixed Return Investment'),
-            'headline' => __('Guaranteed Returns, Institutional Stability.'),
-            'description' => __(
-                'Pick from any of our core investment plans. We allocate capital across diverse, low-volatility sectors to yield consistent, fixed returns.',
-            ),
-            'details' => [
-                __('Diverse portfolio allocation'),
-                __('Automated monthly yields'),
-                __('Risk-mitigated strategies'),
-                __('Insurance-backed capital'),
-            ],
-            'icon' =>
-                '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
-            'cta_label' => __('View Plans'),
-            'cta_url' => '#invest',
-            'image' => 'assets/templates/bento/images/features/fixed-return-investment.png',
-        ],  -->
+       
         [
             'id' => 'crypto-futures',
             'title' => __('Crypto Trading'),
@@ -72,23 +54,23 @@
                 '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>',
             'image' => 'assets/templates/bento/images/features/crypto-trading.png',
         ],
-        <!-- [
+         [
             'id' => 'forex',
-            'title' => __('Forex Trading'),
-            'headline' => __('The Global Currency Hub.'),
+            'title' => __('Copy Trading'),
+            'headline' => __('Follow. Copy. Grow.'),
             'description' => __(
-                'Access Major, Minor, and Exotic currency pairs with institution-grade spreads and lightning-fast execution speeds.',
+                'Automatically mirror top traders in real time. Choose leaders by performance, set your risk limits, and track every copied trade transparently.',
             ),
             'details' => [
-                __('Raw spreads starting at 0.0 pips'),
-                __('50+ Currency pairs'),
-                __('24/5 Live markets'),
-                __('Tier-1 liquidity providers'),
+                __('Copy verified pro traders'),
+                __('Flexible risk controls & stop-loss'),
+                __('Real-time execution notifications'),
+                __('Full copy activity & trade history'),
             ],
             'icon' =>
-                '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>',
-            'image' => 'assets/templates/bento/images/features/forex-trading.png',
-        ], -->
+                '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11c1.657 0 3-1.343 3-3S17.657 5 16 5s-3 1.343-3 3 1.343 3 3 3zM8 11c1.657 0 3-1.343 3-3S9.657 5 8 5 5 6.343 5 8s1.343 3 3 3zM16 13c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zM8 13c-2.67 0-8 1.34-8 4v2h6v-2c0-1.54.77-2.87 2.06-3.87C8.04 13.04 8.02 13.02 8 13z"></path></svg>',
+            'image' => 'assets/templates/bento/images/features/copy-trading.png',
+        ], 
         [
             'id' => 'stocks',
             'title' => __('Global Stocks'),
@@ -106,23 +88,23 @@
                 '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>',
             'image' => 'assets/templates/bento/images/features/global-stocks.png',
         ],
-        <!-- [
-            'id' => 'bonds',
-            'title' => __('Sovereign Bonds'),
-            'headline' => __('Safe Haven Assets.'),
+         [
+            'id' => 'launchpad',
+            'title' => __('Launchpad'),
+            'headline' => __('Early Access Token Sales.'),
             'description' => __(
-                'Invest in government and corporate debt securities. Ideal for wealth preservation and steady long-term income.',
+                'Join vetted token presales and buy securely using WalletConnect/Web3Modal. Transparent allocations, live countdowns, and real-time purchase confirmations.',
             ),
             'details' => [
-                __('Secure sovereign debt'),
-                __('Fixed periodic interest'),
-                __('Liquidity on secondary markets'),
-                __('Tax-efficient structures'),
+                __('WalletConnect/Web3Modal purchases'),
+                __('Configurable chains (BSC/ETH/Custom)'),
+                __('Live sale windows & countdown timers'),
+                __('Instant on-chain payment verification'),
             ],
             'icon' =>
-                '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>',
-            'image' => 'assets/templates/bento/images/features/sovereign-bonds.png',
-        ], -->
+                '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2l4 7H8l4-7zM4 10h16v10a2 2 0 01-2 2H6a2 2 0 01-2-2V10zM9 14h6M9 17h6"></path></svg>',
+            'image' => 'assets/templates/bento/images/features/launchpad.png',
+        ], 
         [
             'id' => 'etfs',
             'title' => __('Diversified ETFs'),
@@ -157,23 +139,7 @@
                 '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
             'image' => 'assets/templates/bento/images/features/margin-trading.png',
         ],
-        <!-- [
-            'id' => 'commodities',
-            'title' => __('Hard Commodities'),
-            'headline' => __('Tangible Wealth.'),
-            'description' => __(
-                'Trade Gold, Silver, Crude Oil, and Natural Gas. Protect your portfolio against inflation with essential global resources.',
-            ),
-            'details' => [
-                __('Spot & Futures contracts'),
-                __('Real-time global pricing'),
-                __('Inflation hedge'),
-                __('24-hour liquidity'),
-            ],
-            'icon' =>
-                '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.99 7.99 0 0120 13c0 2.21-.895 4.21-2.343 5.657z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"></path></svg>',
-            'image' => 'assets/templates/bento/images/features/hard-commodities.png',
-        ], -->
+       
     ];
 @endphp
 
