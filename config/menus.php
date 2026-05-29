@@ -135,7 +135,7 @@ return [
             'items' => [
                 ['name' => 'Stocks & ETFs', 'route_name' => 'sectors.stocks-etfs', 'is_active' => true],
                 ['name' => 'Crypto Assets', 'route_name' => 'sectors.crypto-assets', 'is_active' => true],
-                ['name' => 'Real Estate', 'route_name' => 'sectors.real-estate', 'is_active' => true],
+                //['name' => 'Real Estate', 'route_name' => 'sectors.real-estate', 'is_active' => true],
                 // ['name' => 'Commodities', 'route_name' => 'sectors.commodities', 'is_active' => true],
             ],
             'is_active' => moduleEnabledFromJson('investment_module')
@@ -144,8 +144,8 @@ return [
             'name' => 'Instruments',
             'items' => [
                 ['name' => 'Stocks', 'route_name' => 'capital-instruments.stocks', 'is_active' => moduleEnabledFromJson('stock_module')],
-                ['name' => 'Bonds', 'route_name' => 'capital-instruments.bonds', 'is_active' => moduleEnabledFromJson('bonds_module')],
-                ['name' => 'Mutual Funds', 'route_name' => 'capital-instruments.mutual-funds', 'is_active' => moduleEnabledFromJson('mutual_fund_module')],
+                //['name' => 'Bonds', 'route_name' => 'capital-instruments.bonds', 'is_active' => moduleEnabledFromJson('bonds_module')],
+                //['name' => 'Mutual Funds', 'route_name' => 'capital-instruments.mutual-funds', 'is_active' => moduleEnabledFromJson('mutual_fund_module')],
                 ['name' => 'ETFs', 'route_name' => 'capital-instruments.etfs', 'is_active' => moduleEnabledFromJson('etf_module')],
             ],
             'is_active' => moduleEnabledFromJson('stock_module') || moduleEnabledFromJson('bonds_module') || moduleEnabledFromJson('mutual_fund_module') || moduleEnabledFromJson('etf_module')
@@ -153,10 +153,10 @@ return [
         [
             'name' => 'Trading',
             'items' => [
-                ['name' => 'Investment Plans', 'route_name' => 'investment-plans', 'is_active' => moduleEnabledFromJson('investment_module')],
+                //['name' => 'Investment Plans', 'route_name' => 'investment-plans', 'is_active' => moduleEnabledFromJson('investment_module')],
                 ['name' => 'Futures Trading', 'route_name' => 'trading.futures', 'is_active' => moduleEnabledFromJson('futures_module')],
                 ['name' => 'Margin Trading', 'route_name' => 'trading.margin', 'is_active' => moduleEnabledFromJson('margin_module')],
-                ['name' => 'Forex Trading', 'route_name' => 'trading.forex', 'is_active' => moduleEnabledFromJson('forex_module')],
+                //['name' => 'Forex Trading', 'route_name' => 'trading.forex', 'is_active' => moduleEnabledFromJson('forex_module')],
             ],
             'is_active' => moduleEnabledFromJson('investment_module') || moduleEnabledFromJson('futures_module') || moduleEnabledFromJson('margin_module') || moduleEnabledFromJson('forex_module')
         ],
