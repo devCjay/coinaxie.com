@@ -383,28 +383,7 @@
                     ],
                     'icon' => '<path d="M12 5v14m0-14l-4 4m4-4l4 4"/>',
                 ],
-                [
-                    'route_name' => 'admin.investments.index',
-                    'name' => 'Investments',
-                    'color' => [
-                        'bg' => 'bg-amber-500/10',
-                        'border' => 'border-amber-500/20',
-                        'text' => 'text-amber-300',
-                        'hover' => 'hover:bg-amber-500/20 hover:border-amber-500/30',
-                    ],
-                    'icon' => '<path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>',
-                ],
-                [
-                    'route_name' => 'admin.trading.index',
-                    'name' => 'Trades',
-                    'color' => [
-                        'bg' => 'bg-violet-500/10',
-                        'border' => 'border-violet-500/20',
-                        'text' => 'text-violet-300',
-                        'hover' => 'hover:bg-violet-500/20 hover:border-violet-500/30',
-                    ],
-                    'icon' => '<polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>',
-                ],
+                
                 [
                     'route_name' => 'admin.transactions.index',
                     'name' => 'Transactions',
