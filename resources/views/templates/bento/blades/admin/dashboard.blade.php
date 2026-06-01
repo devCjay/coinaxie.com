@@ -178,7 +178,7 @@
                                 <div class="text-xs font-bold text-amber-400">{{ showAmount($eq['margin_balance']) }}</div>
                             @endif
                         </div>
-                        <div
+                       <!--  <div
                             class="bg-white/[0.03] border border-white/[0.05] rounded-xl p-2.5 text-center hover:bg-white/[0.06] transition-all backdrop-blur-sm">
                             <div class="text-[8px] font-bold uppercase tracking-wider text-slate-500 mb-1">
                                 {{ __('Forex') }}</div>
@@ -187,7 +187,7 @@
                             @else
                                 <div class="text-xs font-bold text-cyan-400">{{ showAmount($eq['forex_balance']) }}</div>
                             @endif
-                        </div>
+                        </div> -->
                         <div
                             class="bg-white/[0.03] border border-white/[0.05] rounded-xl p-2.5 text-center hover:bg-white/[0.06] transition-all backdrop-blur-sm">
                             <div class="text-[8px] font-bold uppercase tracking-wider text-slate-500 mb-1">
@@ -209,7 +209,7 @@
                                 <div class="text-xs font-bold text-pink-400">{{ showAmount($eq['etfs_balance']) }}</div>
                             @endif
                         </div>
-                        <div
+                        <!-- <div
                             class="bg-white/[0.03] border border-white/[0.05] rounded-xl p-2.5 text-center hover:bg-white/[0.06] transition-all backdrop-blur-sm col-span-2">
                             <div class="text-[8px] font-bold uppercase tracking-wider text-slate-500 mb-1">
                                 {{ __('Bonds') }}</div>
@@ -218,7 +218,7 @@
                             @else
                                 <div class="text-xs font-bold text-slate-400">{{ showAmount($eq['bonds_balance']) }}</div>
                             @endif
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -316,7 +316,7 @@
                     </div>
                 </div>
             @else
-                <div
+                <!-- <div
                     class="relative bg-secondary/40 border border-white/5 rounded-2xl overflow-hidden hover:border-white/10 transition-colors group opacity-60">
                     <div
                         class="absolute inset-0 bg-[linear-gradient(45deg,rgba(0,0,0,0.1)_25%,transparent_25%,transparent_50%,rgba(0,0,0,0.1)_50%,rgba(0,0,0,0.1)_75%,transparent_75%,transparent)] bg-[length:20px_20px] opacity-20">
@@ -341,7 +341,7 @@
                             {{ __('Settings') }}
                         </a>
                     </div>
-                </div>
+                </div> -->
             @endif
 
         </div>{{-- /3-col bento --}}
