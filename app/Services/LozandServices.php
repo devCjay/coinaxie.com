@@ -71,6 +71,130 @@ class LozandServices
         return [$symbol, ''];
     }
 
+    protected function marketPriceSource(): string
+    {
+        return ((string) getSetting('trading_market_price_source', 'api')) === 'custom' ? 'custom' : 'api';
+    }
+
+    protected function customMarketPricesForMarket(string $market): array
+    {
+        $raw = getSetting('trading_custom_market_prices', '[]');
+        $items = is_array($raw) ? $raw : json_decode((string) $raw, true);
+        $items = is_array($items) ? $items : [];
+        $market = in_array($market, ['futures', 'margin'], true) ? $market : 'futures';
+
+        $out = [];
+        foreach ($items as $row) {
+            if (!is_array($row)) {
+                continue;
+            }
+            $rowMarket = (string) ($row['market'] ?? 'both');
+            if (!in_array($rowMarket, ['futures', 'margin', 'both'], true)) {
+                $rowMarket = 'both';
+            }
+            if ($rowMarket !== 'both' && $rowMarket !== $market) {
+                continue;
+            }
+
+            $ticker = strtoupper(trim((string) ($row['ticker'] ?? '')));
+            $price = (float) ($row['current_price'] ?? 0);
+            if ($ticker === '' || $price <= 0) {
+                continue;
+            }
+
+            $open = (float) ($row['open_price'] ?? 0);
+            $high = (float) ($row['high'] ?? 0);
+            $low = (float) ($row['low'] ?? 0);
+            $volume = (float) ($row['volume'] ?? 0);
+            $change = (float) ($row['change_1d_percentage'] ?? 0);
+
+            if ($open <= 0) {
+                $open = $price;
+            }
+            if ($high <= 0) {
+                $high = $price;
+            }
+            if ($low <= 0) {
+                $low = $price;
+            }
+
+            [$base, $quote] = $this->parseSymbolBaseQuote($ticker);
+
+            $out[] = [
+                'ticker' => $ticker,
+                'base' => $base,
+                'quote' => $quote,
+                'current_price' => $price,
+                'open_price' => $open,
+                'high' => $high,
+                'low' => $low,
+                'volume' => $volume,
+                'change_1d_percentage' => $change,
+            ];
+        }
+
+        usort($out, function ($a, $b) {
+            return strcmp((string) ($a['ticker'] ?? ''), (string) ($b['ticker'] ?? ''));
+        });
+
+        return $out;
+    }
+
+    protected function customMarketTicker(string $market, string $ticker): ?array
+    {
+        $ticker = strtoupper(trim($ticker));
+        if ($ticker === '') {
+            return null;
+        }
+        $list = $this->customMarketPricesForMarket($market);
+        foreach ($list as $row) {
+            if (isset($row['ticker']) && (string) $row['ticker'] === $ticker) {
+                return $row;
+            }
+        }
+        return null;
+    }
+
+    protected function syntheticOrderBookForPrice(float $price): array
+    {
+        $price = $price > 0 ? $price : 1;
+        $step = $price > 1000 ? 1 : ($price > 100 ? 0.1 : ($price > 1 ? 0.01 : 0.0001));
+        $levels = 50;
+
+        $asks = [];
+        $bids = [];
+        for ($i = 1; $i <= $levels; $i++) {
+            $askPrice = $price + ($i * $step);
+            $bidPrice = max($step, $price - ($i * $step));
+            $qtyBase = 0.01 + (($i % 9) * 0.01);
+            $asks[] = [round($askPrice, 8), round($qtyBase, 8)];
+            $bids[] = [round($bidPrice, 8), round($qtyBase, 8)];
+        }
+
+        return ['asks' => $asks, 'bids' => $bids];
+    }
+
+    protected function syntheticRecentTradesForPrice(float $price): array
+    {
+        $price = $price > 0 ? $price : 1;
+        $step = $price > 1000 ? 1 : ($price > 100 ? 0.1 : ($price > 1 ? 0.01 : 0.0001));
+        $nowMs = (int) now()->valueOf();
+        $out = [];
+        for ($i = 0; $i < 50; $i++) {
+            $direction = ($i % 2) === 0 ? 1 : -1;
+            $jitter = (($i % 5) + 1) * $step * 0.4;
+            $tradePrice = max($step, $price + ($direction * $jitter));
+            $qty = 0.01 + (($i % 10) * 0.01);
+            $out[] = [
+                'price' => (float) round($tradePrice, 8),
+                'qty' => (float) round($qty, 8),
+                'time' => $nowMs - ($i * 2000),
+                'isBuyerMaker' => ($i % 2) === 0,
+            ];
+        }
+        return $out;
+    }
+
     protected function binanceErrorMessage($response): string
     {
         $json = $response->json();
@@ -541,7 +665,16 @@ class LozandServices
      */
     public function futureTickers()
     {
-        $cacheKey = 'future_tickers';
+        $source = $this->marketPriceSource();
+        if ($source === 'custom') {
+            return [
+                'status' => 'success',
+                'data' => $this->customMarketPricesForMarket('futures'),
+                'code' => 200,
+            ];
+        }
+
+        $cacheKey = 'future_tickers_' . $source;
         if (Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -677,7 +810,24 @@ class LozandServices
      */
     public function futureTicker($ticker)
     {
-        $cacheKey = 'future_ticker_' . $ticker;
+        $source = $this->marketPriceSource();
+        if ($source === 'custom') {
+            $row = $this->customMarketTicker('futures', (string) $ticker);
+            if (!$row) {
+                return [
+                    'status' => 'error',
+                    'message' => 'Ticker not found in custom market prices',
+                    'code' => 404,
+                ];
+            }
+            return [
+                'status' => 'success',
+                'data' => $row,
+                'code' => 200,
+            ];
+        }
+
+        $cacheKey = 'future_ticker_' . $source . '_' . $ticker;
         if (Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -859,7 +1009,24 @@ class LozandServices
      */
     public function futuresOrderBook($ticker)
     {
-        $cacheKey = 'futures_order_book_' . $ticker;
+        $source = $this->marketPriceSource();
+        if ($source === 'custom') {
+            $row = $this->customMarketTicker('futures', (string) $ticker);
+            if (!$row) {
+                return [
+                    'status' => 'error',
+                    'message' => 'Ticker not found in custom market prices',
+                    'code' => 404,
+                ];
+            }
+            return [
+                'status' => 'success',
+                'data' => $this->syntheticOrderBookForPrice((float) ($row['current_price'] ?? 0)),
+                'code' => 200,
+            ];
+        }
+
+        $cacheKey = 'futures_order_book_' . $source . '_' . $ticker;
         if (Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -1056,7 +1223,24 @@ class LozandServices
      */
     public function futuresRecentTrades($ticker)
     {
-        $cacheKey = 'futures_recent_trades_' . $ticker;
+        $source = $this->marketPriceSource();
+        if ($source === 'custom') {
+            $row = $this->customMarketTicker('futures', (string) $ticker);
+            if (!$row) {
+                return [
+                    'status' => 'error',
+                    'message' => 'Ticker not found in custom market prices',
+                    'code' => 404,
+                ];
+            }
+            return [
+                'status' => 'success',
+                'data' => $this->syntheticRecentTradesForPrice((float) ($row['current_price'] ?? 0)),
+                'code' => 200,
+            ];
+        }
+
+        $cacheKey = 'futures_recent_trades_' . $source . '_' . $ticker;
         if (Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -1186,7 +1370,16 @@ class LozandServices
      */
     public function margins()
     {
-        $cacheKey = 'margins';
+        $source = $this->marketPriceSource();
+        if ($source === 'custom') {
+            return [
+                'status' => 'success',
+                'data' => $this->customMarketPricesForMarket('margin'),
+                'code' => 200,
+            ];
+        }
+
+        $cacheKey = 'margins_' . $source;
         if (Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -1322,7 +1515,24 @@ class LozandServices
      */
     public function margin($ticker)
     {
-        $cacheKey = 'margin_' . $ticker;
+        $source = $this->marketPriceSource();
+        if ($source === 'custom') {
+            $row = $this->customMarketTicker('margin', (string) $ticker);
+            if (!$row) {
+                return [
+                    'status' => 'error',
+                    'message' => 'Ticker not found in custom market prices',
+                    'code' => 404,
+                ];
+            }
+            return [
+                'status' => 'success',
+                'data' => $row,
+                'code' => 200,
+            ];
+        }
+
+        $cacheKey = 'margin_' . $source . '_' . $ticker;
         if (Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -1451,7 +1661,24 @@ class LozandServices
      */
     public function marginOrderBook($ticker)
     {
-        $cacheKey = 'margin_order_book_' . $ticker;
+        $source = $this->marketPriceSource();
+        if ($source === 'custom') {
+            $row = $this->customMarketTicker('margin', (string) $ticker);
+            if (!$row) {
+                return [
+                    'status' => 'error',
+                    'message' => 'Ticker not found in custom market prices',
+                    'code' => 404,
+                ];
+            }
+            return [
+                'status' => 'success',
+                'data' => $this->syntheticOrderBookForPrice((float) ($row['current_price'] ?? 0)),
+                'code' => 200,
+            ];
+        }
+
+        $cacheKey = 'margin_order_book_' . $source . '_' . $ticker;
         if (Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
@@ -1648,7 +1875,24 @@ class LozandServices
      */
     public function marginRecentTrades($ticker)
     {
-        $cacheKey = 'margin_recent_trades_' . $ticker;
+        $source = $this->marketPriceSource();
+        if ($source === 'custom') {
+            $row = $this->customMarketTicker('margin', (string) $ticker);
+            if (!$row) {
+                return [
+                    'status' => 'error',
+                    'message' => 'Ticker not found in custom market prices',
+                    'code' => 404,
+                ];
+            }
+            return [
+                'status' => 'success',
+                'data' => $this->syntheticRecentTradesForPrice((float) ($row['current_price'] ?? 0)),
+                'code' => 200,
+            ];
+        }
+
+        $cacheKey = 'margin_recent_trades_' . $source . '_' . $ticker;
         if (Cache::has($cacheKey)) {
             return Cache::get($cacheKey);
         }
