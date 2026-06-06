@@ -63,7 +63,7 @@
                 </div>
 
                 <form id="core-settings-form" action="{{ route('admin.settings.core.update') }}" method="POST"
-                    enctype="multipart/form-data" class="space-y-12 pb-24">
+                    enctype="multipart/form-data" class="space-y-12 pb-24" novalidate>
                     @csrf
 
                     <div id="core-settings-tab-core" class="{{ $settingsTab === 'core' ? '' : 'hidden' }} space-y-12">
@@ -495,7 +495,10 @@
 
                                     <div class="flex flex-col gap-2">
                                         <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Chain ID') }}</label>
-                                        <input type="number" min="1" max="999999" name="launchpad_web3_custom_chain_id" value="{{ (int) getSetting('launchpad_web3_custom_chain_id', 0) }}"
+                                        @php
+                                            $customChainId = (int) getSetting('launchpad_web3_custom_chain_id', 0);
+                                        @endphp
+                                        <input type="number" min="1" max="999999" name="launchpad_web3_custom_chain_id" value="{{ $customChainId > 0 ? $customChainId : '' }}"
                                             class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
                                     </div>
 
@@ -683,7 +686,8 @@
             function toggleLpWeb3Panels() {
                 const active = ($('#lp-web3-active-chain').val() || 'bsc').toString();
                 $('.lp-web3-panel').each(function() {
-                    $(this).toggle($(this).data('chain') === active);
+                    const isActive = ($(this).data('chain') || '').toString() === active;
+                    $(this).toggle(isActive);
                 });
             }
 
@@ -692,6 +696,11 @@
             });
 
             toggleLpWeb3Panels();
+
+            const $customChainIdInput = $('input[name="launchpad_web3_custom_chain_id"]');
+            if ($customChainIdInput.length && String($customChainIdInput.val() || '') === '0') {
+                $customChainIdInput.val('');
+            }
 
             /**
              * 0.1 Initialize Select2 for Currency
