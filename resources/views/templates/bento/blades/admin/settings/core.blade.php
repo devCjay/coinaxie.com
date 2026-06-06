@@ -588,7 +588,7 @@
 
                     {{-- Sticky Submit Bar --}}
                     <div class="pt-10">
-                        <button type="submit" id="submit-btn"
+                        <button type="submit" id="submit-btn" form="core-settings-form"
                             class="w-full md:w-auto px-12 py-5 bg-accent-primary text-white text-xs font-bold uppercase tracking-[0.2em] rounded-2xl shadow-xl shadow-accent-primary/30 hover:scale-[1.02] active:scale-95 transition-all duration-300 flex items-center justify-center gap-4">
                             <svg class="w-5 h-5 submit-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
@@ -845,8 +845,19 @@
                     data: formData,
                     processData: false,
                     contentType: false,
+                    dataType: 'json',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    },
                     success: function(response) {
-                        toastNotification(response.message, 'success');
+                        if (typeof response === 'string') {
+                            try {
+                                response = JSON.parse(response);
+                            } catch (e) {}
+                        }
+                        const message = (response && response.message) ? response.message : '{{ __('Settings updated successfully.') }}';
+                        toastNotification(message, 'success');
                     },
                     error: function(xhr) {
                         let errorMessage = xhr.responseJSON.message ||
