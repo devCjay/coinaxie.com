@@ -161,6 +161,26 @@
                 }
             }
 
+            function syncPriceInput() {
+                const mode = $('.margin-mode-btn.bg-white\\/10').data('mode') || 'normal';
+                if (mode === 'repay') {
+                    $('#priceInputGroup').addClass('hidden');
+                    return;
+                }
+
+                $('#priceInputGroup').removeClass('hidden');
+
+                const type = $('.order-type-tab.bg-accent-primary\\/20').data('type') || 'limit';
+                if (type === 'market') {
+                    $('#inputPrice').val(currentPrice).prop('disabled', true).addClass(
+                        'opacity-60 cursor-not-allowed');
+                } else {
+                    $('#inputPrice').prop('disabled', false).removeClass('opacity-60 cursor-not-allowed');
+                }
+            }
+
+            syncPriceInput();
+
 
             // Event Delegation
             $(document).on('click', '#btnBuy', function() {
@@ -208,13 +228,10 @@
                 $(this).removeClass('bg-white/5 border-white/10 text-white/70').addClass(
                     'bg-accent-primary/20 border-accent-primary/30 text-white');
                 const type = $(this).data('type');
-                if (type === 'market') {
-                    $('#priceInputGroup').addClass('hidden');
-                    $('#inputPrice').prop('disabled', true);
-                } else {
-                    $('#priceInputGroup').removeClass('hidden');
-                    $('#inputPrice').prop('disabled', false).val(currentPrice);
+                if (type === 'limit') {
+                    $('#inputPrice').val(currentPrice);
                 }
+                syncPriceInput();
             });
 
             $(document).on('click', '.time-btn', function() {
@@ -245,15 +262,7 @@
                 $(this).removeClass('hover:bg-white/5 text-white/60 transition').addClass(
                     'bg-white/10 text-white font-medium shadow-sm border border-white/5');
 
-                const mode = $(this).data('mode');
-                if (mode === 'repay') {
-                    $('#priceInputGroup').addClass('hidden');
-                } else {
-                    const type = $('.order-type-tab.bg-accent-primary\\/20').data('type');
-                    if (type === 'limit') {
-                        $('#priceInputGroup').removeClass('hidden');
-                    }
-                }
+                syncPriceInput();
                 updateSubmitButton();
             });
 
@@ -450,6 +459,7 @@
                             let marginText = "{{ __('Margin') }}";
                             $('#currentLeverageLabel').text(marginText + ' ' + currentLeverage + 'x');
                             $('.leverage-display').text(marginText + ' ' + currentLeverage + 'x');
+                            syncPriceInput();
                         } else {
                             const $newData = $(response);
                             $('#topPanelStats').html($newData.find('#topPanelStats').html());
@@ -471,6 +481,7 @@
 
                             const rawPrice = $('#lastPrice').text().replace(/,/g, '');
                             currentPrice = parseFloat(rawPrice) || 0;
+                            syncPriceInput();
                         }
                     }
                 });

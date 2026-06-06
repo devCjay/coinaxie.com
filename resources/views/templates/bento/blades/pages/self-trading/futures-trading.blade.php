@@ -225,11 +225,12 @@
                     'bg-accent-primary/20 border-accent-primary/30 text-white');
                 const type = $(this).data('type');
                 if (type === 'market') {
-                    $('#priceInputGroup').addClass('hidden');
-                    $('#inputPrice').prop('disabled', true);
+                    $('#priceInputGroup').removeClass('hidden');
+                    $('#inputPrice').val(currentPrice).prop('disabled', true).addClass('opacity-60 cursor-not-allowed');
                 } else {
                     $('#priceInputGroup').removeClass('hidden');
-                    $('#inputPrice').prop('disabled', false).val(currentPrice);
+                    $('#inputPrice').prop('disabled', false).removeClass('opacity-60 cursor-not-allowed').val(
+                        currentPrice);
                 }
             });
 
