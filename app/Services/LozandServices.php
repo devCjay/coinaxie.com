@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\CustomMarketToken;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class LozandServices
 {
@@ -78,6 +80,65 @@ class LozandServices
 
     protected function customMarketPricesForMarket(string $market): array
     {
+        if (Schema::hasTable('custom_market_tokens')) {
+            $market = in_array($market, ['futures', 'margin'], true) ? $market : 'futures';
+            $rows = CustomMarketToken::query()
+                ->where('is_active', true)
+                ->where(function ($q) use ($market) {
+                    $q->where('market', 'both')->orWhere('market', $market);
+                })
+                ->orderBy('ticker', 'asc')
+                ->get([
+                    'ticker',
+                    'market',
+                    'current_price',
+                    'open_price',
+                    'high',
+                    'low',
+                    'volume',
+                    'change_1d_percentage',
+                ]);
+
+            $out = [];
+            foreach ($rows as $row) {
+                $ticker = strtoupper(trim((string) $row->ticker));
+                $price = (float) ($row->current_price ?? 0);
+                if ($ticker === '' || $price <= 0) {
+                    continue;
+                }
+                $open = (float) ($row->open_price ?? 0);
+                $high = (float) ($row->high ?? 0);
+                $low = (float) ($row->low ?? 0);
+                $volume = (float) ($row->volume ?? 0);
+                $change = (float) ($row->change_1d_percentage ?? 0);
+
+                if ($open <= 0) {
+                    $open = $price;
+                }
+                if ($high <= 0) {
+                    $high = $price;
+                }
+                if ($low <= 0) {
+                    $low = $price;
+                }
+
+                [$base, $quote] = $this->parseSymbolBaseQuote($ticker);
+
+                $out[] = [
+                    'ticker' => $ticker,
+                    'base' => $base,
+                    'quote' => $quote,
+                    'current_price' => $price,
+                    'open_price' => $open,
+                    'high' => $high,
+                    'low' => $low,
+                    'volume' => $volume,
+                    'change_1d_percentage' => $change,
+                ];
+            }
+            return $out;
+        }
+
         $raw = getSetting('trading_custom_market_prices', '[]');
         $items = is_array($raw) ? $raw : json_decode((string) $raw, true);
         $items = is_array($items) ? $items : [];
@@ -145,6 +206,55 @@ class LozandServices
         $ticker = strtoupper(trim($ticker));
         if ($ticker === '') {
             return null;
+        }
+        if (Schema::hasTable('custom_market_tokens')) {
+            $market = in_array($market, ['futures', 'margin'], true) ? $market : 'futures';
+            $row = CustomMarketToken::query()
+                ->where('is_active', true)
+                ->where('ticker', $ticker)
+                ->where(function ($q) use ($market) {
+                    $q->where('market', 'both')->orWhere('market', $market);
+                })
+                ->first();
+
+            if (!$row) {
+                return null;
+            }
+
+            $price = (float) ($row->current_price ?? 0);
+            if ($price <= 0) {
+                return null;
+            }
+
+            $open = (float) ($row->open_price ?? 0);
+            $high = (float) ($row->high ?? 0);
+            $low = (float) ($row->low ?? 0);
+            $volume = (float) ($row->volume ?? 0);
+            $change = (float) ($row->change_1d_percentage ?? 0);
+
+            if ($open <= 0) {
+                $open = $price;
+            }
+            if ($high <= 0) {
+                $high = $price;
+            }
+            if ($low <= 0) {
+                $low = $price;
+            }
+
+            [$base, $quote] = $this->parseSymbolBaseQuote($ticker);
+
+            return [
+                'ticker' => $ticker,
+                'base' => $base,
+                'quote' => $quote,
+                'current_price' => $price,
+                'open_price' => $open,
+                'high' => $high,
+                'low' => $low,
+                'volume' => $volume,
+                'change_1d_percentage' => $change,
+            ];
         }
         $list = $this->customMarketPricesForMarket($market);
         foreach ($list as $row) {

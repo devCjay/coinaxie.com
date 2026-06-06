@@ -32,21 +32,11 @@
                     </svg>
                 </div>
                 <div class="relative z-10 flex-1">
-                    <h4 class="text-sm font-bold text-accent-primary mb-1">{{ __('Features Guarantee') }}</h4>
+                    <h4 class="text-sm font-bold text-accent-primary mb-1">{{ __('Control Panel') }}</h4>
                     <p class="text-sm text-slate-400 leading-relaxed mb-3">
-                        If you notice any missing features, you can contact us to request them. General scope features are
-                        added to the software core at no additional cost. Urgent or custom features will be charged for
-                        customization.
+                        You can control the system functionality from this section, use the sidebar menu for navigation to various settings available in the system
                     </p>
-                    <a href="https://lozand.com/contact" target="_blank"
-                        class="text-xs font-bold text-accent-primary hover:text-white transition-colors flex items-center gap-1.5 group/link">
-                        {{ __('Contact Support') }}
-                        <svg class="w-3.5 h-3.5 transform group-hover/link:translate-x-0.5 transition-transform"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                        </svg>
-                    </a>
+                    
                 </div>
             </div>
 

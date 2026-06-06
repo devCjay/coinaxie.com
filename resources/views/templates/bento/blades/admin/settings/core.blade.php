@@ -540,11 +540,6 @@
                     <div id="core-settings-tab-market" class="{{ $settingsTab === 'market' ? '' : 'hidden' }} space-y-12">
                         @php
                             $marketPriceSource = (string) getSetting('trading_market_price_source', 'api');
-                            $rawCustomMarketPrices = getSetting('trading_custom_market_prices', '[]');
-                            $customMarketPrices = is_array($rawCustomMarketPrices)
-                                ? $rawCustomMarketPrices
-                                : json_decode((string) $rawCustomMarketPrices, true);
-                            $customMarketPrices = is_array($customMarketPrices) ? $customMarketPrices : [];
                         @endphp
 
                         <section class="space-y-8">
@@ -571,117 +566,22 @@
                                         </option>
                                     </select>
                                     <p class="text-[10px] text-slate-500 font-bold px-2 italic">
-                                        {{ __('When set to Custom, Futures & Margin will use the prices you enter below (same symbols, different prices).') }}
+                                        {{ __('When set to Custom, Futures & Margin will use prices from Custom Tokens.') }}
                                     </p>
                                 </div>
                             </div>
 
-                            <div id="custom-market-prices-wrapper" class="space-y-6">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <div class="text-white font-black">{{ __('Custom Tokens') }}</div>
-                                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                                            {{ __('Example symbol: BTCUSDT') }}
-                                        </div>
+                            <div class="bg-white/[0.03] border border-white/10 rounded-3xl p-8 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                                <div class="space-y-2">
+                                    <div class="text-white font-black">{{ __('Manage Custom Tokens') }}</div>
+                                    <div class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                                        {{ __('Create tokens like BTCUSDT and set prices used by Futures & Margin when Custom is enabled.') }}
                                     </div>
-                                    <button type="button" id="add-market-price-btn"
-                                        class="bg-accent-primary/20 border border-accent-primary/30 text-white font-bold text-xs px-5 py-3 rounded-2xl hover:bg-accent-primary/30 transition-all">
-                                        {{ __('Add Token') }}
-                                    </button>
                                 </div>
-
-                                <div id="market-prices-container" class="flex flex-col gap-6 relative">
-                                    @forelse ($customMarketPrices as $i => $row)
-                                        @php
-                                            $rowMarket = (string) ($row['market'] ?? 'both');
-                                            $rowTicker = strtoupper(trim((string) ($row['ticker'] ?? '')));
-                                            $rowPrice = (string) ($row['current_price'] ?? '');
-                                            $rowOpen = (string) ($row['open_price'] ?? '');
-                                            $rowHigh = (string) ($row['high'] ?? '');
-                                            $rowLow = (string) ($row['low'] ?? '');
-                                            $rowVolume = (string) ($row['volume'] ?? '');
-                                            $rowChange = (string) ($row['change_1d_percentage'] ?? '');
-                                        @endphp
-                                        <div class="market-price-item group/market relative grid grid-cols-1 md:grid-cols-2 gap-6 p-8 rounded-3xl bg-white/5 border border-white/10 transition-all duration-500 hover:bg-white/[0.07]">
-                                            <button type="button" class="remove-market-price-btn absolute -top-3 -right-3 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg shadow-red-500/20 z-10">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
-                                                </svg>
-                                            </button>
-
-                                            <div class="flex flex-col gap-3">
-                                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Market') }}</label>
-                                                <select name="trading_custom_market_prices[{{ $i }}][market]"
-                                                    class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none appearance-none">
-                                                    <option value="both" class="bg-secondary-dark" {{ $rowMarket === 'both' ? 'selected' : '' }}>{{ __('Both') }}</option>
-                                                    <option value="futures" class="bg-secondary-dark" {{ $rowMarket === 'futures' ? 'selected' : '' }}>{{ __('Futures') }}</option>
-                                                    <option value="margin" class="bg-secondary-dark" {{ $rowMarket === 'margin' ? 'selected' : '' }}>{{ __('Margin') }}</option>
-                                                </select>
-                                            </div>
-
-                                            <div class="flex flex-col gap-3">
-                                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Symbol') }}</label>
-                                                <input type="text" name="trading_custom_market_prices[{{ $i }}][ticker]"
-                                                    value="{{ $rowTicker }}" placeholder="BTCUSDT"
-                                                    class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-base font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                            </div>
-
-                                            <div class="flex flex-col gap-3">
-                                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Current Price') }}</label>
-                                                <input type="number" min="0" step="0.00000001" name="trading_custom_market_prices[{{ $i }}][current_price]"
-                                                    value="{{ $rowPrice }}" placeholder="0.00"
-                                                    class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-base font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                            </div>
-
-                                            <div class="flex flex-col gap-3">
-                                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('24h Change (%)') }}</label>
-                                                <input type="number" step="0.01" name="trading_custom_market_prices[{{ $i }}][change_1d_percentage]"
-                                                    value="{{ $rowChange }}" placeholder="0"
-                                                    class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-base font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                            </div>
-
-                                            <div class="flex flex-col gap-3">
-                                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Open') }}</label>
-                                                <input type="number" min="0" step="0.00000001" name="trading_custom_market_prices[{{ $i }}][open_price]"
-                                                    value="{{ $rowOpen }}" placeholder="0.00"
-                                                    class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-base font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                            </div>
-
-                                            <div class="flex flex-col gap-3">
-                                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('24h High') }}</label>
-                                                <input type="number" min="0" step="0.00000001" name="trading_custom_market_prices[{{ $i }}][high]"
-                                                    value="{{ $rowHigh }}" placeholder="0.00"
-                                                    class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-base font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                            </div>
-
-                                            <div class="flex flex-col gap-3">
-                                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('24h Low') }}</label>
-                                                <input type="number" min="0" step="0.00000001" name="trading_custom_market_prices[{{ $i }}][low]"
-                                                    value="{{ $rowLow }}" placeholder="0.00"
-                                                    class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-base font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                            </div>
-
-                                            <div class="flex flex-col gap-3">
-                                                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Volume') }}</label>
-                                                <input type="number" min="0" step="0.00000001" name="trading_custom_market_prices[{{ $i }}][volume]"
-                                                    value="{{ $rowVolume }}" placeholder="0"
-                                                    class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-base font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                                            </div>
-                                        </div>
-                                    @empty
-                                        <div id="empty-market-prices-msg"
-                                            class="flex flex-col items-center justify-center p-12 rounded-3xl border-2 border-dashed border-white/5 bg-white/[0.02]">
-                                            <div class="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-4">
-                                                <svg class="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                                        d="M3 3v18h18M7 14l3-3 4 4 7-7" />
-                                                </svg>
-                                            </div>
-                                            <p class="text-slate-500 font-bold text-sm text-center italic">
-                                                {{ __('No custom tokens yet. Click "Add Token" to create one.') }}</p>
-                                        </div>
-                                    @endforelse
-                                </div>
+                                <a href="{{ route('admin.custom-tokens.index') }}"
+                                    class="bg-accent-primary/20 border border-accent-primary/30 text-white font-bold text-xs px-6 py-4 rounded-2xl hover:bg-accent-primary/30 transition-all text-center">
+                                    {{ __('Open Custom Tokens') }}
+                                </a>
                             </div>
                         </section>
                     </div>
@@ -891,103 +791,6 @@
                     $item.remove();
                     if ($officesContainer.find('.office-item').length === 0) {
                         $emptyOfficesMsg.fadeIn();
-                    }
-                }, 300);
-            });
-
-            let marketIndex = {{ count($customMarketPrices ?? []) }};
-            const $marketPricesContainer = $('#market-prices-container');
-            const $emptyMarketPricesMsg = $('#empty-market-prices-msg');
-
-            function toggleCustomMarketPrices() {
-                const source = ($('#trading-market-price-source').val() || 'api').toString();
-                $('#custom-market-prices-wrapper').toggle(source === 'custom');
-            }
-
-            $('#trading-market-price-source').on('change', function() {
-                toggleCustomMarketPrices();
-            });
-
-            toggleCustomMarketPrices();
-
-            $('#add-market-price-btn').on('click', function() {
-                if ($emptyMarketPricesMsg.length) {
-                    $emptyMarketPricesMsg.hide();
-                }
-
-                const html = `
-                    <div class="market-price-item group/market relative grid grid-cols-1 md:grid-cols-2 gap-6 p-8 rounded-3xl bg-white/5 border border-white/10 transition-all duration-500 hover:bg-white/[0.07] animate__animated animate__fadeInUp animate__faster">
-                        <button type="button" class="remove-market-price-btn absolute -top-3 -right-3 w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 shadow-lg shadow-red-500/20 z-10">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-
-                        <div class="flex flex-col gap-3">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Market') }}</label>
-                            <select name="trading_custom_market_prices[${marketIndex}][market]"
-                                class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-sm font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none appearance-none">
-                                <option value="both" class="bg-secondary-dark">{{ __('Both') }}</option>
-                                <option value="futures" class="bg-secondary-dark">{{ __('Futures') }}</option>
-                                <option value="margin" class="bg-secondary-dark">{{ __('Margin') }}</option>
-                            </select>
-                        </div>
-
-                        <div class="flex flex-col gap-3">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Symbol') }}</label>
-                            <input type="text" name="trading_custom_market_prices[${marketIndex}][ticker]" placeholder="BTCUSDT"
-                                class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-base font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                        </div>
-
-                        <div class="flex flex-col gap-3">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Current Price') }}</label>
-                            <input type="number" min="0" step="0.00000001" name="trading_custom_market_prices[${marketIndex}][current_price]" placeholder="0.00"
-                                class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-base font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                        </div>
-
-                        <div class="flex flex-col gap-3">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('24h Change (%)') }}</label>
-                            <input type="number" step="0.01" name="trading_custom_market_prices[${marketIndex}][change_1d_percentage]" placeholder="0"
-                                class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-base font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                        </div>
-
-                        <div class="flex flex-col gap-3">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Open') }}</label>
-                            <input type="number" min="0" step="0.00000001" name="trading_custom_market_prices[${marketIndex}][open_price]" placeholder="0.00"
-                                class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-base font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                        </div>
-
-                        <div class="flex flex-col gap-3">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('24h High') }}</label>
-                            <input type="number" min="0" step="0.00000001" name="trading_custom_market_prices[${marketIndex}][high]" placeholder="0.00"
-                                class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-base font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                        </div>
-
-                        <div class="flex flex-col gap-3">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('24h Low') }}</label>
-                            <input type="number" min="0" step="0.00000001" name="trading_custom_market_prices[${marketIndex}][low]" placeholder="0.00"
-                                class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-base font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                        </div>
-
-                        <div class="flex flex-col gap-3">
-                            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Volume') }}</label>
-                            <input type="number" min="0" step="0.00000001" name="trading_custom_market_prices[${marketIndex}][volume]" placeholder="0"
-                                class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-base font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
-                        </div>
-                    </div>
-                `;
-
-                $marketPricesContainer.append(html);
-                marketIndex++;
-            });
-
-            $(document).on('click', '.remove-market-price-btn', function() {
-                const $item = $(this).closest('.market-price-item');
-                $item.addClass('animate__fadeOutDown');
-                setTimeout(() => {
-                    $item.remove();
-                    if ($marketPricesContainer.find('.market-price-item').length === 0 && $emptyMarketPricesMsg.length) {
-                        $emptyMarketPricesMsg.fadeIn();
                     }
                 }, 300);
             });

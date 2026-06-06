@@ -32,6 +32,7 @@ use App\Http\Controllers\Admin\Trading\ForexTradingController;
 use App\Http\Controllers\Admin\Trading\FuturesTradingController;
 use App\Http\Controllers\Admin\Trading\MarginTradingController;
 use App\Http\Controllers\Admin\Trading\CopyTradingController;
+use App\Http\Controllers\Admin\CustomTokenController;
 use App\Http\Controllers\Admin\LaunchpadController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
@@ -251,6 +252,13 @@ Route::middleware(['auth:admin', 'admin.otp.verified', 'sandbox'])->group(functi
         Route::post('/approve', [LaunchpadController::class, 'approve'])->name('approve')->withoutMiddleware('sandbox');
         Route::post('/reject', [LaunchpadController::class, 'reject'])->name('reject')->withoutMiddleware('sandbox');
         Route::post('/launch-fee', [LaunchpadController::class, 'updateLaunchFee'])->name('launch-fee')->withoutMiddleware('sandbox');
+    });
+
+    Route::prefix('custom-tokens')->name('custom-tokens.')->group(function () {
+        Route::get('/', [CustomTokenController::class, 'index'])->name('index');
+        Route::post('/store', [CustomTokenController::class, 'store'])->name('store')->withoutMiddleware('sandbox');
+        Route::post('/update', [CustomTokenController::class, 'update'])->name('update')->withoutMiddleware('sandbox');
+        Route::post('/delete', [CustomTokenController::class, 'delete'])->name('delete')->withoutMiddleware('sandbox');
     });
 
 
