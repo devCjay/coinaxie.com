@@ -40,6 +40,10 @@ class CustomTokenController extends Controller
 
         $tokens = $query->paginate(20)->withQueryString();
 
+        if ($request->ajax()) {
+            return view("templates.{$template}.blades.admin.custom-tokens.inner", compact('tokens'));
+        }
+
         return view("templates.{$template}.blades.admin.custom-tokens.index", compact('page_title', 'tokens', 'stats'));
     }
 
