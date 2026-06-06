@@ -243,9 +243,8 @@
                                 </td>
                                 <td class="px-8 py-6 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <button type="button"
-                                            class="h-10 px-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black text-xs uppercase tracking-widest"
-                                            onclick="openEditToken(@json([
+                                        @php
+                                            $editPayload = [
                                                 'id' => (int) $t->id,
                                                 'market' => (string) $t->market,
                                                 'ticker' => (string) $t->ticker,
@@ -256,7 +255,11 @@
                                                 'low' => $t->low !== null ? (float) $t->low : null,
                                                 'volume' => $t->volume !== null ? (float) $t->volume : null,
                                                 'is_active' => (bool) $t->is_active,
-                                            ])">
+                                            ];
+                                        @endphp
+                                        <button type="button"
+                                            class="h-10 px-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-white font-black text-xs uppercase tracking-widest"
+                                            onclick='openEditToken(@json($editPayload))'>
                                             {{ __('Edit') }}
                                         </button>
                                         <form method="POST" action="{{ route('admin.custom-tokens.delete') }}" class="inline">
@@ -488,4 +491,3 @@
         });
     </script>
 @endsection
-
