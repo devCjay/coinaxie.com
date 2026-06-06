@@ -912,6 +912,135 @@ class LozandServices
         }
     }
 
+    public function futureTickersFromApi(): array
+    {
+        $cacheKey = 'future_tickers_api_import';
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
+
+        try {
+            $data = $this->withMarketDataFallback(function ($provider) {
+                try {
+                    if ($provider === 'binance') {
+                        $response = Http::timeout(30)->get($this->binance_futures_base_url . '/fapi/v1/ticker/24hr');
+                        if ($response->successful()) {
+                            $items = $response->json();
+                            $normalized = [];
+                            if (is_array($items)) {
+                                foreach ($items as $item) {
+                                    if (is_array($item)) {
+                                        $normalized[] = $this->normalizeBinance24hTicker($item);
+                                    }
+                                }
+                            }
+                            return [
+                                'status' => 'success',
+                                'data' => $normalized,
+                                'code' => $response->status()
+                            ];
+                        }
+                        Log::error($response->body());
+                        return [
+                            'status' => 'error',
+                            'message' => $this->binanceErrorMessage($response),
+                            'code' => $response->status()
+                        ];
+                    }
+
+                    if ($provider === 'bybit') {
+                        $response = Http::timeout(30)->get($this->bybit_base_url . '/v5/market/tickers', [
+                            'category' => 'linear',
+                        ]);
+                        if ($response->successful()) {
+                            $json = $response->json();
+                            $retCode = is_array($json) ? (int) ($json['retCode'] ?? 1) : 1;
+                            if ($retCode === 0) {
+                                $list = $json['result']['list'] ?? [];
+                                $normalized = [];
+                                if (is_array($list)) {
+                                    foreach ($list as $item) {
+                                        if (is_array($item)) {
+                                            $normalized[] = $this->normalizeBybitTicker($item);
+                                        }
+                                    }
+                                }
+                                return [
+                                    'status' => 'success',
+                                    'data' => $normalized,
+                                    'code' => $response->status()
+                                ];
+                            }
+                        }
+                        Log::error($response->body());
+                        return [
+                            'status' => 'error',
+                            'message' => $this->bybitErrorMessage($response),
+                            'code' => $response->status()
+                        ];
+                    }
+
+                    if ($provider === 'okx') {
+                        $response = Http::timeout(30)->get($this->okx_base_url . '/api/v5/market/tickers', [
+                            'instType' => 'SWAP',
+                        ]);
+                        if ($response->successful()) {
+                            $json = $response->json();
+                            if (is_array($json) && (string) ($json['code'] ?? '') === '0') {
+                                $list = $json['data'] ?? [];
+                                $normalized = [];
+                                if (is_array($list)) {
+                                    foreach ($list as $item) {
+                                        if (is_array($item)) {
+                                            $normalized[] = $this->normalizeOkxTicker($item);
+                                        }
+                                    }
+                                }
+                                return [
+                                    'status' => 'success',
+                                    'data' => $normalized,
+                                    'code' => $response->status()
+                                ];
+                            }
+                        }
+                        Log::error($response->body());
+                        return [
+                            'status' => 'error',
+                            'message' => $this->okxErrorMessage($response),
+                            'code' => $response->status()
+                        ];
+                    }
+
+                    return [
+                        'status' => 'error',
+                        'message' => 'Unsupported market data provider: ' . $provider,
+                        'code' => 500
+                    ];
+                } catch (\Exception $e) {
+                    Log::error($e->getMessage());
+                    return [
+                        'status' => 'error',
+                        'message' => $e->getMessage(),
+                        'code' => 500
+                    ];
+                }
+            });
+
+            if (($data['status'] ?? null) === 'success') {
+                Cache::put($cacheKey, $data, now()->addSeconds(10));
+            }
+
+            return $data;
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            return [
+                'status' => 'error',
+                'message' => $e->getMessage(),
+                'code' => 500
+            ];
+        }
+    }
+
     /**
      * Get single future ticker data.
      *
@@ -1609,6 +1738,135 @@ class LozandServices
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
+            return [
+                'status' => 'error',
+                'message' => $e->getMessage(),
+                'code' => 500
+            ];
+        }
+    }
+
+    public function marginsFromApi(): array
+    {
+        $cacheKey = 'margins_api_import';
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
+
+        try {
+            $data = $this->withMarketDataFallback(function ($provider) {
+                try {
+                    if ($provider === 'binance') {
+                        $response = Http::timeout(30)->get($this->binance_spot_base_url . '/api/v3/ticker/24hr');
+                        if ($response->successful()) {
+                            $items = $response->json();
+                            $normalized = [];
+                            if (is_array($items)) {
+                                foreach ($items as $item) {
+                                    if (is_array($item)) {
+                                        $normalized[] = $this->normalizeBinance24hTicker($item);
+                                    }
+                                }
+                            }
+                            return [
+                                'status' => 'success',
+                                'data' => $normalized,
+                                'code' => $response->status()
+                            ];
+                        }
+                        Log::error($response->body());
+                        return [
+                            'status' => 'error',
+                            'message' => $this->binanceErrorMessage($response),
+                            'code' => $response->status()
+                        ];
+                    }
+
+                    if ($provider === 'bybit') {
+                        $response = Http::timeout(30)->get($this->bybit_base_url . '/v5/market/tickers', [
+                            'category' => 'spot',
+                        ]);
+                        if ($response->successful()) {
+                            $json = $response->json();
+                            $retCode = is_array($json) ? (int) ($json['retCode'] ?? 1) : 1;
+                            if ($retCode === 0) {
+                                $list = $json['result']['list'] ?? [];
+                                $normalized = [];
+                                if (is_array($list)) {
+                                    foreach ($list as $item) {
+                                        if (is_array($item)) {
+                                            $normalized[] = $this->normalizeBybitTicker($item);
+                                        }
+                                    }
+                                }
+                                return [
+                                    'status' => 'success',
+                                    'data' => $normalized,
+                                    'code' => $response->status()
+                                ];
+                            }
+                        }
+                        Log::error($response->body());
+                        return [
+                            'status' => 'error',
+                            'message' => $this->bybitErrorMessage($response),
+                            'code' => $response->status()
+                        ];
+                    }
+
+                    if ($provider === 'okx') {
+                        $response = Http::timeout(30)->get($this->okx_base_url . '/api/v5/market/tickers', [
+                            'instType' => 'SPOT',
+                        ]);
+                        if ($response->successful()) {
+                            $json = $response->json();
+                            if (is_array($json) && (string) ($json['code'] ?? '') === '0') {
+                                $list = $json['data'] ?? [];
+                                $normalized = [];
+                                if (is_array($list)) {
+                                    foreach ($list as $item) {
+                                        if (is_array($item)) {
+                                            $normalized[] = $this->normalizeOkxTicker($item);
+                                        }
+                                    }
+                                }
+                                return [
+                                    'status' => 'success',
+                                    'data' => $normalized,
+                                    'code' => $response->status()
+                                ];
+                            }
+                        }
+                        Log::error($response->body());
+                        return [
+                            'status' => 'error',
+                            'message' => $this->okxErrorMessage($response),
+                            'code' => $response->status()
+                        ];
+                    }
+
+                    return [
+                        'status' => 'error',
+                        'message' => 'Unsupported market data provider: ' . $provider,
+                        'code' => 500
+                    ];
+                } catch (\Exception $e) {
+                    Log::error($e->getMessage());
+                    return [
+                        'status' => 'error',
+                        'message' => $e->getMessage(),
+                        'code' => 500
+                    ];
+                }
+            });
+
+            if (($data['status'] ?? null) === 'success') {
+                Cache::put($cacheKey, $data, now()->addSeconds(10));
+            }
+
+            return $data;
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
             return [
                 'status' => 'error',
                 'message' => $e->getMessage(),

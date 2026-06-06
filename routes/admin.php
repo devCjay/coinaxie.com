@@ -256,6 +256,7 @@ Route::middleware(['auth:admin', 'admin.otp.verified', 'sandbox'])->group(functi
 
     Route::prefix('custom-tokens')->name('custom-tokens.')->group(function () {
         Route::get('/', [CustomTokenController::class, 'index'])->name('index');
+        Route::post('/import', [CustomTokenController::class, 'importFromApi'])->name('import')->withoutMiddleware('sandbox');
         Route::post('/store', [CustomTokenController::class, 'store'])->name('store')->withoutMiddleware('sandbox');
         Route::post('/update', [CustomTokenController::class, 'update'])->name('update')->withoutMiddleware('sandbox');
         Route::post('/delete', [CustomTokenController::class, 'delete'])->name('delete')->withoutMiddleware('sandbox');

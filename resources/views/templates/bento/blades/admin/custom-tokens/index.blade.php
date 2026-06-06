@@ -134,28 +134,30 @@
                         </div>
                     </div>
 
-                    <form method="GET" action="{{ route('admin.custom-tokens.index') }}" class="flex-1 max-w-2xl flex flex-wrap gap-3 lg:justify-end">
-                        <div class="relative flex-1 group min-w-[200px]">
-                            <input type="text" name="search" value="{{ request('search') }}"
-                                placeholder="{{ __('Search by symbol...') }}"
-                                class="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-5 text-sm font-medium text-white focus:border-accent-primary focus:ring-1 focus:ring-accent-primary transition-all outline-none placeholder:text-text-secondary/30">
-                            <button type="submit"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded-xl text-text-secondary transition-colors group-hover:text-accent-primary">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                </svg>
-                            </button>
-                        </div>
+                    <div class="flex-1 max-w-2xl flex flex-wrap gap-3 lg:justify-end">
+                        <form method="GET" action="{{ route('admin.custom-tokens.index') }}" class="flex flex-wrap gap-3 flex-1 min-w-[260px]">
+                            <div class="relative flex-1 group min-w-[200px]">
+                                <input type="text" name="search" value="{{ request('search') }}"
+                                    placeholder="{{ __('Search by symbol...') }}"
+                                    class="w-full h-12 bg-white/5 border border-white/10 rounded-2xl px-5 text-sm font-medium text-white focus:border-accent-primary focus:ring-1 focus:ring-accent-primary transition-all outline-none placeholder:text-text-secondary/30">
+                                <button type="submit"
+                                    class="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-white/10 rounded-xl text-text-secondary transition-colors group-hover:text-accent-primary">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                </button>
+                            </div>
 
-                        <select name="market"
-                            class="h-12 bg-white/5 border border-white/10 rounded-2xl px-5 text-sm font-bold text-white focus:border-accent-primary focus:ring-1 focus:ring-accent-primary transition-all outline-none appearance-none min-w-[160px]">
-                            @php $m = (string) request('market', 'all'); @endphp
-                            <option value="all" class="bg-secondary-dark" {{ $m === 'all' ? 'selected' : '' }}>{{ __('All') }}</option>
-                            <option value="both" class="bg-secondary-dark" {{ $m === 'both' ? 'selected' : '' }}>{{ __('Both') }}</option>
-                            <option value="futures" class="bg-secondary-dark" {{ $m === 'futures' ? 'selected' : '' }}>{{ __('Futures') }}</option>
-                            <option value="margin" class="bg-secondary-dark" {{ $m === 'margin' ? 'selected' : '' }}>{{ __('Margin') }}</option>
-                        </select>
+                            <select name="market"
+                                class="h-12 bg-white/5 border border-white/10 rounded-2xl px-5 text-sm font-bold text-white focus:border-accent-primary focus:ring-1 focus:ring-accent-primary transition-all outline-none appearance-none min-w-[160px]">
+                                @php $m = (string) request('market', 'all'); @endphp
+                                <option value="all" class="bg-secondary-dark" {{ $m === 'all' ? 'selected' : '' }}>{{ __('All') }}</option>
+                                <option value="both" class="bg-secondary-dark" {{ $m === 'both' ? 'selected' : '' }}>{{ __('Both') }}</option>
+                                <option value="futures" class="bg-secondary-dark" {{ $m === 'futures' ? 'selected' : '' }}>{{ __('Futures') }}</option>
+                                <option value="margin" class="bg-secondary-dark" {{ $m === 'margin' ? 'selected' : '' }}>{{ __('Margin') }}</option>
+                            </select>
+                        </form>
 
                         @if (request('search') || request('market'))
                             <a href="{{ route('admin.custom-tokens.index') }}"
@@ -168,6 +170,21 @@
                             </a>
                         @endif
 
+                        <form method="POST" action="{{ route('admin.custom-tokens.import') }}">
+                            @csrf
+                            <input type="hidden" name="overwrite" value="0">
+                            <button type="submit"
+                                class="h-12 px-6 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 text-text-secondary hover:text-white flex items-center gap-2 transition-all font-bold text-xs uppercase tracking-widest shadow-lg">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M12 3v12m0 0l-3-3m3 3l3-3"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"></path>
+                                </svg>
+                                {{ __('Import From API') }}
+                            </button>
+                        </form>
+
                         <button type="button" onclick="openModal('createTokenModal')"
                             class="h-12 px-6 rounded-2xl bg-accent-primary text-white flex items-center gap-2 transition-all font-black text-xs uppercase tracking-widest shadow-lg hover:opacity-90 active:scale-95">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -176,7 +193,7 @@
                             </svg>
                             {{ __('Add Token') }}
                         </button>
-                    </form>
+                    </div>
                 </div>
             </div>
 
