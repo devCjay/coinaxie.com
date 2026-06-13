@@ -4,6 +4,7 @@ namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ContactController extends Controller
 {
@@ -22,8 +23,14 @@ class ContactController extends Controller
             'message' => 'required|string',
         ]);
 
-        // TODO: Send email to support email using existing email helpers
+        try {
+            $user = auth()->user();
+            sendContactEmail($user, $request->subject, $request->message);
 
-        return back()->with('success', __('Your message has been sent successfully!'));
+            return back()->with('success', __('Your message has been sent successfully!'));
+        } catch (\Exception $e) {
+            Log::error('Failed to send contact email: ' . $e->getMessage());
+            return back()->with('error', __('An error occurred while sending your message. Please try again later.'));
+        }
     }
 }

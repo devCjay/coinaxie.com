@@ -62,6 +62,11 @@
                         <p class="text-green-400 text-sm font-medium">{{ session('success') }}</p>
                     </div>
                 @endif
+                @if(session('error'))
+                    <div class="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+                        <p class="text-red-400 text-sm font-medium">{{ session('error') }}</p>
+                    </div>
+                @endif
 
                 <div class="space-y-2">
                     <label class="text-xs font-bold text-text-secondary uppercase tracking-wider">{{ __('Subject') }}</label>

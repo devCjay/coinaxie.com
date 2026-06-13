@@ -1,6 +1,7 @@
 <?php
 
 use App\Mail\AccountBan;
+use App\Mail\ContactEmail;
 use App\Mail\DepositEmail;
 use App\Mail\EmailVerification;
 use App\Mail\EtfEmail;
@@ -317,6 +318,35 @@ if (!function_exists('sendRichTextEmail')) {
             }
         } catch (\Exception $e) {
             Log::error('Failed to send rich text email: ' . $e->getMessage());
+        }
+    }
+}
+
+// send contact email to support
+if (!function_exists('sendContactEmail')) {
+    function sendContactEmail($sender, $subject, $message)
+    {
+        if (config('app.env') === 'sandbox') {
+            return;
+        }
+        $supportEmail = getSetting('email');
+        if (!$supportEmail) {
+            return;
+        }
+        try {
+            $locale = $sender->lang ?? config('app.locale');
+            if (getSetting('email_queue') == 'enabled') {
+                Mail::to($supportEmail)->locale($locale)->queue(
+                    new ContactEmail($sender->name, $sender->email, $message, $subject)
+                );
+            } else {
+                Mail::to($supportEmail)->locale($locale)->send(
+                    new ContactEmail($sender->name, $sender->email, $message, $subject)
+                );
+            }
+        } catch (\Exception $e) {
+            Log::error('Failed to send contact email: ' . $e->getMessage());
+            throw $e;
         }
     }
 }
