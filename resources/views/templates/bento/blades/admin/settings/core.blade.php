@@ -97,6 +97,13 @@
                                     class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-base font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
                             </div>
 
+                            <div class="flex flex-col gap-3">
+                                <label
+                                    class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Support Phone') }}</label>
+                                <input type="tel" name="support_phone" value="{{ getSetting('phone') }}"
+                                    class="bg-white/5 border border-white/10 rounded-2xl px-6 py-4 text-white text-base font-bold focus:border-accent-primary/50 focus:ring-4 focus:ring-accent-primary/10 transition-all outline-none">
+                            </div>
+
                             <div class="flex flex-col gap-3 md:col-span-2">
                                 <label
                                     class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ __('Application Timezone') }}</label>

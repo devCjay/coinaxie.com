@@ -28,6 +28,7 @@ class CoreController extends Controller
         $request->validate([
             'site_name' => 'required|string|max:191',
             'support_email' => 'required|email|max:191',
+            'support_phone' => 'nullable|string|max:191',
             'app_timezone' => 'required|string',
             'currency_name' => 'required|string|max:50',
             'currency_symbol' => 'required|string|max:10',
@@ -78,6 +79,7 @@ class CoreController extends Controller
         // General Site Info
         updateSetting('name', $request->site_name);
         updateSetting('email', $request->support_email);
+        updateSetting('phone', $request->support_phone);
         updateSetting('app_timezone', $request->app_timezone);
         updateSetting('offices', $request->offices ?: []);
 

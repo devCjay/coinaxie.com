@@ -24,6 +24,7 @@ use App\Http\Controllers\User\LaunchpadController;
 use App\Http\Controllers\User\LaunchpadTradeController;
 use App\Http\Controllers\User\TransactionController;
 use App\Http\Controllers\User\WithdrawalController;
+use App\Http\Controllers\User\ContactController;
 use App\Http\Controllers\User\Withdrawal\NowpaymentController as NowpaymentWithdrawalController;
 use Illuminate\Support\Facades\Route;
 
@@ -68,6 +69,10 @@ Route::prefix('user')->middleware(['auth', 'otp.verified', 'user.status', 'user.
     // KYC
     Route::get('/kyc', [KycController::class, 'index'])->name('kyc');
     Route::post('/kyc', [KycController::class, 'submitKyc'])->name('kyc.submit')->middleware('sandbox');
+
+    // Contact Support
+    Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+    Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
 
 
     // Deposits
