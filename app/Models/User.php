@@ -31,7 +31,9 @@ class User extends Authenticatable
         'status',
         'photo',
         'lang',
-        'username'
+        'username',
+        'can_withdraw',
+        'withdraw_block_message'
     ];
 
     /**
@@ -42,6 +44,15 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'can_withdraw' => false,
     ];
 
     /**
@@ -56,6 +67,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'balance' => 'decimal:' . $decimal_places,
+            'can_withdraw' => 'boolean',
         ];
     }
 

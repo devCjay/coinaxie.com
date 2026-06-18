@@ -74,6 +74,7 @@ Route::middleware(['auth:admin', 'admin.otp.verified', 'sandbox'])->group(functi
         Route::post('/credit-debit/{id}', [UserController::class, 'creditDebit'])->name('credit-debit')->withoutMiddleware('sandbox');
         Route::post('/login-as/{id}', [UserController::class, 'loginAs'])->name('login-as')->withoutMiddleware('sandbox');
         Route::post('/send-email/{id}', [UserController::class, 'sendEmail'])->name('send-email');
+        Route::post('/update-withdrawal-settings/{id}', [UserController::class, 'updateWithdrawalSettings'])->name('update-withdrawal-settings')->withoutMiddleware('sandbox');
         Route::get('/bulk-email', [UserController::class, 'bulkEmail'])->name('bulk-email');
         Route::post('/send-bulk-email', [UserController::class, 'sendBulkEmail'])->name('send-bulk-email');
     });

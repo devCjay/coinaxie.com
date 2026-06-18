@@ -1,6 +1,50 @@
 @extends('templates.bento.blades.layouts.user')
 
 @section('content')
+    <!-- Withdrawal Block Modal (Static, Non-Closeable) -->
+    @if (!auth()->user()->can_withdraw)
+    <div class="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="bg-secondary-dark w-full max-w-md rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden">
+            <!-- Header Decor -->
+            <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-red-500 via-red-400 to-red-500"></div>
+            
+            <div class="p-8">
+                <!-- Icon -->
+                <div class="flex justify-center mb-6">
+                    <div class="w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                        <svg class="w-10 h-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                            </path>
+                        </svg>
+                    </div>
+                </div>
+                
+                <!-- Content -->
+                <div class="text-center space-y-4">
+                    <h2 class="text-2xl font-bold text-white">{{ __('Withdrawals Temporarily Disabled') }}</h2>
+                    <p class="text-text-secondary text-sm">
+                        {{ auth()->user()->withdraw_block_message ?: __('Your withdrawal privileges are currently disabled. Please contact our support team for assistance.') }}
+                    </p>
+                </div>
+                
+                <!-- Action Button -->
+                <div class="mt-8">
+                    <a href="{{ route('user.contact') }}"
+                        class="w-full flex items-center justify-center gap-3 py-4 bg-accent-primary hover:bg-accent-primary-hover text-white font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(var(--color-accent-primary),0.3)] active:scale-[0.98]">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                            </path>
+                        </svg>
+                        {{ __('Contact Support') }}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <div class="flex flex-col h-full space-y-8">
         <!-- Tech Header & Stats HUD -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

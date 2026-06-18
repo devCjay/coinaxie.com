@@ -727,6 +727,38 @@
                     </div>
                 </div> {{-- End Main Layout Container --}}
 
+                {{-- Withdrawal Settings Section --}}
+                <div class="bg-secondary border border-white/5 rounded-3xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
+                        <h4 class="text-sm font-bold text-white uppercase tracking-wider">
+                            {{ __('Withdrawal Settings') }}
+                        </h4>
+                        <button type="button" class="trigger-modal text-xs font-bold text-accent-primary hover:text-white transition-colors" data-target="#withdrawal_settings_modal">
+                            {{ __('Edit') }}
+                        </button>
+                    </div>
+                    <div class="p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <p class="text-[10px] text-text-secondary uppercase font-bold tracking-widest mb-1">
+                                    {{ __('Can Withdraw') }}
+                                </p>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase {{ $user->can_withdraw ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20' }}">
+                                    {{ $user->can_withdraw ? __('Enabled') : __('Disabled') }}
+                                </span>
+                            </div>
+                            <div class="md:col-span-2">
+                                <p class="text-[10px] text-text-secondary uppercase font-bold tracking-widest mb-1">
+                                    {{ __('Withdrawal Block Message') }}
+                                </p>
+                                <p class="text-sm text-white font-medium">
+                                    {{ $user->withdraw_block_message ?: __('No custom message set') }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {{-- Detailed Info Section --}}
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {{-- Personal Information --}}
@@ -1410,6 +1442,115 @@
                 </div>
             </div>
         </div>
+
+        {{-- Withdrawal Settings Modal --}}
+        <div id="withdrawal_settings_modal" class="fixed inset-0 z-[110] hidden">
+            <div class="absolute inset-0 bg-black/60 backdrop-blur-sm modal-close"></div>
+            <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md p-6">
+                <div
+                    class="bg-secondary border border-white/10 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+                    <div class="p-6 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
+                        <h3 class="text-xl font-bold text-white flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-rose-500/20 flex items-center justify-center text-rose-400">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                    </path>
+                                </svg>
+                            </div>
+                            {{ __('Withdrawal Settings') }}
+                        </h3>
+                        <button type="button"
+                            class="text-text-secondary hover:text-white transition-colors modal-close cursor-pointer">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form id="withdrawal-settings-form" class="p-6 space-y-6">
+                        @csrf
+                        {{-- Can Withdraw Toggle --}}
+                        <div class="space-y-2">
+                            <label
+                                class="text-xs font-bold text-text-secondary uppercase tracking-widest">{{ __('Can Withdraw') }}</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <label
+                                    class="relative flex items-center justify-center p-4 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10 transition-all group has-[:checked]:border-emerald-500/50 has-[:checked]:bg-emerald-500/10">
+                                    <input type="radio" name="can_withdraw" value="1" class="hidden peer" {{ $user->can_withdraw ? 'checked' : '' }}>
+                                    <div class="flex flex-col items-center gap-2">
+                                        <svg class="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                        <span
+                                            class="text-xs font-bold text-white uppercase tracking-widest">{{ __('Enabled') }}</span>
+                                    </div>
+                                    <div
+                                        class="absolute top-2 right-2 opacity-0 peer-checked:opacity-100 transition-opacity">
+                                        <div class="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center">
+                                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </label>
+                                <label
+                                    class="relative flex items-center justify-center p-4 rounded-xl border border-white/10 bg-white/5 cursor-pointer hover:bg-white/10 transition-all group has-[:checked]:border-rose-500/50 has-[:checked]:bg-rose-500/10">
+                                    <input type="radio" name="can_withdraw" value="0" class="hidden peer" {{ !$user->can_withdraw ? 'checked' : '' }}>
+                                    <div class="flex flex-col items-center gap-2">
+                                        <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                        <span
+                                            class="text-xs font-bold text-white uppercase tracking-widest">{{ __('Disabled') }}</span>
+                                    </div>
+                                    <div
+                                        class="absolute top-2 right-2 opacity-0 peer-checked:opacity-100 transition-opacity">
+                                        <div class="w-4 h-4 rounded-full bg-rose-500 flex items-center justify-center">
+                                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                    d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        {{-- Withdrawal Block Message --}}
+                        <div class="space-y-2">
+                            <label
+                                class="text-xs font-bold text-text-secondary uppercase tracking-widest">{{ __('Block Message (Optional)') }}</label>
+                            <textarea name="withdraw_block_message" rows="3"
+                                class="w-full bg-[#1e293b] border border-white/10 rounded-xl p-4 text-white text-base font-medium focus:ring-1 focus:ring-rose-500 focus:border-rose-500 outline-none transition-all placeholder:text-text-secondary/30"
+                                placeholder="{{ __('Message to display when withdrawal is blocked...') }}">{{ $user->withdraw_block_message }}</textarea>
+                        </div>
+
+                        {{-- Action Buttons --}}
+                        <div class="flex gap-4 pt-4">
+                            <button type="button"
+                                class="flex-1 py-4 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all modal-close cursor-pointer">
+                                {{ __('Cancel') }}
+                            </button>
+                            <button type="submit"
+                                class="flex-1 py-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black shadow-lg shadow-rose-500/20 transition-all cursor-pointer">
+                                {{ __('Update Settings') }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <div id="loading-spinner"
             class="fixed inset-0 z-[120] hidden items-center justify-center bg-black/50 backdrop-blur-sm">
             <div class="w-16 h-16 border-4 border-accent-primary/20 border-t-accent-primary rounded-full animate-spin">
@@ -1651,6 +1792,41 @@
                     });
                 });
 
+                // Withdrawal settings form
+                $('#withdrawal-settings-form').on('submit', function(e) {
+                    e.preventDefault();
+                    const formData = $(this).serialize();
+
+                    $('#loading-spinner').removeClass('hidden').addClass('flex');
+                    $('#withdrawal_settings_modal').addClass('hidden').removeClass('flex');
+
+                    $.ajax({
+                        url: "{{ route('admin.users.update-withdrawal-settings', $user->id) }}",
+                        type: 'POST',
+                        data: formData,
+                        success: function(response) {
+                            if (response.success || response.status === 'success') {
+                                updateDetailContent();
+                                toastNotification(response.message, 'success');
+                            } else {
+                                toastNotification(response.message ||
+                                    '{{ __('An error occurred.') }}',
+                                    'error');
+                                $('#withdrawal_settings_modal').removeClass('hidden').addClass('flex');
+                            }
+                        },
+                        error: function(xhr) {
+                            const error = xhr.responseJSON ? xhr.responseJSON.message :
+                                "{{ __('An error occurred while processing the request.') }}";
+                            toastNotification(error, 'error');
+                            $('#withdrawal_settings_modal').removeClass('hidden').addClass('flex');
+                        },
+                        complete: function() {
+                            $('#loading-spinner').addClass('hidden').removeClass('flex');
+                        }
+                    });
+                });
+
                 function updateDetailContent() {
                     $.get(window.location.href, function(data) {
                         $('#user-detail-content').html($(data).find('#user-detail-content').html());
@@ -1662,6 +1838,7 @@
                     $('#credit_debit_user_modal').addClass('hidden').removeClass('flex');
                     $('#send_email_modal').addClass('hidden').removeClass('flex');
                     $('#trading_modules_modal').addClass('hidden').removeClass('flex');
+                    $('#withdrawal_settings_modal').addClass('hidden').removeClass('flex');
                 });
             });
         </script>
