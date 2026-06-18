@@ -349,6 +349,7 @@ class CopyTradingController extends Controller
 
                         // Add PnL to balance!
                         $tradingAccount->increment('balance', $pnlOverride);
+                        $tradingAccount->refresh();
 
                         // Mark position as realized, set realized_pnl!
                         $position->update([
@@ -356,6 +357,22 @@ class CopyTradingController extends Controller
                             'realized_pnl' => $pnlOverride,
                             'timestamp' => (string) now()->valueOf(),
                         ]);
+
+                        // Record transaction for pro trader
+                        $ref = \Str::random(12);
+                        $typeTx = $pnlOverride > 0 ? 'credit' : 'debit';
+                        $absPnl = abs($pnlOverride);
+                        $proDesc = "Futures trading PnL on {$ticker}: " . ($pnlOverride > 0 ? "+" : "") . number_format($pnlOverride, 2) . " USDT";
+                        recordTransaction($user, $absPnl, 'USDT', $absPnl, 'USDT', 1, $typeTx, 'completed', $ref, $proDesc, $tradingAccount->balance);
+
+                        // Send notification and email to pro trader
+                        $proTitle = $pnlOverride > 0 ? "Futures Trading Profit" : "Futures Trading Loss";
+                        $proBody = __("You have realized a PnL of :pnl USDT on your futures trade for :ticker.", [
+                            'pnl' => number_format($pnlOverride, 2),
+                            'ticker' => $ticker
+                        ], $user->lang);
+                        recordNotificationMessage($user, $proTitle, $proBody);
+                        sendRichTextEmail($proTitle, nl2br(e($proBody)), $user);
 
                         // Now do the same for followers!
                         $relationships = CopyTradingRelationship::where('pro_trader_id', $pro->id)
@@ -406,6 +423,24 @@ class CopyTradingController extends Controller
                                     // Just credit/debit the follower's balance
                                     $followerAccount->increment('balance', $followerPnl);
                                 }
+                                $followerAccount->refresh();
+
+                                // Record transaction for follower
+                                $followerRef = \Str::random(12);
+                                $followerTypeTx = $followerPnl > 0 ? 'credit' : 'debit';
+                                $followerAbsPnl = abs($followerPnl);
+                                $followerDesc = "Copy trading PnL ({$pro->display_name}) on {$ticker}: " . ($followerPnl > 0 ? "+" : "") . number_format($followerPnl, 2) . " USDT";
+                                recordTransaction($follower, $followerAbsPnl, 'USDT', $followerAbsPnl, 'USDT', 1, $followerTypeTx, 'completed', $followerRef, $followerDesc, $followerAccount->balance);
+
+                                // Send notification and email to follower
+                                $followerTitle = $followerPnl > 0 ? "Copy Trading Profit" : "Copy Trading Loss";
+                                $followerBody = __("You have realized a PnL of :pnl USDT from copying :pro_trader's futures trade for :ticker.", [
+                                    'pnl' => number_format($followerPnl, 2),
+                                    'pro_trader' => $pro->display_name,
+                                    'ticker' => $ticker
+                                ], $follower->lang);
+                                recordNotificationMessage($follower, $followerTitle, $followerBody);
+                                sendRichTextEmail($followerTitle, nl2br(e($followerBody)), $follower);
                             } catch (\Exception $e) {
                                 Log::error($e->getMessage());
                             }
@@ -526,12 +561,29 @@ class CopyTradingController extends Controller
                         // Refund margin and add PnL!
                         $tradingAccount->increment('balance', (float) $position->margin);
                         $tradingAccount->increment('balance', $pnlOverride);
+                        $tradingAccount->refresh();
 
                         $position->update([
                             'unrealized_pnl' => 0,
                             'realized_pnl' => $pnlOverride,
                             'timestamp' => (string) now()->valueOf(),
                         ]);
+
+                        // Record transaction for pro trader
+                        $ref = \Str::random(12);
+                        $typeTx = $pnlOverride > 0 ? 'credit' : 'debit';
+                        $absPnl = abs($pnlOverride);
+                        $proDesc = "Margin trading PnL on {$ticker}: " . ($pnlOverride > 0 ? "+" : "") . number_format($pnlOverride, 2) . " USDT";
+                        recordTransaction($user, $absPnl, 'USDT', $absPnl, 'USDT', 1, $typeTx, 'completed', $ref, $proDesc, $tradingAccount->balance);
+
+                        // Send notification and email to pro trader
+                        $proTitle = $pnlOverride > 0 ? "Margin Trading Profit" : "Margin Trading Loss";
+                        $proBody = __("You have realized a PnL of :pnl USDT on your margin trade for :ticker.", [
+                            'pnl' => number_format($pnlOverride, 2),
+                            'ticker' => $ticker
+                        ], $user->lang);
+                        recordNotificationMessage($user, $proTitle, $proBody);
+                        sendRichTextEmail($proTitle, nl2br(e($proBody)), $user);
 
                         $relationships = CopyTradingRelationship::where('pro_trader_id', $pro->id)
                             ->where('status', 'active')
@@ -576,6 +628,24 @@ class CopyTradingController extends Controller
                                 } else {
                                     $followerAccount->increment('balance', $followerPnl);
                                 }
+                                $followerAccount->refresh();
+
+                                // Record transaction for follower
+                                $followerRef = \Str::random(12);
+                                $followerTypeTx = $followerPnl > 0 ? 'credit' : 'debit';
+                                $followerAbsPnl = abs($followerPnl);
+                                $followerDesc = "Copy trading PnL ({$pro->display_name}) on {$ticker}: " . ($followerPnl > 0 ? "+" : "") . number_format($followerPnl, 2) . " USDT";
+                                recordTransaction($follower, $followerAbsPnl, 'USDT', $followerAbsPnl, 'USDT', 1, $followerTypeTx, 'completed', $followerRef, $followerDesc, $followerAccount->balance);
+
+                                // Send notification and email to follower
+                                $followerTitle = $followerPnl > 0 ? "Copy Trading Profit" : "Copy Trading Loss";
+                                $followerBody = __("You have realized a PnL of :pnl USDT from copying :pro_trader's margin trade for :ticker.", [
+                                    'pnl' => number_format($followerPnl, 2),
+                                    'pro_trader' => $pro->display_name,
+                                    'ticker' => $ticker
+                                ], $follower->lang);
+                                recordNotificationMessage($follower, $followerTitle, $followerBody);
+                                sendRichTextEmail($followerTitle, nl2br(e($followerBody)), $follower);
                             } catch (\Exception $e) {
                                 Log::error($e->getMessage());
                             }
