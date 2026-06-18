@@ -556,10 +556,11 @@
                 </div>
 
                 <div id="tradeHistoryPnlWrap">
-                    <label class="text-sm text-text-secondary">{{ __('PnL (optional)') }}</label>
+                    <label class="text-sm text-text-secondary">{{ __('PnL (required for completed trade)') }}</label>
                     <input type="number" name="pnl" id="tradeHistoryPnl" step="0.01"
                         class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
                         placeholder="0.00">
+                    <p class="mt-1 text-xs text-text-secondary">Positive value = profit, Negative value = loss</p>
                 </div>
 
                 <div class="md:col-span-2">

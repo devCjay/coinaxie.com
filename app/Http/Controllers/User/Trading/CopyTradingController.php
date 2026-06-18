@@ -349,7 +349,7 @@ class CopyTradingController extends Controller
                 $entry = (float) $p->entry_price;
                 $mark = (float) $p->current_price;
                 $size = (float) $p->size;
-                $pnl = (float) $p->unrealized_pnl;
+                $pnl = (float) ($p->realized_pnl ?? $p->unrealized_pnl);
                 if ($pnl == 0 && $entry > 0 && $mark > 0 && $size > 0) {
                     $pnl = $p->side === 'buy' ? (($mark - $entry) * $size) : (($entry - $mark) * $size);
                 }
@@ -372,7 +372,7 @@ class CopyTradingController extends Controller
                 $entry = (float) $p->entry_price;
                 $mark = (float) $p->current_price;
                 $size = (float) $p->size;
-                $pnl = (float) $p->unrealized_pnl;
+                $pnl = (float) ($p->realized_pnl ?? $p->unrealized_pnl);
                 if ($pnl == 0 && $entry > 0 && $mark > 0 && $size > 0) {
                     $pnl = $p->side === 'buy' ? (($mark - $entry) * $size) : (($entry - $mark) * $size);
                 }

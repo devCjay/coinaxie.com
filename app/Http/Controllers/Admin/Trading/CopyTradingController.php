@@ -140,7 +140,7 @@ class CopyTradingController extends Controller
             'order_mode' => 'nullable|in:normal,borrow',
             'take_profit' => 'nullable|numeric|min:0',
             'stop_loss' => 'nullable|numeric|min:0',
-            'pnl' => 'nullable|numeric',
+            'pnl' => 'required|numeric',
         ]);
 
         $pro = CopyTradingProTrader::with('user')->findOrFail((int) $request->pro_trader_id);
@@ -170,7 +170,7 @@ class CopyTradingController extends Controller
             return back()->with('error', __('Invalid entry price'));
         }
 
-        $pnlOverride = $request->filled('pnl') ? (float) $request->pnl : null;
+        $pnlOverride = (float) $request->pnl;
 
         if ($tp > 0 && $side === 'buy' && $tp <= $entryPrice) {
             return back()->with('error', __('Take profit should be greater than entry price'));
@@ -333,12 +333,84 @@ class CopyTradingController extends Controller
                         }
                     }
                 });
-                if ($type === 'market' && $pnlOverride !== null) {
+                if ($type === 'market') {
+                    // First set the unrealized PnL
                     FuturesTradingPositions::where('user_id', $user->id)->where('ticker', $ticker)->update([
                         'current_price' => $currentPrice,
                         'unrealized_pnl' => $pnlOverride,
                         'timestamp' => (string) now()->valueOf(),
                     ]);
+
+                    // Now close the position and realize the PnL!
+                    $position = FuturesTradingPositions::where('user_id', $user->id)->where('ticker', $ticker)->first();
+                    if ($position) {
+                        // Refund margin
+                        $tradingAccount->increment('balance', (float) $position->margin);
+
+                        // Add PnL to balance!
+                        $tradingAccount->increment('balance', $pnlOverride);
+
+                        // Mark position as realized, set realized_pnl!
+                        $position->update([
+                            'unrealized_pnl' => 0,
+                            'realized_pnl' => $pnlOverride,
+                            'timestamp' => (string) now()->valueOf(),
+                        ]);
+
+                        // Now do the same for followers!
+                        $relationships = CopyTradingRelationship::where('pro_trader_id', $pro->id)
+                            ->where('status', 'active')
+                            ->whereIn('market_type', ['futures', 'both'])
+                            ->get();
+
+                        foreach ($relationships as $rel) {
+                            try {
+                                $follower = $rel->follower;
+                                if (!$follower || $follower->id === $user->id) continue;
+
+                                $followerAccount = $follower->tradingAccounts()
+                                    ->where('account_type', 'futures')
+                                    ->where('currency', 'USDT')
+                                    ->first() ?? $follower->tradingAccounts()->where('account_type', 'futures')->first();
+                                if (!$followerAccount) continue;
+
+                                // Calculate follower's PnL based on their allocation
+                                $followerPnl = 0;
+                                $totalProBalance = (float) $tradingAccount->balance;
+                                if ($totalProBalance > 0) {
+                                    $followerRatio = 0;
+                                    if ($rel->allocation_type === 'percent') {
+                                        $followerRatio = ((float) $rel->allocation_value) / 100;
+                                    } else {
+                                        $followerRatio = ((float) $rel->allocation_value) / $totalProBalance;
+                                    }
+                                    $followerRatio = min(1, max(0, $followerRatio));
+                                    $followerPnl = $pnlOverride * $followerRatio;
+                                } else {
+                                    $followerPnl = $pnlOverride * 0.1;
+                                }
+
+                                // Create a copy position for follower, then close it!
+                                $followerPos = FuturesTradingPositions::where('user_id', $follower->id)->where('ticker', $ticker)->first();
+
+                                // If follower has open pos, close it and credit/debit balance
+                                if ($followerPos) {
+                                    $followerAccount->increment('balance', (float) $followerPos->margin);
+                                    $followerAccount->increment('balance', $followerPnl);
+                                    $followerPos->update([
+                                        'unrealized_pnl' => 0,
+                                        'realized_pnl' => $followerPnl,
+                                        'timestamp' => (string) now()->valueOf(),
+                                    ]);
+                                } else {
+                                    // Just credit/debit the follower's balance
+                                    $followerAccount->increment('balance', $followerPnl);
+                                }
+                            } catch (\Exception $e) {
+                                Log::error($e->getMessage());
+                            }
+                        }
+                    }
                 }
             } else {
                 $orderMode = (string) ($request->order_mode ?? 'normal');
@@ -441,12 +513,74 @@ class CopyTradingController extends Controller
                         $tradingAccount->decrement('balance', (float) $lockedMargin);
                     }
                 });
-                if ($type === 'market' && $pnlOverride !== null) {
+                if ($type === 'market') {
+                    // First set the unrealized PnL
                     MarginTradingPosition::where('user_id', $user->id)->where('ticker', $ticker)->where('status', 'open')->update([
                         'current_price' => $currentPrice,
                         'unrealized_pnl' => $pnlOverride,
                         'timestamp' => (string) now()->valueOf(),
                     ]);
+
+                    $position = MarginTradingPosition::where('user_id', $user->id)->where('ticker', $ticker)->where('status', 'open')->first();
+                    if ($position) {
+                        // Refund margin and add PnL!
+                        $tradingAccount->increment('balance', (float) $position->margin);
+                        $tradingAccount->increment('balance', $pnlOverride);
+
+                        $position->update([
+                            'unrealized_pnl' => 0,
+                            'realized_pnl' => $pnlOverride,
+                            'timestamp' => (string) now()->valueOf(),
+                        ]);
+
+                        $relationships = CopyTradingRelationship::where('pro_trader_id', $pro->id)
+                            ->where('status', 'active')
+                            ->whereIn('market_type', ['margin', 'both'])
+                            ->get();
+
+                        foreach ($relationships as $rel) {
+                            try {
+                                $follower = $rel->follower;
+                                if (!$follower || $follower->id === $user->id) continue;
+
+                                $followerAccount = $follower->tradingAccounts()
+                                    ->where('account_type', 'margin')
+                                    ->where('currency', 'USDT')
+                                    ->first() ?? $follower->tradingAccounts()->where('account_type', 'margin')->first();
+                                if (!$followerAccount) continue;
+
+                                $followerPnl = 0;
+                                $totalProBalance = (float) $tradingAccount->balance;
+                                if ($totalProBalance > 0) {
+                                    $followerRatio = 0;
+                                    if ($rel->allocation_type === 'percent') {
+                                        $followerRatio = ((float) $rel->allocation_value) / 100;
+                                    } else {
+                                        $followerRatio = ((float) $rel->allocation_value) / $totalProBalance;
+                                    }
+                                    $followerRatio = min(1, max(0, $followerRatio));
+                                    $followerPnl = $pnlOverride * $followerRatio;
+                                } else {
+                                    $followerPnl = $pnlOverride * 0.1;
+                                }
+
+                                $followerPos = MarginTradingPosition::where('user_id', $follower->id)->where('ticker', $ticker)->where('status', 'open')->first();
+                                if ($followerPos) {
+                                    $followerAccount->increment('balance', (float) $followerPos->margin);
+                                    $followerAccount->increment('balance', $followerPnl);
+                                    $followerPos->update([
+                                        'unrealized_pnl' => 0,
+                                        'realized_pnl' => $followerPnl,
+                                        'timestamp' => (string) now()->valueOf(),
+                                    ]);
+                                } else {
+                                    $followerAccount->increment('balance', $followerPnl);
+                                }
+                            } catch (\Exception $e) {
+                                Log::error($e->getMessage());
+                            }
+                        }
+                    }
                 }
             }
 
