@@ -33,6 +33,11 @@
             border-radius: 24px;
             box-shadow: 0 25px 70px rgba(0, 0, 0, 0.55);
         }
+
+        .token-search-results {
+            max-height: 220px;
+            overflow-y: auto;
+        }
     </style>
 
     <div class="space-y-8">
@@ -590,20 +595,17 @@
 
                 <div>
                     <label class="text-sm text-text-secondary">{{ __('Custom Token') }}</label>
-                    <select name="custom_token_id" id="tradeHistoryToken"
-                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
-                        required>
-                        <option value="">{{ __('Select token') }}</option>
-                        @foreach ($customTokens as $token)
-                            <option value="{{ $token->id }}"
-                                data-market="{{ $token->market }}"
-                                data-ticker="{{ $token->ticker }}"
-                                data-price="{{ $token->current_price }}"
-                                @selected((string) old('custom_token_id') === (string) $token->id)>
-                                {{ $token->ticker }} ({{ strtoupper($token->market) }})
-                            </option>
-                        @endforeach
-                    </select>
+                    <input type="hidden" name="custom_token_id" id="tradeHistoryTokenId"
+                        value="{{ old('custom_token_id') }}">
+                    <div class="relative mt-2">
+                        <input type="text" id="tradeHistoryTokenSearch"
+                            class="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                            placeholder="{{ __('Search token by ticker...') }}"
+                            autocomplete="off">
+                        <div id="tradeHistoryTokenResults"
+                            class="token-search-results absolute left-0 right-0 top-full mt-2 hidden rounded-2xl border border-white/10 bg-slate-950 shadow-2xl z-20"></div>
+                    </div>
+                    <p class="mt-1 text-xs text-text-secondary">{{ __('Type to filter active custom tokens for the selected market.') }}</p>
                 </div>
 
                 <div>
@@ -725,24 +727,6 @@
         function syncTradeHistoryFields() {
             const market = ($('#tradeHistoryMarket').val() || 'futures').toString();
             const type = ($('#tradeHistoryType').val() || 'market').toString();
-            let hasVisibleOption = false;
-
-            $('#tradeHistoryToken option').each(function(index) {
-                if (index === 0) return;
-                const tokenMarket = ($(this).data('market') || '').toString();
-                const matches = tokenMarket === market || tokenMarket === 'both';
-                $(this).prop('hidden', !matches);
-                if (matches) {
-                    hasVisibleOption = true;
-                }
-            });
-
-            const selectedOption = $('#tradeHistoryToken option:selected');
-            const selectedMarket = (selectedOption.data('market') || '').toString();
-            const isSelectedVisible = selectedOption.length && (selectedMarket === market || selectedMarket === 'both');
-            if (!isSelectedVisible) {
-                $('#tradeHistoryToken').val('');
-            }
 
             if (type === 'limit') {
                 $('#tradeHistoryPnlWrap').addClass('hidden');
@@ -759,17 +743,94 @@
                 $('#tradeHistoryOrderMode').val('normal');
             }
 
-            if (!hasVisibleOption) {
-                $('#tradeHistoryToken').val('');
+            ensureTradeHistoryTokenMatchesMarket();
+            renderTradeHistoryTokenResults();
+            syncTradeHistoryTokenDetails();
+        }
+
+        const tradeHistoryTokens = @json(
+            $customTokens
+                ->map(fn($token) => [
+                    'id' => (int) $token->id,
+                    'ticker' => (string) $token->ticker,
+                    'market' => (string) $token->market,
+                    'price' => (float) $token->current_price,
+                ])
+                ->values()
+        );
+
+        function getTradeHistoryTokenById(id) {
+            return tradeHistoryTokens.find(token => token.id.toString() === (id || '').toString()) || null;
+        }
+
+        function getTradeHistoryFilteredTokens() {
+            const market = ($('#tradeHistoryMarket').val() || 'futures').toString();
+            const query = ($('#tradeHistoryTokenSearch').val() || '').toString().trim().toLowerCase();
+
+            return tradeHistoryTokens.filter(token => {
+                const marketMatch = token.market === market || token.market === 'both';
+                const queryMatch = !query || token.ticker.toLowerCase().includes(query);
+                return marketMatch && queryMatch;
+            });
+        }
+
+        function ensureTradeHistoryTokenMatchesMarket() {
+            const selectedId = $('#tradeHistoryTokenId').val();
+            const selectedToken = getTradeHistoryTokenById(selectedId);
+            const market = ($('#tradeHistoryMarket').val() || 'futures').toString();
+
+            if (selectedToken && !(selectedToken.market === market || selectedToken.market === 'both')) {
+                $('#tradeHistoryTokenId').val('');
+                $('#tradeHistoryTokenSearch').val('');
+            }
+        }
+
+        function renderTradeHistoryTokenResults() {
+            const results = $('#tradeHistoryTokenResults');
+            const filteredTokens = getTradeHistoryFilteredTokens();
+
+            if (!filteredTokens.length) {
+                results.html('<div class="px-4 py-3 text-sm text-text-secondary">{{ __('No matching token found.') }}</div>');
+                results.removeClass('hidden');
+                return;
             }
 
+            const selectedId = ($('#tradeHistoryTokenId').val() || '').toString();
+            const html = filteredTokens.map(token => {
+                const activeClass = token.id.toString() === selectedId
+                    ? 'bg-accent-primary/20 text-white'
+                    : 'text-white/80 hover:bg-white/5';
+
+                return `<button type="button" class="trade-history-token-option w-full flex items-center justify-between gap-3 px-4 py-3 text-left transition ${activeClass}" data-id="${token.id}">
+                    <span class="font-semibold">${token.ticker}</span>
+                    <span class="text-xs uppercase text-text-secondary">${token.market}</span>
+                    <span class="text-xs text-text-secondary">${Number(token.price).toFixed(8)}</span>
+                </button>`;
+            }).join('');
+
+            results.html(html);
+            results.removeClass('hidden');
+        }
+
+        function selectTradeHistoryToken(id) {
+            const token = getTradeHistoryTokenById(id);
+            if (!token) {
+                $('#tradeHistoryTokenId').val('');
+                $('#tradeHistoryTokenSearch').val('');
+                syncTradeHistoryTokenDetails();
+                return;
+            }
+
+            $('#tradeHistoryTokenId').val(token.id);
+            $('#tradeHistoryTokenSearch').val(`${token.ticker} (${token.market.toUpperCase()})`);
+            $('#tradeHistoryTokenResults').addClass('hidden');
             syncTradeHistoryTokenDetails();
         }
 
         function syncTradeHistoryTokenDetails() {
-            const selectedOption = $('#tradeHistoryToken option:selected');
-            const ticker = (selectedOption.data('ticker') || '').toString();
-            const price = (selectedOption.data('price') || '').toString();
+            const token = getTradeHistoryTokenById($('#tradeHistoryTokenId').val());
+            const ticker = token ? token.ticker : '';
+            const price = token ? token.price : '';
 
             $('#tradeHistoryTicker').val(ticker);
             $('#tradeHistoryPrice').val(price);
@@ -783,7 +844,8 @@
             $('#tradeHistoryUserLabel').text(data.user_label || '');
             $('#tradeHistoryMarket').val('futures');
             $('#tradeHistoryType').val('market');
-            $('#tradeHistoryToken').val('');
+            $('#tradeHistoryTokenId').val('');
+            $('#tradeHistoryTokenSearch').val('');
             $('#tradeHistoryTicker').val('');
             $('#tradeHistorySide').val('buy');
             $('#tradeHistoryAmount').val('');
@@ -816,11 +878,23 @@
                 syncTradeHistoryFields();
             });
 
-            $('#tradeHistoryToken').on('change', function() {
-                syncTradeHistoryTokenDetails();
+            $('#tradeHistoryTokenSearch').on('focus input', function() {
+                const selectedToken = getTradeHistoryTokenById($('#tradeHistoryTokenId').val());
+                const currentValue = ($(this).val() || '').toString().trim();
+                if (selectedToken && currentValue !== `${selectedToken.ticker} (${selectedToken.market.toUpperCase()})`) {
+                    $('#tradeHistoryTokenId').val('');
+                }
+                renderTradeHistoryTokenResults();
+            });
+
+            $(document).on('click', '.trade-history-token-option', function() {
+                selectTradeHistoryToken($(this).data('id'));
             });
 
             syncTradeHistoryFields();
+            if ($('#tradeHistoryTokenId').val()) {
+                selectTradeHistoryToken($('#tradeHistoryTokenId').val());
+            }
 
             if (@json((bool) old('pro_trader_id'))) {
                 openModal('tradeHistoryModal');
@@ -829,6 +903,12 @@
             $(window).on('click', function(e) {
                 if ($(e.target).hasClass('modal')) {
                     $(e.target).hide();
+                }
+            });
+
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('#tradeHistoryTokenSearch, #tradeHistoryTokenResults').length) {
+                    $('#tradeHistoryTokenResults').addClass('hidden');
                 }
             });
         });

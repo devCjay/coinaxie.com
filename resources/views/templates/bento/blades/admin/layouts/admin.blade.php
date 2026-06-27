@@ -60,6 +60,17 @@
         .modal-close {
             cursor: pointer !important;
         }
+
+        select {
+            color-scheme: dark;
+        }
+
+        select,
+        select option,
+        select optgroup {
+            background-color: #0f172a !important;
+            color: #f8fafc !important;
+        }
     </style>
 
     @stack('css')
