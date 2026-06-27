@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -396,34 +397,46 @@ class UserController extends Controller
         }
 
         try {
-            \DB::beginTransaction();
+            \DB::transaction(function () use ($user, $amount, $type) {
+                if ($type == 'credit') {
+                    $user->balance += $amount;
+                } else {
+                    $user->balance -= $amount;
+                }
 
-            if ($type == 'credit') {
-                $user->balance += $amount;
-            } else {
-                $user->balance -= $amount;
-            }
+                $user->save();
+            });
 
-            $user->save();
-
-
-
-            \DB::commit();
             $user->refresh();
             $currency = getSetting('currency');
             $ref = \Str::orderedUuid();
 
-            recordTransaction($user, $amount, $currency, $amount, $currency, 1, $type, 'completed', $ref, $description, $user->balance);
-            $title = __($description, [], $user->lang);
-            $body = __('Your balance has been adjusted by admin. Amount: :amount :currency', ['amount' => $amount, 'currency' => $currency], $user->lang);
-            recordNotificationMessage($user, $title, $body);
+            try {
+                recordTransaction($user, $amount, $currency, $amount, $currency, 1, $type, 'completed', $ref, $description, $user->balance);
+                $title = __($description, [], $user->lang);
+                $body = __('Your balance has been adjusted by admin. Amount: :amount :currency', ['amount' => $amount, 'currency' => $currency], $user->lang);
+                recordNotificationMessage($user, $title, $body);
+            } catch (\Throwable $e) {
+                Log::error('Admin user credit/debit side effects failed', [
+                    'user_id' => $user->id,
+                    'type' => $type,
+                    'amount' => $amount,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
                 'message' => __('User balance adjusted successfully.')
             ]);
-        } catch (\Exception $e) {
-            \DB::rollBack();
+        } catch (\Throwable $e) {
+            Log::error('Admin user credit/debit failed', [
+                'user_id' => $user->id,
+                'type' => $type,
+                'amount' => $amount,
+                'error' => $e->getMessage(),
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => __('An error occurred while adjusting balance.')
