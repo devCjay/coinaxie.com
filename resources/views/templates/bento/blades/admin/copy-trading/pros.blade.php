@@ -7,6 +7,16 @@
         $minCopyAmount = (float) ($minCopyAmount ?? 0);
         $stats = $stats ?? [];
         $customTokens = $customTokens ?? collect();
+        $tradeHistoryTokenOptions = $customTokens
+            ->map(function ($token) {
+                return [
+                    'id' => (int) $token->id,
+                    'ticker' => (string) $token->ticker,
+                    'market' => (string) $token->market,
+                    'price' => (float) $token->current_price,
+                ];
+            })
+            ->values();
     @endphp
 
     <style>
@@ -748,16 +758,7 @@
             syncTradeHistoryTokenDetails();
         }
 
-        const tradeHistoryTokens = @json(
-            $customTokens
-                ->map(fn($token) => [
-                    'id' => (int) $token->id,
-                    'ticker' => (string) $token->ticker,
-                    'market' => (string) $token->market,
-                    'price' => (float) $token->current_price,
-                ])
-                ->values()
-        );
+        const tradeHistoryTokens = @json($tradeHistoryTokenOptions);
 
         function getTradeHistoryTokenById(id) {
             return tradeHistoryTokens.find(token => token.id.toString() === (id || '').toString()) || null;
