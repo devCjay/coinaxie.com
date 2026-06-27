@@ -722,6 +722,8 @@
         });
     </script>
 
+    @include('templates.bento.blades.partials.notifications')
+
     {{-- Page Specific Scripts --}}
     @yield('scripts')
 

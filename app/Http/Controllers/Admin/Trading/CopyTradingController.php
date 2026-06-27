@@ -12,6 +12,7 @@ use App\Models\MarginTradingPosition;
 use App\Services\CopyTradingService;
 use App\Services\LozandServices;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -32,6 +33,126 @@ class CopyTradingController extends Controller
             ->get();
 
         $users = User::latest()->take(50)->get();
+        $proUserIds = $pros->pluck('user_id')->filter()->values();
+        $proUserMeta = $pros->mapWithKeys(function ($pro) {
+            $label = $pro->display_name ?: ($pro->user->username ?? $pro->user->email ?? ('#' . $pro->user_id));
+
+            return [
+                $pro->user_id => [
+                    'pro_trader_id' => (int) $pro->id,
+                    'trader_label' => (string) $label,
+                ],
+            ];
+        });
+
+        $recentTrades = collect();
+
+        if ($proUserIds->isNotEmpty()) {
+            $recentTrades = $recentTrades
+                ->concat(
+                    FuturesTradingPositions::whereIn('user_id', $proUserIds)
+                        ->latest()
+                        ->take(20)
+                        ->get()
+                        ->map(function ($position) use ($proUserMeta) {
+                            $meta = $proUserMeta[$position->user_id] ?? null;
+                            $pnl = (float) ($position->realized_pnl ?: $position->unrealized_pnl);
+
+                            return [
+                                'market' => 'futures',
+                                'order_type' => 'market',
+                                'trader_label' => $meta['trader_label'] ?? ('#' . $position->user_id),
+                                'ticker' => (string) $position->ticker,
+                                'side' => (string) $position->side,
+                                'size' => (float) $position->size,
+                                'entry_price' => (float) $position->entry_price,
+                                'leverage' => (float) $position->leverage,
+                                'pnl' => $pnl,
+                                'status' => $pnl != 0 ? 'closed' : 'open',
+                                'created_at' => $position->created_at,
+                                'sort_at' => optional($position->created_at)->timestamp ?? 0,
+                            ];
+                        })
+                )
+                ->concat(
+                    MarginTradingPosition::whereIn('user_id', $proUserIds)
+                        ->latest()
+                        ->take(20)
+                        ->get()
+                        ->map(function ($position) use ($proUserMeta) {
+                            $meta = $proUserMeta[$position->user_id] ?? null;
+                            $pnl = (float) ($position->realized_pnl ?: $position->unrealized_pnl);
+
+                            return [
+                                'market' => 'margin',
+                                'order_type' => 'market',
+                                'trader_label' => $meta['trader_label'] ?? ('#' . $position->user_id),
+                                'ticker' => (string) $position->ticker,
+                                'side' => (string) $position->side,
+                                'size' => (float) $position->size,
+                                'entry_price' => (float) $position->entry_price,
+                                'leverage' => (float) $position->leverage,
+                                'pnl' => $pnl,
+                                'status' => (string) ($position->status ?? 'open'),
+                                'created_at' => $position->created_at,
+                                'sort_at' => optional($position->created_at)->timestamp ?? 0,
+                            ];
+                        })
+                )
+                ->concat(
+                    FuturesTradingOrders::whereIn('user_id', $proUserIds)
+                        ->where('type', 'limit')
+                        ->latest()
+                        ->take(20)
+                        ->get()
+                        ->map(function ($order) use ($proUserMeta) {
+                            $meta = $proUserMeta[$order->user_id] ?? null;
+
+                            return [
+                                'market' => 'futures',
+                                'order_type' => 'limit',
+                                'trader_label' => $meta['trader_label'] ?? ('#' . $order->user_id),
+                                'ticker' => (string) $order->ticker,
+                                'side' => (string) $order->side,
+                                'size' => (float) $order->size,
+                                'entry_price' => (float) $order->price,
+                                'leverage' => (float) $order->leverage,
+                                'pnl' => null,
+                                'status' => (string) $order->status,
+                                'created_at' => $order->created_at,
+                                'sort_at' => optional($order->created_at)->timestamp ?? 0,
+                            ];
+                        })
+                )
+                ->concat(
+                    MarginTradingOrder::whereIn('user_id', $proUserIds)
+                        ->where('type', 'limit')
+                        ->latest()
+                        ->take(20)
+                        ->get()
+                        ->map(function ($order) use ($proUserMeta) {
+                            $meta = $proUserMeta[$order->user_id] ?? null;
+
+                            return [
+                                'market' => 'margin',
+                                'order_type' => 'limit',
+                                'trader_label' => $meta['trader_label'] ?? ('#' . $order->user_id),
+                                'ticker' => (string) $order->ticker,
+                                'side' => (string) $order->side,
+                                'size' => (float) $order->size,
+                                'entry_price' => (float) $order->price,
+                                'leverage' => (float) $order->leverage,
+                                'pnl' => null,
+                                'status' => (string) $order->status,
+                                'created_at' => $order->created_at,
+                                'sort_at' => optional($order->created_at)->timestamp ?? 0,
+                            ];
+                        })
+                )
+                ->sortByDesc('sort_at')
+                ->take(20)
+                ->values();
+        }
 
         $stats = [
             'pro_traders' => (int) $pros->count(),
@@ -40,7 +161,7 @@ class CopyTradingController extends Controller
             'total_followers' => (int) $pros->sum('followers_count'),
         ];
 
-        return view("templates.{$template}.blades.admin.copy-trading.pros", compact('page_title', 'pros', 'users', 'minCopyAmount', 'stats'));
+        return view("templates.{$template}.blades.admin.copy-trading.pros", compact('page_title', 'pros', 'users', 'minCopyAmount', 'stats', 'recentTrades'));
     }
 
     public function storePro(Request $request)
@@ -136,11 +257,11 @@ class CopyTradingController extends Controller
             'side' => 'required|in:buy,sell',
             'amount' => 'required|numeric|min:0.00000001',
             'leverage' => 'required|integer|min:1|max:100',
-            'price' => 'nullable|numeric|min:0',
+            'price' => 'nullable|numeric|min:0|required_if:type,limit',
             'order_mode' => 'nullable|in:normal,borrow',
             'take_profit' => 'nullable|numeric|min:0',
             'stop_loss' => 'nullable|numeric|min:0',
-            'pnl' => 'required|numeric',
+            'pnl' => 'nullable|numeric|required_if:type,market',
         ]);
 
         $pro = CopyTradingProTrader::with('user')->findOrFail((int) $request->pro_trader_id);
@@ -151,7 +272,7 @@ class CopyTradingController extends Controller
 
         $market = (string) $request->market;
         $type = (string) $request->type;
-        $ticker = (string) $request->ticker;
+        $ticker = Str::upper(trim((string) $request->ticker));
         $side = (string) $request->side;
         $leverage = (int) $request->leverage;
         $quoteAmount = (float) $request->amount;
@@ -170,7 +291,7 @@ class CopyTradingController extends Controller
             return back()->with('error', __('Invalid entry price'));
         }
 
-        $pnlOverride = (float) $request->pnl;
+        $pnlOverride = $type === 'market' ? (float) $request->pnl : null;
 
         if ($tp > 0 && $side === 'buy' && $tp <= $entryPrice) {
             return back()->with('error', __('Take profit should be greater than entry price'));
@@ -542,6 +663,7 @@ class CopyTradingController extends Controller
                                 'margin' => $lockedMargin,
                                 'leverage' => $leverage,
                                 'timestamp' => (string) now()->valueOf(),
+                                'status' => 'open',
                             ]);
                         }
                     } else {
@@ -567,6 +689,7 @@ class CopyTradingController extends Controller
                             'unrealized_pnl' => 0,
                             'realized_pnl' => $pnlOverride,
                             'timestamp' => (string) now()->valueOf(),
+                            'status' => 'closed',
                         ]);
 
                         // Record transaction for pro trader
@@ -624,6 +747,7 @@ class CopyTradingController extends Controller
                                         'unrealized_pnl' => 0,
                                         'realized_pnl' => $followerPnl,
                                         'timestamp' => (string) now()->valueOf(),
+                                        'status' => 'closed',
                                     ]);
                                 } else {
                                     $followerAccount->increment('balance', $followerPnl);
@@ -654,9 +778,17 @@ class CopyTradingController extends Controller
                 }
             }
 
-            return back()->with('success', __('Trade history added'));
+            return back()->with('success', __('Trade history added successfully.'));
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+            Log::error('Failed to store pro trader trade history', [
+                'pro_trader_id' => $request->pro_trader_id,
+                'market' => $request->market,
+                'type' => $request->type,
+                'ticker' => $request->ticker,
+                'error' => $e->getMessage(),
+            ]);
+
+            return back()->withInput()->with('error', __('Failed to store trade history. :message', ['message' => $e->getMessage()]));
         }
     }
 
@@ -672,4 +804,3 @@ class CopyTradingController extends Controller
         return view("templates.{$template}.blades.admin.copy-trading.relationships", compact('page_title', 'relationships'));
     }
 }
-

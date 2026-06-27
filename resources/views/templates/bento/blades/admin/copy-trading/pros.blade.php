@@ -293,6 +293,86 @@
         </div>
     </div>
 
+        <div class="bg-secondary border border-white/5 rounded-[2rem] overflow-hidden shadow-2xl relative">
+            <div class="bg-secondary/30 border-b border-white/5 p-4 lg:p-6 relative">
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div>
+                        <h4 class="text-white font-bold tracking-tight">{{ __('Recent Trade History') }}</h4>
+                        <p class="text-[10px] text-text-secondary uppercase font-bold tracking-widest mt-0.5 opacity-50">
+                            {{ __('Latest stored trade records for pro traders') }}</p>
+                    </div>
+                    <div class="text-xs text-text-secondary">
+                        {{ __('Shows the most recent market results and pending limit orders.') }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white/[0.02]">
+                            <th class="px-6 py-4"><span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('Trader') }}</span></th>
+                            <th class="px-6 py-4"><span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('Market') }}</span></th>
+                            <th class="px-6 py-4"><span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('Pair') }}</span></th>
+                            <th class="px-6 py-4"><span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('Type') }}</span></th>
+                            <th class="px-6 py-4 text-right"><span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('Entry') }}</span></th>
+                            <th class="px-6 py-4 text-right"><span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('PnL') }}</span></th>
+                            <th class="px-6 py-4 text-right"><span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('Status') }}</span></th>
+                            <th class="px-6 py-4 text-right"><span class="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary opacity-60">{{ __('Submitted') }}</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-white/5">
+                        @forelse (($recentTrades ?? collect()) as $trade)
+                            @php
+                                $status = strtolower((string) ($trade['status'] ?? 'pending'));
+                                $statusClass = match ($status) {
+                                    'closed', 'filled' => 'bg-emerald-500/15 border border-emerald-500/25 text-emerald-400',
+                                    'open', 'pending' => 'bg-amber-500/15 border border-amber-500/25 text-amber-300',
+                                    default => 'bg-white/5 border border-white/10 text-white/60',
+                                };
+                                $pnl = $trade['pnl'];
+                            @endphp
+                            <tr>
+                                <td class="px-6 py-4">
+                                    <div class="text-sm font-bold text-white">{{ $trade['trader_label'] }}</div>
+                                    <div class="text-[11px] text-text-secondary mt-1">
+                                        {{ strtoupper($trade['side']) }} · {{ $fmt8($trade['size']) }} · {{ $fmt2($trade['leverage']) }}x
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-white/80 uppercase">{{ $trade['market'] }}</td>
+                                <td class="px-6 py-4 text-sm font-semibold text-white">{{ $trade['ticker'] }}</td>
+                                <td class="px-6 py-4 text-sm text-white/80 uppercase">{{ $trade['order_type'] }}</td>
+                                <td class="px-6 py-4 text-right text-sm text-white">{{ $fmt8($trade['entry_price']) }}</td>
+                                <td class="px-6 py-4 text-right">
+                                    @if ($pnl === null)
+                                        <span class="text-sm text-text-secondary">{{ __('Pending') }}</span>
+                                    @else
+                                        <span class="text-sm font-bold {{ $pnl >= 0 ? 'text-emerald-400' : 'text-red-400' }}">
+                                            {{ $pnl >= 0 ? '+' : '' }}{{ $fmt2($pnl) }}
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <span class="text-[11px] px-3 py-1.5 rounded-full {{ $statusClass }}">
+                                        {{ ucfirst($status) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-right text-xs text-text-secondary">
+                                    {{ optional($trade['created_at'])->format('Y-m-d H:i') ?? __('N/A') }}
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="px-6 py-12 text-center text-text-secondary">
+                                    {{ __('No trade history records found yet.') }}
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     <div id="minCopyAmountModal" class="modal">
         <div class="modal-content max-w-md">
             <div class="flex items-center justify-between gap-4">
@@ -473,16 +553,28 @@
                     class="text-white/60 hover:text-white transition text-2xl leading-none">&times;</button>
             </div>
 
-            <form action="{{ route('admin.copy-trading.trades.store') }}" method="POST" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form action="{{ route('admin.copy-trading.trades.store') }}" method="POST"
+                class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                 @csrf
-                <input type="hidden" name="pro_trader_id" id="tradeHistoryProId">
+                <input type="hidden" name="pro_trader_id" id="tradeHistoryProId" value="{{ old('pro_trader_id') }}">
+
+                @if ($errors->any() && old('pro_trader_id'))
+                    <div class="md:col-span-2 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3">
+                        <div class="text-sm font-semibold text-red-200">{{ __('Please fix the trade history form errors.') }}</div>
+                        <ul class="mt-2 space-y-1 text-xs text-red-200/90">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
                 <div>
                     <label class="text-sm text-text-secondary">{{ __('Market') }}</label>
                     <select name="market" id="tradeHistoryMarket"
                         class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
-                        <option value="futures">{{ __('Futures') }}</option>
-                        <option value="margin">{{ __('Margin') }}</option>
+                        <option value="futures" @selected(old('market', 'futures') === 'futures')>{{ __('Futures') }}</option>
+                        <option value="margin" @selected(old('market') === 'margin')>{{ __('Margin') }}</option>
                     </select>
                 </div>
 
@@ -490,8 +582,8 @@
                     <label class="text-sm text-text-secondary">{{ __('Order Type') }}</label>
                     <select name="type" id="tradeHistoryType"
                         class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
-                        <option value="market">{{ __('Market') }}</option>
-                        <option value="limit">{{ __('Limit') }}</option>
+                        <option value="market" @selected(old('type', 'market') === 'market')>{{ __('Market') }}</option>
+                        <option value="limit" @selected(old('type') === 'limit')>{{ __('Limit') }}</option>
                     </select>
                 </div>
 
@@ -499,15 +591,15 @@
                     <label class="text-sm text-text-secondary">{{ __('Ticker') }}</label>
                     <input type="text" name="ticker" id="tradeHistoryTicker"
                         class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
-                        placeholder="BTCUSDT" required>
+                        placeholder="BTCUSDT" value="{{ old('ticker') }}" required>
                 </div>
 
                 <div>
                     <label class="text-sm text-text-secondary">{{ __('Side') }}</label>
                     <select name="side" id="tradeHistorySide"
                         class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
-                        <option value="buy">{{ __('Buy') }}</option>
-                        <option value="sell">{{ __('Sell') }}</option>
+                        <option value="buy" @selected(old('side', 'buy') === 'buy')>{{ __('Buy') }}</option>
+                        <option value="sell" @selected(old('side') === 'sell')>{{ __('Sell') }}</option>
                     </select>
                 </div>
 
@@ -515,12 +607,13 @@
                     <label class="text-sm text-text-secondary">{{ __('Amount (USDT)') }}</label>
                     <input type="number" name="amount" id="tradeHistoryAmount" step="0.01" min="0"
                         class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
-                        placeholder="0.00" required>
+                        placeholder="0.00" value="{{ old('amount') }}" required>
                 </div>
 
                 <div>
                     <label class="text-sm text-text-secondary">{{ __('Leverage') }}</label>
-                    <input type="number" name="leverage" id="tradeHistoryLeverage" min="1" max="100" value="10"
+                    <input type="number" name="leverage" id="tradeHistoryLeverage" min="1" max="100"
+                        value="{{ old('leverage', 10) }}"
                         class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
                         required>
                 </div>
@@ -529,15 +622,15 @@
                     <label class="text-sm text-text-secondary">{{ __('Limit Price') }}</label>
                     <input type="number" name="price" id="tradeHistoryPrice" step="0.00000001" min="0"
                         class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
-                        placeholder="0.00">
+                        placeholder="0.00" value="{{ old('price') }}">
                 </div>
 
                 <div id="tradeHistoryOrderModeWrap" class="hidden">
                     <label class="text-sm text-text-secondary">{{ __('Margin Order Mode') }}</label>
                     <select name="order_mode" id="tradeHistoryOrderMode"
                         class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none">
-                        <option value="normal">{{ __('Normal') }}</option>
-                        <option value="borrow">{{ __('Borrow') }}</option>
+                        <option value="normal" @selected(old('order_mode', 'normal') === 'normal')>{{ __('Normal') }}</option>
+                        <option value="borrow" @selected(old('order_mode') === 'borrow')>{{ __('Borrow') }}</option>
                     </select>
                 </div>
 
@@ -545,21 +638,21 @@
                     <label class="text-sm text-text-secondary">{{ __('Take Profit (optional)') }}</label>
                     <input type="number" name="take_profit" id="tradeHistoryTakeProfit" step="0.00000001" min="0"
                         class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
-                        placeholder="0.00">
+                        placeholder="0.00" value="{{ old('take_profit') }}">
                 </div>
 
                 <div>
                     <label class="text-sm text-text-secondary">{{ __('Stop Loss (optional)') }}</label>
                     <input type="number" name="stop_loss" id="tradeHistoryStopLoss" step="0.00000001" min="0"
                         class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
-                        placeholder="0.00">
+                        placeholder="0.00" value="{{ old('stop_loss') }}">
                 </div>
 
                 <div id="tradeHistoryPnlWrap">
                     <label class="text-sm text-text-secondary">{{ __('PnL (required for completed trade)') }}</label>
                     <input type="number" name="pnl" id="tradeHistoryPnl" step="0.01"
                         class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
-                        placeholder="0.00">
+                        placeholder="0.00" value="{{ old('pnl') }}">
                     <p class="mt-1 text-xs text-text-secondary">Positive value = profit, Negative value = loss</p>
                 </div>
 
@@ -610,11 +703,12 @@
                 $('#tradeHistoryPriceWrap').removeClass('hidden');
                 $('#tradeHistoryPrice').attr('required', true);
                 $('#tradeHistoryPnlWrap').addClass('hidden');
-                $('#tradeHistoryPnl').val('');
+                $('#tradeHistoryPnl').attr('required', false);
             } else {
                 $('#tradeHistoryPriceWrap').addClass('hidden');
-                $('#tradeHistoryPrice').attr('required', false).val('');
+                $('#tradeHistoryPrice').attr('required', false);
                 $('#tradeHistoryPnlWrap').removeClass('hidden');
+                $('#tradeHistoryPnl').attr('required', true);
             }
 
             if (market === 'margin') {
@@ -664,6 +758,12 @@
                 syncTradeHistoryFields();
             });
 
+            syncTradeHistoryFields();
+
+            if (@json((bool) old('pro_trader_id'))) {
+                openModal('tradeHistoryModal');
+            }
+
             $(window).on('click', function(e) {
                 if ($(e.target).hasClass('modal')) {
                     $(e.target).hide();
@@ -672,4 +772,3 @@
         });
     </script>
 @endsection
-
