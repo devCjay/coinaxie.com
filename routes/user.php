@@ -189,6 +189,7 @@ Route::prefix('user')->middleware(['auth', 'otp.verified', 'user.status', 'user.
         Route::get('/', [SupportTicketController::class, 'index'])->name('index');
         Route::post('/', [SupportTicketController::class, 'store'])->name('store');
         Route::get('/{id}', [SupportTicketController::class, 'show'])->name('show');
+        Route::get('/{id}/messages/{messageId}/attachment', [SupportTicketController::class, 'attachment'])->name('attachment');
         Route::post('/{id}/reply', [SupportTicketController::class, 'reply'])->name('reply');
     });
 

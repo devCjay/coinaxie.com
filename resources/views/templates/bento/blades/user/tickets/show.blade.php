@@ -56,9 +56,9 @@
 
                         @if ($message->attachment_path)
                             <div class="mt-4">
-                                <a href="{{ asset('storage/' . $message->attachment_path) }}" target="_blank" rel="noopener"
-                                    class="inline-block">
-                                    <img src="{{ asset('storage/' . $message->attachment_path) }}"
+                                <a href="{{ route('user.tickets.attachment', [$ticket->id, $message->id]) }}" target="_blank"
+                                    rel="noopener" class="inline-block">
+                                    <img src="{{ route('user.tickets.attachment', [$ticket->id, $message->id]) }}"
                                         alt="{{ __('Ticket attachment') }}"
                                         class="max-h-72 rounded-xl border border-white/10 object-contain">
                                 </a>

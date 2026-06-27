@@ -3,13 +3,16 @@
 namespace Tests\Feature;
 
 use App\Models\Admin;
+use App\Models\NotificationMessage;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use App\Mail\RichTextEmail;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -125,8 +128,39 @@ class SupportTicketFlowTest extends TestCase
     }
 
     #[Test]
+    public function user_can_load_ticket_attachment_through_the_ticket_route()
+    {
+        Storage::fake('public');
+
+        $ticket = SupportTicket::create([
+            'user_id' => $this->user->id,
+            'ticket_number' => 'TKT-ATTACH01',
+            'subject' => 'Attachment route',
+            'status' => 'open',
+            'last_reply_at' => now(),
+        ]);
+
+        $path = UploadedFile::fake()->image('ticket-view.png')->store('support-tickets', 'public');
+
+        $message = SupportTicketMessage::create([
+            'support_ticket_id' => $ticket->id,
+            'user_id' => $this->user->id,
+            'sender_type' => 'user',
+            'message' => 'Please check my image.',
+            'attachment_path' => $path,
+        ]);
+
+        $response = $this->actingAs($this->user)
+            ->get(route('user.tickets.attachment', [$ticket->id, $message->id]));
+
+        $response->assertOk();
+    }
+
+    #[Test]
     public function admin_can_reply_to_and_close_a_ticket()
     {
+        Mail::fake();
+
         $ticket = SupportTicket::create([
             'user_id' => $this->user->id,
             'ticket_number' => 'TKT-TEST123',
@@ -155,6 +189,13 @@ class SupportTicketFlowTest extends TestCase
             'sender_type' => 'admin',
             'message' => 'Please reset your password and try again.',
         ]);
+        $this->assertDatabaseHas('notification_messages', [
+            'user_id' => $this->user->id,
+            'title' => 'Support ticket reply',
+        ]);
+        Mail::assertSent(RichTextEmail::class, function ($mail) {
+            return $mail->hasTo($this->user->email) && $mail->subject === 'Support ticket reply: TKT-TEST123';
+        });
 
         $closeResponse = $this->actingAs($this->admin, 'admin')
             ->post(route('admin.tickets.close', $ticket->id));
@@ -194,5 +235,34 @@ class SupportTicketFlowTest extends TestCase
         $this->assertSame('admin', $message->sender_type);
         $this->assertNotNull($message->attachment_path);
         Storage::disk('public')->assertExists($message->attachment_path);
+    }
+
+    #[Test]
+    public function admin_can_load_ticket_attachment_through_the_ticket_route()
+    {
+        Storage::fake('public');
+
+        $ticket = SupportTicket::create([
+            'user_id' => $this->user->id,
+            'ticket_number' => 'TKT-ADMINAT',
+            'subject' => 'Admin attachment route',
+            'status' => 'open',
+            'last_reply_at' => now(),
+        ]);
+
+        $path = UploadedFile::fake()->image('admin-view.png')->store('support-tickets', 'public');
+
+        $message = SupportTicketMessage::create([
+            'support_ticket_id' => $ticket->id,
+            'admin_id' => $this->admin->id,
+            'sender_type' => 'admin',
+            'message' => 'Here is an admin image.',
+            'attachment_path' => $path,
+        ]);
+
+        $response = $this->actingAs($this->admin, 'admin')
+            ->get(route('admin.tickets.attachment', [$ticket->id, $message->id]));
+
+        $response->assertOk();
     }
 }

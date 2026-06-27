@@ -134,6 +134,7 @@ Route::middleware(['auth:admin', 'admin.otp.verified', 'sandbox'])->group(functi
     Route::prefix('tickets')->name('tickets.')->group(function () {
         Route::get('/', [SupportTicketController::class, 'index'])->name('index');
         Route::get('/view/{id}', [SupportTicketController::class, 'show'])->name('show');
+        Route::get('/view/{id}/messages/{messageId}/attachment', [SupportTicketController::class, 'attachment'])->name('attachment');
         Route::post('/reply/{id}', [SupportTicketController::class, 'reply'])->name('reply');
         Route::post('/close/{id}', [SupportTicketController::class, 'close'])->name('close');
     });

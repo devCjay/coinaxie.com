@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\Controller;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -118,6 +119,18 @@ class SupportTicketController extends Controller
         $template = config('site.template');
 
         return view("templates.$template.blades.user.tickets.show", compact('page_title', 'ticket'));
+    }
+
+    public function attachment($id, $messageId): Response
+    {
+        $ticket = SupportTicket::where('user_id', Auth::id())->findOrFail($id);
+        $message = $ticket->messages()->findOrFail($messageId);
+
+        if (!$message->attachment_path || !Storage::disk('public')->exists($message->attachment_path)) {
+            abort(404);
+        }
+
+        return Storage::disk('public')->response($message->attachment_path);
     }
 
     public function reply(Request $request, $id)

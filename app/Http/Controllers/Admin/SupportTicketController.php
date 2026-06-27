@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
+use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -72,6 +73,18 @@ class SupportTicketController extends Controller
         return view("templates.$template.blades.admin.tickets.show", compact('page_title', 'ticket'));
     }
 
+    public function attachment($id, $messageId): Response
+    {
+        $ticket = SupportTicket::findOrFail($id);
+        $message = $ticket->messages()->findOrFail($messageId);
+
+        if (!$message->attachment_path || !Storage::disk('public')->exists($message->attachment_path)) {
+            abort(404);
+        }
+
+        return Storage::disk('public')->response($message->attachment_path);
+    }
+
     public function reply(Request $request, $id)
     {
         $ticket = SupportTicket::with('user')->findOrFail($id);
@@ -116,6 +129,15 @@ class SupportTicketController extends Controller
             __('Support ticket reply'),
             __('Your ticket :ticket has received a new reply from support.', ['ticket' => $ticket->ticket_number]),
         );
+
+        $emailSubject = __('Support ticket reply: :ticket', ['ticket' => $ticket->ticket_number]);
+        $emailBody = __('Your support ticket has received a new reply from support.') . '<br><br>'
+            . '<strong>' . e(__('Ticket')) . ':</strong> ' . e($ticket->ticket_number) . '<br>'
+            . '<strong>' . e(__('Subject')) . ':</strong> ' . e($ticket->subject) . '<br><br>'
+            . '<strong>' . e(__('Reply')) . ':</strong><br>' . nl2br(e($validated['message'])) . '<br><br>'
+            . '<a href="' . e(route('user.tickets.show', $ticket->id)) . '">' . e(__('View Ticket')) . '</a>';
+
+        sendRichTextEmail($emailSubject, $emailBody, $ticket->user);
 
         return back()->with('success', __('Reply sent successfully.'));
     }
