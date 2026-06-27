@@ -8,6 +8,7 @@ use App\Models\SupportTicketMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class SupportTicketController extends Controller
@@ -57,28 +58,41 @@ class SupportTicketController extends Controller
         $validated = $request->validate([
             'subject' => 'required|string|max:255',
             'message' => 'required|string',
+            'attachment' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
         ]);
 
         $user = Auth::user();
+        $attachmentPath = $request->hasFile('attachment')
+            ? $request->file('attachment')->store('support-tickets', 'public')
+            : null;
 
-        $ticket = DB::transaction(function () use ($validated, $user) {
-            $ticket = SupportTicket::create([
-                'user_id' => $user->id,
-                'ticket_number' => $this->generateTicketNumber(),
-                'subject' => $validated['subject'],
-                'status' => 'open',
-                'last_reply_at' => now(),
-            ]);
+        try {
+            $ticket = DB::transaction(function () use ($validated, $user, $attachmentPath) {
+                $ticket = SupportTicket::create([
+                    'user_id' => $user->id,
+                    'ticket_number' => $this->generateTicketNumber(),
+                    'subject' => $validated['subject'],
+                    'status' => 'open',
+                    'last_reply_at' => now(),
+                ]);
 
-            SupportTicketMessage::create([
-                'support_ticket_id' => $ticket->id,
-                'user_id' => $user->id,
-                'sender_type' => 'user',
-                'message' => $validated['message'],
-            ]);
+                SupportTicketMessage::create([
+                    'support_ticket_id' => $ticket->id,
+                    'user_id' => $user->id,
+                    'sender_type' => 'user',
+                    'message' => $validated['message'],
+                    'attachment_path' => $attachmentPath,
+                ]);
 
-            return $ticket;
-        });
+                return $ticket;
+            });
+        } catch (\Throwable $exception) {
+            if ($attachmentPath) {
+                Storage::disk('public')->delete($attachmentPath);
+            }
+
+            throw $exception;
+        }
 
         recordNotificationMessage(
             $user,
@@ -108,28 +122,42 @@ class SupportTicketController extends Controller
 
     public function reply(Request $request, $id)
     {
-        $request->validate([
-            'message' => 'required|string',
-        ]);
-
         $ticket = SupportTicket::where('user_id', Auth::id())->findOrFail($id);
 
         if ($ticket->status === 'closed') {
             return back()->with('error', __('This ticket has already been closed.'));
         }
 
-        DB::transaction(function () use ($ticket, $request) {
-            SupportTicketMessage::create([
-                'support_ticket_id' => $ticket->id,
-                'user_id' => Auth::id(),
-                'sender_type' => 'user',
-                'message' => $request->message,
-            ]);
+        $validated = $request->validate([
+            'message' => 'required|string',
+            'attachment' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+        ]);
 
-            $ticket->update([
-                'last_reply_at' => now(),
-            ]);
-        });
+        $attachmentPath = $request->hasFile('attachment')
+            ? $request->file('attachment')->store('support-tickets', 'public')
+            : null;
+
+        try {
+            DB::transaction(function () use ($ticket, $validated, $attachmentPath) {
+                SupportTicketMessage::create([
+                    'support_ticket_id' => $ticket->id,
+                    'user_id' => Auth::id(),
+                    'sender_type' => 'user',
+                    'message' => $validated['message'],
+                    'attachment_path' => $attachmentPath,
+                ]);
+
+                $ticket->update([
+                    'last_reply_at' => now(),
+                ]);
+            });
+        } catch (\Throwable $exception) {
+            if ($attachmentPath) {
+                Storage::disk('public')->delete($attachmentPath);
+            }
+
+            throw $exception;
+        }
 
         return back()->with('success', __('Reply sent successfully.'));
     }

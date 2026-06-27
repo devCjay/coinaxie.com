@@ -53,6 +53,17 @@
                         <div class="text-sm text-text-secondary whitespace-pre-line leading-6">
                             {{ $message->message }}
                         </div>
+
+                        @if ($message->attachment_path)
+                            <div class="mt-4">
+                                <a href="{{ asset('storage/' . $message->attachment_path) }}" target="_blank" rel="noopener"
+                                    class="inline-block">
+                                    <img src="{{ asset('storage/' . $message->attachment_path) }}"
+                                        alt="{{ __('Ticket attachment') }}"
+                                        class="max-h-72 rounded-xl border border-white/10 object-contain">
+                                </a>
+                            </div>
+                        @endif
                     </div>
                 </div>
             @endforeach
@@ -66,11 +77,21 @@
                     {{ __('This ticket has been closed and can no longer receive replies.') }}
                 </p>
             @else
-                <form action="{{ route('user.tickets.reply', $ticket->id) }}" method="POST" class="mt-4 space-y-4">
+                <form action="{{ route('user.tickets.reply', $ticket->id) }}" method="POST" enctype="multipart/form-data"
+                    class="mt-4 space-y-4">
                     @csrf
                     <textarea name="message" rows="6"
                         class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-text-secondary focus:outline-none focus:ring-1 focus:ring-accent-primary"
                         placeholder="{{ __('Type your reply...') }}">{{ old('message') }}</textarea>
+
+                    <div>
+                        <label class="block text-sm text-text-secondary mb-2">{{ __('Image Attachment') }}</label>
+                        <input type="file" name="attachment" accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white file:mr-4 file:rounded-lg file:border-0 file:bg-accent-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-accent-primary-hover">
+                        <p class="mt-2 text-xs text-text-secondary">
+                            {{ __('Optional. Upload JPG, PNG, GIF, or WEBP up to 5MB.') }}
+                        </p>
+                    </div>
 
                     <button type="submit"
                         class="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-accent-primary text-white font-bold hover:bg-accent-primary-hover transition-colors">

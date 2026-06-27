@@ -7,7 +7,9 @@ use App\Models\SupportTicket;
 use App\Models\SupportTicketMessage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -73,6 +75,56 @@ class SupportTicketFlowTest extends TestCase
     }
 
     #[Test]
+    public function user_can_create_a_support_ticket_with_image_attachment()
+    {
+        Storage::fake('public');
+
+        $response = $this->actingAs($this->user)
+            ->post(route('user.tickets.store'), [
+                'subject' => 'Payment proof',
+                'message' => 'Please check the attached screenshot.',
+                'attachment' => UploadedFile::fake()->image('ticket-proof.png'),
+            ]);
+
+        $ticket = SupportTicket::first();
+        $message = SupportTicketMessage::first();
+
+        $response->assertRedirect(route('user.tickets.show', $ticket->id));
+
+        $this->assertNotNull($message);
+        $this->assertNotNull($message->attachment_path);
+        Storage::disk('public')->assertExists($message->attachment_path);
+    }
+
+    #[Test]
+    public function user_can_reply_to_a_ticket_with_an_optional_image_attachment()
+    {
+        Storage::fake('public');
+
+        $ticket = SupportTicket::create([
+            'user_id' => $this->user->id,
+            'ticket_number' => 'TKT-USERREPLY',
+            'subject' => 'Verification issue',
+            'status' => 'open',
+            'last_reply_at' => now(),
+        ]);
+
+        $response = $this->actingAs($this->user)
+            ->post(route('user.tickets.reply', $ticket->id), [
+                'message' => 'Here is the screenshot you requested.',
+                'attachment' => UploadedFile::fake()->image('reply-proof.png'),
+            ]);
+
+        $response->assertRedirect();
+
+        $message = SupportTicketMessage::latest('id')->first();
+
+        $this->assertSame('user', $message->sender_type);
+        $this->assertNotNull($message->attachment_path);
+        Storage::disk('public')->assertExists($message->attachment_path);
+    }
+
+    #[Test]
     public function admin_can_reply_to_and_close_a_ticket()
     {
         $ticket = SupportTicket::create([
@@ -114,5 +166,33 @@ class SupportTicketFlowTest extends TestCase
             'status' => 'closed',
             'closed_by_admin_id' => $this->admin->id,
         ]);
+    }
+
+    #[Test]
+    public function admin_can_reply_to_a_ticket_with_an_optional_image_attachment()
+    {
+        Storage::fake('public');
+
+        $ticket = SupportTicket::create([
+            'user_id' => $this->user->id,
+            'ticket_number' => 'TKT-ADMINIMG',
+            'subject' => 'Withdrawal issue',
+            'status' => 'open',
+            'last_reply_at' => now(),
+        ]);
+
+        $response = $this->actingAs($this->admin, 'admin')
+            ->post(route('admin.tickets.reply', $ticket->id), [
+                'message' => 'Please review this support reference image.',
+                'attachment' => UploadedFile::fake()->image('admin-reply.png'),
+            ]);
+
+        $response->assertRedirect();
+
+        $message = SupportTicketMessage::latest('id')->first();
+
+        $this->assertSame('admin', $message->sender_type);
+        $this->assertNotNull($message->attachment_path);
+        Storage::disk('public')->assertExists($message->attachment_path);
     }
 }
