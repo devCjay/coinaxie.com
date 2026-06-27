@@ -77,7 +77,7 @@ if (!function_exists('validPassword')) {
 //record transaction
 
 if (!function_exists('recordTransaction')) {
-    function recordTransaction($user, $amount, $currency, $converted_amount, $converted_currency, $rate, $type, $status, $reference, $description, $new_balance)
+    function recordTransaction($user, $amount, $currency, $converted_amount, $converted_currency, $rate, $type, $status, $reference, $description, $new_balance, $createdAt = null)
     {
         $transaction = new Transaction();
         $transaction->user_id = $user->id;
@@ -91,6 +91,10 @@ if (!function_exists('recordTransaction')) {
         $transaction->reference = $reference;
         $transaction->description = $description;
         $transaction->new_balance = $new_balance;
+        if ($createdAt) {
+            $transaction->created_at = $createdAt;
+            $transaction->updated_at = $createdAt;
+        }
         $transaction->save();
 
         // send traction email
@@ -517,7 +521,6 @@ if (!function_exists('logSandBoxUsers')) {
         return;
     }
 }
-
 
 
 

@@ -10,7 +10,7 @@ use App\Models\FuturesTradingPositions;
 use App\Models\MarginTradingOrder;
 use App\Models\MarginTradingPosition;
 use App\Services\CopyTradingService;
-use App\Services\LozandServices;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -57,6 +57,7 @@ class CopyTradingController extends Controller
                         ->map(function ($position) use ($proUserMeta) {
                             $meta = $proUserMeta[$position->user_id] ?? null;
                             $pnl = (float) ($position->realized_pnl ?: $position->unrealized_pnl);
+                            $tradeDate = $this->resolveTradeDate($position->timestamp ?? null, $position->created_at);
 
                             return [
                                 'market' => 'futures',
@@ -69,8 +70,8 @@ class CopyTradingController extends Controller
                                 'leverage' => (float) $position->leverage,
                                 'pnl' => $pnl,
                                 'status' => $pnl != 0 ? 'closed' : 'open',
-                                'created_at' => $position->created_at,
-                                'sort_at' => optional($position->created_at)->timestamp ?? 0,
+                                'trade_date' => $tradeDate,
+                                'sort_at' => optional($tradeDate)->timestamp ?? 0,
                             ];
                         })
                 )
@@ -82,6 +83,7 @@ class CopyTradingController extends Controller
                         ->map(function ($position) use ($proUserMeta) {
                             $meta = $proUserMeta[$position->user_id] ?? null;
                             $pnl = (float) ($position->realized_pnl ?: $position->unrealized_pnl);
+                            $tradeDate = $this->resolveTradeDate($position->timestamp ?? null, $position->created_at);
 
                             return [
                                 'market' => 'margin',
@@ -94,8 +96,8 @@ class CopyTradingController extends Controller
                                 'leverage' => (float) $position->leverage,
                                 'pnl' => $pnl,
                                 'status' => (string) ($position->status ?? 'open'),
-                                'created_at' => $position->created_at,
-                                'sort_at' => optional($position->created_at)->timestamp ?? 0,
+                                'trade_date' => $tradeDate,
+                                'sort_at' => optional($tradeDate)->timestamp ?? 0,
                             ];
                         })
                 )
@@ -107,6 +109,7 @@ class CopyTradingController extends Controller
                         ->get()
                         ->map(function ($order) use ($proUserMeta) {
                             $meta = $proUserMeta[$order->user_id] ?? null;
+                            $tradeDate = $this->resolveTradeDate($order->timestamp ?? null, $order->created_at);
 
                             return [
                                 'market' => 'futures',
@@ -119,8 +122,8 @@ class CopyTradingController extends Controller
                                 'leverage' => (float) $order->leverage,
                                 'pnl' => null,
                                 'status' => (string) $order->status,
-                                'created_at' => $order->created_at,
-                                'sort_at' => optional($order->created_at)->timestamp ?? 0,
+                                'trade_date' => $tradeDate,
+                                'sort_at' => optional($tradeDate)->timestamp ?? 0,
                             ];
                         })
                 )
@@ -132,6 +135,7 @@ class CopyTradingController extends Controller
                         ->get()
                         ->map(function ($order) use ($proUserMeta) {
                             $meta = $proUserMeta[$order->user_id] ?? null;
+                            $tradeDate = $this->resolveTradeDate($order->timestamp ?? null, $order->created_at);
 
                             return [
                                 'market' => 'margin',
@@ -144,8 +148,8 @@ class CopyTradingController extends Controller
                                 'leverage' => (float) $order->leverage,
                                 'pnl' => null,
                                 'status' => (string) $order->status,
-                                'created_at' => $order->created_at,
-                                'sort_at' => optional($order->created_at)->timestamp ?? 0,
+                                'trade_date' => $tradeDate,
+                                'sort_at' => optional($tradeDate)->timestamp ?? 0,
                             ];
                         })
                 )
@@ -257,11 +261,12 @@ class CopyTradingController extends Controller
             'side' => 'required|in:buy,sell',
             'amount' => 'required|numeric|min:0.00000001',
             'leverage' => 'required|integer|min:1|max:100',
-            'price' => 'nullable|numeric|min:0|required_if:type,limit',
+            'price' => 'required|numeric|min:0.00000001',
             'order_mode' => 'nullable|in:normal,borrow',
             'take_profit' => 'nullable|numeric|min:0',
             'stop_loss' => 'nullable|numeric|min:0',
             'pnl' => 'nullable|numeric|required_if:type,market',
+            'traded_at' => 'required|date',
         ]);
 
         $pro = CopyTradingProTrader::with('user')->findOrFail((int) $request->pro_trader_id);
@@ -278,15 +283,11 @@ class CopyTradingController extends Controller
         $quoteAmount = (float) $request->amount;
         $tp = (float) ($request->take_profit ?? 0);
         $sl = (float) ($request->stop_loss ?? 0);
+        $tradeDate = Carbon::parse($request->traded_at);
+        $tradeTimestamp = (string) $tradeDate->valueOf();
 
-        $lozandServices = new LozandServices();
-        $tickerInfo = $market === 'futures' ? $lozandServices->futureTicker($ticker) : $lozandServices->margin($ticker);
-        if (($tickerInfo['status'] ?? null) !== 'success') {
-            return back()->with('error', __('Failed to fetch market data'));
-        }
-
-        $currentPrice = (float) ($tickerInfo['data']['current_price'] ?? 0);
-        $entryPrice = $type === 'market' ? $currentPrice : (float) ($request->price ?? 0);
+        $entryPrice = (float) $request->price;
+        $currentPrice = $entryPrice;
         if ($entryPrice <= 0) {
             return back()->with('error', __('Invalid entry price'));
         }
@@ -354,7 +355,7 @@ class CopyTradingController extends Controller
                     return back()->with('error', __('Insufficient balance for margin'));
                 }
 
-                DB::transaction(function () use ($user, $tradingAccount, $ticker, $side, $type, $entryPrice, $currentPrice, $baseAmount, $lockedMargin, $leverage, $tp, $sl) {
+                DB::transaction(function () use ($user, $tradingAccount, $ticker, $side, $type, $entryPrice, $currentPrice, $baseAmount, $lockedMargin, $leverage, $tp, $sl, $tradeDate, $tradeTimestamp) {
                     $order = FuturesTradingOrders::create([
                         'user_id' => $user->id,
                         'type' => $type,
@@ -368,8 +369,9 @@ class CopyTradingController extends Controller
                         'leverage' => $leverage,
                         'status' => $type === 'market' ? 'filled' : 'pending',
                         'order_id' => 'ORD-' . strtoupper(Str::random(10)),
-                        'timestamp' => (string) now()->valueOf(),
+                        'timestamp' => $tradeTimestamp,
                     ]);
+                    $this->stampTradeModel($order, $tradeDate);
 
                     DB::afterCommit(function () use ($order) {
                         app(CopyTradingService::class)->handleFuturesOrderCreated($order->fresh());
@@ -393,7 +395,8 @@ class CopyTradingController extends Controller
                                     'stop_loss' => $sl > 0 ? $sl : 0,
                                     'unrealized_pnl' => 0,
                                     'realized_pnl' => 0,
-                                    'timestamp' => (string) now()->valueOf(),
+                                    'timestamp' => $tradeTimestamp,
+                                    'updated_at' => $tradeDate,
                                 ]);
                             } else {
                                 if ((float) $position->size > $baseAmount) {
@@ -403,7 +406,8 @@ class CopyTradingController extends Controller
                                         'size' => (float) $position->size - $baseAmount,
                                         'current_price' => $currentPrice,
                                         'margin' => (float) $position->margin - $marginToRefund,
-                                        'timestamp' => (string) now()->valueOf(),
+                                        'timestamp' => $tradeTimestamp,
+                                        'updated_at' => $tradeDate,
                                     ]);
                                 } elseif ((float) $position->size == $baseAmount) {
                                     $tradingAccount->increment('balance', (float) $position->margin);
@@ -424,7 +428,8 @@ class CopyTradingController extends Controller
                                         'stop_loss' => $sl > 0 ? $sl : 0,
                                         'unrealized_pnl' => 0,
                                         'realized_pnl' => 0,
-                                        'timestamp' => (string) now()->valueOf(),
+                                        'timestamp' => $tradeTimestamp,
+                                        'updated_at' => $tradeDate,
                                     ]);
                                 }
                             }
@@ -432,7 +437,7 @@ class CopyTradingController extends Controller
                             if ($lockedMargin > 0) {
                                 $tradingAccount->decrement('balance', $lockedMargin);
                             }
-                            FuturesTradingPositions::create([
+                            $position = FuturesTradingPositions::create([
                                 'user_id' => $user->id,
                                 'ticker' => $ticker,
                                 'side' => $side,
@@ -445,8 +450,9 @@ class CopyTradingController extends Controller
                                 'stop_loss' => $sl > 0 ? $sl : 0,
                                 'unrealized_pnl' => 0,
                                 'realized_pnl' => 0,
-                                'timestamp' => (string) now()->valueOf(),
+                                'timestamp' => $tradeTimestamp,
                             ]);
+                            $this->stampTradeModel($position, $tradeDate);
                         }
                     } else {
                         if ($lockedMargin > 0) {
@@ -459,7 +465,8 @@ class CopyTradingController extends Controller
                     FuturesTradingPositions::where('user_id', $user->id)->where('ticker', $ticker)->update([
                         'current_price' => $currentPrice,
                         'unrealized_pnl' => $pnlOverride,
-                        'timestamp' => (string) now()->valueOf(),
+                        'timestamp' => $tradeTimestamp,
+                        'updated_at' => $tradeDate,
                     ]);
 
                     // Now close the position and realize the PnL!
@@ -476,7 +483,8 @@ class CopyTradingController extends Controller
                         $position->update([
                             'unrealized_pnl' => 0,
                             'realized_pnl' => $pnlOverride,
-                            'timestamp' => (string) now()->valueOf(),
+                            'timestamp' => $tradeTimestamp,
+                            'updated_at' => $tradeDate,
                         ]);
 
                         // Record transaction for pro trader
@@ -484,7 +492,7 @@ class CopyTradingController extends Controller
                         $typeTx = $pnlOverride > 0 ? 'credit' : 'debit';
                         $absPnl = abs($pnlOverride);
                         $proDesc = "Futures trading PnL on {$ticker}: " . ($pnlOverride > 0 ? "+" : "") . number_format($pnlOverride, 2) . " USDT";
-                        recordTransaction($user, $absPnl, 'USDT', $absPnl, 'USDT', 1, $typeTx, 'completed', $ref, $proDesc, $tradingAccount->balance);
+                        recordTransaction($user, $absPnl, 'USDT', $absPnl, 'USDT', 1, $typeTx, 'completed', $ref, $proDesc, $tradingAccount->balance, $tradeDate);
 
                         // Send notification and email to pro trader
                         $proTitle = $pnlOverride > 0 ? "Futures Trading Profit" : "Futures Trading Loss";
@@ -538,7 +546,8 @@ class CopyTradingController extends Controller
                                     $followerPos->update([
                                         'unrealized_pnl' => 0,
                                         'realized_pnl' => $followerPnl,
-                                        'timestamp' => (string) now()->valueOf(),
+                                        'timestamp' => $tradeTimestamp,
+                                        'updated_at' => $tradeDate,
                                     ]);
                                 } else {
                                     // Just credit/debit the follower's balance
@@ -551,7 +560,7 @@ class CopyTradingController extends Controller
                                 $followerTypeTx = $followerPnl > 0 ? 'credit' : 'debit';
                                 $followerAbsPnl = abs($followerPnl);
                                 $followerDesc = "Copy trading PnL ({$pro->display_name}) on {$ticker}: " . ($followerPnl > 0 ? "+" : "") . number_format($followerPnl, 2) . " USDT";
-                                recordTransaction($follower, $followerAbsPnl, 'USDT', $followerAbsPnl, 'USDT', 1, $followerTypeTx, 'completed', $followerRef, $followerDesc, $followerAccount->balance);
+                                recordTransaction($follower, $followerAbsPnl, 'USDT', $followerAbsPnl, 'USDT', 1, $followerTypeTx, 'completed', $followerRef, $followerDesc, $followerAccount->balance, $tradeDate);
 
                                 // Send notification and email to follower
                                 $followerTitle = $followerPnl > 0 ? "Copy Trading Profit" : "Copy Trading Loss";
@@ -591,7 +600,7 @@ class CopyTradingController extends Controller
                     return back()->with('error', __('Insufficient balance for margin'));
                 }
 
-                DB::transaction(function () use ($user, $tradingAccount, $orderMode, $ticker, $side, $type, $entryPrice, $currentPrice, $baseAmount, $lockedMargin, $leverage, $tp, $sl) {
+                DB::transaction(function () use ($user, $tradingAccount, $orderMode, $ticker, $side, $type, $entryPrice, $currentPrice, $baseAmount, $lockedMargin, $leverage, $tp, $sl, $tradeDate, $tradeTimestamp) {
                     $order = MarginTradingOrder::create([
                         'user_id' => $user->id,
                         'type' => $type,
@@ -605,8 +614,9 @@ class CopyTradingController extends Controller
                         'take_profit' => $tp > 0 ? $tp : null,
                         'stop_loss' => $sl > 0 ? $sl : null,
                         'status' => $type === 'market' ? 'filled' : 'pending',
-                        'timestamp' => (string) now()->valueOf(),
+                        'timestamp' => $tradeTimestamp,
                     ]);
+                    $this->stampTradeModel($order, $tradeDate);
 
                     DB::afterCommit(function () use ($order) {
                         app(CopyTradingService::class)->handleMarginOrderCreated($order->fresh());
@@ -624,7 +634,8 @@ class CopyTradingController extends Controller
                                     'entry_price' => $newEntryPrice,
                                     'current_price' => $currentPrice,
                                     'margin' => (float) $position->margin + $lockedMargin,
-                                    'timestamp' => (string) now()->valueOf(),
+                                    'timestamp' => $tradeTimestamp,
+                                    'updated_at' => $tradeDate,
                                 ]);
                             } else {
                                 if ((float) $position->size > $baseAmount) {
@@ -634,7 +645,8 @@ class CopyTradingController extends Controller
                                         'size' => (float) $position->size - $baseAmount,
                                         'current_price' => $currentPrice,
                                         'margin' => (float) $position->margin - $marginToRefund,
-                                        'timestamp' => (string) now()->valueOf(),
+                                        'timestamp' => $tradeTimestamp,
+                                        'updated_at' => $tradeDate,
                                     ]);
                                 } elseif ((float) $position->size == $baseAmount) {
                                     $tradingAccount->increment('balance', (float) $position->margin);
@@ -648,12 +660,13 @@ class CopyTradingController extends Controller
                                         'entry_price' => $entryPrice,
                                         'current_price' => $currentPrice,
                                         'margin' => $lockedMargin,
-                                        'timestamp' => (string) now()->valueOf(),
+                                        'timestamp' => $tradeTimestamp,
+                                        'updated_at' => $tradeDate,
                                     ]);
                                 }
                             }
                         } else {
-                            MarginTradingPosition::create([
+                            $position = MarginTradingPosition::create([
                                 'user_id' => $user->id,
                                 'ticker' => $ticker,
                                 'side' => $side,
@@ -662,9 +675,10 @@ class CopyTradingController extends Controller
                                 'current_price' => $currentPrice,
                                 'margin' => $lockedMargin,
                                 'leverage' => $leverage,
-                                'timestamp' => (string) now()->valueOf(),
+                                'timestamp' => $tradeTimestamp,
                                 'status' => 'open',
                             ]);
+                            $this->stampTradeModel($position, $tradeDate);
                         }
                     } else {
                         $tradingAccount->decrement('balance', (float) $lockedMargin);
@@ -675,7 +689,8 @@ class CopyTradingController extends Controller
                     MarginTradingPosition::where('user_id', $user->id)->where('ticker', $ticker)->where('status', 'open')->update([
                         'current_price' => $currentPrice,
                         'unrealized_pnl' => $pnlOverride,
-                        'timestamp' => (string) now()->valueOf(),
+                        'timestamp' => $tradeTimestamp,
+                        'updated_at' => $tradeDate,
                     ]);
 
                     $position = MarginTradingPosition::where('user_id', $user->id)->where('ticker', $ticker)->where('status', 'open')->first();
@@ -688,8 +703,9 @@ class CopyTradingController extends Controller
                         $position->update([
                             'unrealized_pnl' => 0,
                             'realized_pnl' => $pnlOverride,
-                            'timestamp' => (string) now()->valueOf(),
+                            'timestamp' => $tradeTimestamp,
                             'status' => 'closed',
+                            'updated_at' => $tradeDate,
                         ]);
 
                         // Record transaction for pro trader
@@ -697,7 +713,7 @@ class CopyTradingController extends Controller
                         $typeTx = $pnlOverride > 0 ? 'credit' : 'debit';
                         $absPnl = abs($pnlOverride);
                         $proDesc = "Margin trading PnL on {$ticker}: " . ($pnlOverride > 0 ? "+" : "") . number_format($pnlOverride, 2) . " USDT";
-                        recordTransaction($user, $absPnl, 'USDT', $absPnl, 'USDT', 1, $typeTx, 'completed', $ref, $proDesc, $tradingAccount->balance);
+                        recordTransaction($user, $absPnl, 'USDT', $absPnl, 'USDT', 1, $typeTx, 'completed', $ref, $proDesc, $tradingAccount->balance, $tradeDate);
 
                         // Send notification and email to pro trader
                         $proTitle = $pnlOverride > 0 ? "Margin Trading Profit" : "Margin Trading Loss";
@@ -746,8 +762,9 @@ class CopyTradingController extends Controller
                                     $followerPos->update([
                                         'unrealized_pnl' => 0,
                                         'realized_pnl' => $followerPnl,
-                                        'timestamp' => (string) now()->valueOf(),
+                                        'timestamp' => $tradeTimestamp,
                                         'status' => 'closed',
+                                        'updated_at' => $tradeDate,
                                     ]);
                                 } else {
                                     $followerAccount->increment('balance', $followerPnl);
@@ -759,7 +776,7 @@ class CopyTradingController extends Controller
                                 $followerTypeTx = $followerPnl > 0 ? 'credit' : 'debit';
                                 $followerAbsPnl = abs($followerPnl);
                                 $followerDesc = "Copy trading PnL ({$pro->display_name}) on {$ticker}: " . ($followerPnl > 0 ? "+" : "") . number_format($followerPnl, 2) . " USDT";
-                                recordTransaction($follower, $followerAbsPnl, 'USDT', $followerAbsPnl, 'USDT', 1, $followerTypeTx, 'completed', $followerRef, $followerDesc, $followerAccount->balance);
+                                recordTransaction($follower, $followerAbsPnl, 'USDT', $followerAbsPnl, 'USDT', 1, $followerTypeTx, 'completed', $followerRef, $followerDesc, $followerAccount->balance, $tradeDate);
 
                                 // Send notification and email to follower
                                 $followerTitle = $followerPnl > 0 ? "Copy Trading Profit" : "Copy Trading Loss";
@@ -790,6 +807,24 @@ class CopyTradingController extends Controller
 
             return back()->withInput()->with('error', __('Failed to store trade history. :message', ['message' => $e->getMessage()]));
         }
+    }
+
+    private function stampTradeModel($model, Carbon $tradeDate): void
+    {
+        $model->timestamps = false;
+        $model->created_at = $tradeDate;
+        $model->updated_at = $tradeDate;
+        $model->save();
+        $model->timestamps = true;
+    }
+
+    private function resolveTradeDate($timestamp, $fallback): ?Carbon
+    {
+        if (!empty($timestamp) && is_numeric($timestamp)) {
+            return Carbon::createFromTimestampMs((int) $timestamp);
+        }
+
+        return $fallback ? Carbon::parse($fallback) : null;
     }
 
     public function relationships()

@@ -358,7 +358,7 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-right text-xs text-text-secondary">
-                                    {{ optional($trade['created_at'])->format('Y-m-d H:i') ?? __('N/A') }}
+                                    {{ optional($trade['trade_date'])->format('Y-m-d H:i') ?? __('N/A') }}
                                 </td>
                             </tr>
                         @empty
@@ -618,11 +618,19 @@
                         required>
                 </div>
 
-                <div id="tradeHistoryPriceWrap" class="hidden">
-                    <label class="text-sm text-text-secondary">{{ __('Limit Price') }}</label>
+                <div id="tradeHistoryPriceWrap">
+                    <label class="text-sm text-text-secondary">{{ __('Entry Price') }}</label>
                     <input type="number" name="price" id="tradeHistoryPrice" step="0.00000001" min="0"
                         class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
-                        placeholder="0.00" value="{{ old('price') }}">
+                        placeholder="0.00" value="{{ old('price') }}" required>
+                    <p class="mt-1 text-xs text-text-secondary">{{ __('Used as the executed price for market trades or the limit price for pending orders.') }}</p>
+                </div>
+
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Trade Date') }}</label>
+                    <input type="datetime-local" name="traded_at" id="tradeHistoryTradedAt"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
+                        value="{{ old('traded_at', now()->format('Y-m-d\TH:i')) }}" required>
                 </div>
 
                 <div id="tradeHistoryOrderModeWrap" class="hidden">
@@ -700,13 +708,11 @@
             const type = ($('#tradeHistoryType').val() || 'market').toString();
 
             if (type === 'limit') {
-                $('#tradeHistoryPriceWrap').removeClass('hidden');
                 $('#tradeHistoryPrice').attr('required', true);
                 $('#tradeHistoryPnlWrap').addClass('hidden');
                 $('#tradeHistoryPnl').attr('required', false);
             } else {
-                $('#tradeHistoryPriceWrap').addClass('hidden');
-                $('#tradeHistoryPrice').attr('required', false);
+                $('#tradeHistoryPrice').attr('required', true);
                 $('#tradeHistoryPnlWrap').removeClass('hidden');
                 $('#tradeHistoryPnl').attr('required', true);
             }
@@ -736,6 +742,7 @@
             $('#tradeHistoryTakeProfit').val('');
             $('#tradeHistoryStopLoss').val('');
             $('#tradeHistoryPnl').val('');
+            $('#tradeHistoryTradedAt').val(@json(now()->format('Y-m-d\TH:i')));
             syncTradeHistoryFields();
             openModal('tradeHistoryModal');
         }
