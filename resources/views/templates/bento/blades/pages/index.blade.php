@@ -32,29 +32,11 @@
             'module_loaded' => moduleEnabled('forex_module'),
             'icon' =>
                 '<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>',
-        ],
+        ], 
     ];
 
     $standoutFeatures = [
-        [
-            'id' => 'fixed-return',
-            'title' => __('Fixed Return Investment'),
-            'headline' => __('Guaranteed Returns, Institutional Stability.'),
-            'description' => __(
-                'Pick from any of our core investment plans. We allocate capital across diverse, low-volatility sectors to yield consistent, fixed returns.',
-            ),
-            'details' => [
-                __('Diverse portfolio allocation'),
-                __('Automated monthly yields'),
-                __('Risk-mitigated strategies'),
-                __('Insurance-backed capital'),
-            ],
-            'icon' =>
-                '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
-            'cta_label' => __('View Plans'),
-            'cta_url' => '#invest',
-            'image' => 'assets/templates/bento/images/features/fixed-return-investment.png',
-        ],
+       
         [
             'id' => 'crypto-futures',
             'title' => __('Crypto Trading'),
@@ -72,23 +54,23 @@
                 '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>',
             'image' => 'assets/templates/bento/images/features/crypto-trading.png',
         ],
-        [
-            'id' => 'forex',
-            'title' => __('Forex Trading'),
-            'headline' => __('The Global Currency Hub.'),
+         [
+            'id' => 'copy-trading',
+            'title' => __('Copy Trading'),
+            'headline' => __('Follow. Copy. Grow.'),
             'description' => __(
-                'Access Major, Minor, and Exotic currency pairs with institution-grade spreads and lightning-fast execution speeds.',
+                'Automatically mirror top traders in real time. Choose leaders by performance, set your risk limits, and track every copied trade transparently.',
             ),
             'details' => [
-                __('Raw spreads starting at 0.0 pips'),
-                __('50+ Currency pairs'),
-                __('24/5 Live markets'),
-                __('Tier-1 liquidity providers'),
+                __('Copy verified pro traders'),
+                __('Flexible risk controls & stop-loss'),
+                __('Real-time execution notifications'),
+                __('Full copy activity & trade history'),
             ],
             'icon' =>
-                '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>',
-            'image' => 'assets/templates/bento/images/features/forex-trading.png',
-        ],
+                '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11c1.657 0 3-1.343 3-3S17.657 5 16 5s-3 1.343-3 3 1.343 3 3 3zM8 11c1.657 0 3-1.343 3-3S9.657 5 8 5 5 6.343 5 8s1.343 3 3 3zM16 13c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4zM8 13c-2.67 0-8 1.34-8 4v2h6v-2c0-1.54.77-2.87 2.06-3.87C8.04 13.04 8.02 13.02 8 13z"></path></svg>',
+            'image' => 'assets/templates/bento/images/features/copy_trading.png',
+        ], 
         [
             'id' => 'stocks',
             'title' => __('Global Stocks'),
@@ -106,23 +88,23 @@
                 '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>',
             'image' => 'assets/templates/bento/images/features/global-stocks.png',
         ],
-        [
-            'id' => 'bonds',
-            'title' => __('Sovereign Bonds'),
-            'headline' => __('Safe Haven Assets.'),
+         [
+            'id' => 'launchpad',
+            'title' => __('Launchpad'),
+            'headline' => __('Early Access Token Sales.'),
             'description' => __(
-                'Invest in government and corporate debt securities. Ideal for wealth preservation and steady long-term income.',
+                'Join vetted token presales and buy securely using WalletConnect/Web3Modal. Transparent allocations, live countdowns, and real-time purchase confirmations.',
             ),
             'details' => [
-                __('Secure sovereign debt'),
-                __('Fixed periodic interest'),
-                __('Liquidity on secondary markets'),
-                __('Tax-efficient structures'),
+                __('WalletConnect/Web3Modal purchases'),
+                __('Configurable chains (BSC/ETH/Custom)'),
+                __('Live sale windows & countdown timers'),
+                __('Instant on-chain payment verification'),
             ],
             'icon' =>
-                '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>',
-            'image' => 'assets/templates/bento/images/features/sovereign-bonds.png',
-        ],
+                '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2l4 7H8l4-7zM4 10h16v10a2 2 0 01-2 2H6a2 2 0 01-2-2V10zM9 14h6M9 17h6"></path></svg>',
+            'image' => 'assets/templates/bento/images/features/launchpad.png',
+        ], 
         [
             'id' => 'etfs',
             'title' => __('Diversified ETFs'),
@@ -157,23 +139,7 @@
                 '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
             'image' => 'assets/templates/bento/images/features/margin-trading.png',
         ],
-        [
-            'id' => 'commodities',
-            'title' => __('Hard Commodities'),
-            'headline' => __('Tangible Wealth.'),
-            'description' => __(
-                'Trade Gold, Silver, Crude Oil, and Natural Gas. Protect your portfolio against inflation with essential global resources.',
-            ),
-            'details' => [
-                __('Spot & Futures contracts'),
-                __('Real-time global pricing'),
-                __('Inflation hedge'),
-                __('24-hour liquidity'),
-            ],
-            'icon' =>
-                '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.99 7.99 0 0120 13c0 2.21-.895 4.21-2.343 5.657z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"></path></svg>',
-            'image' => 'assets/templates/bento/images/features/hard-commodities.png',
-        ],
+       
     ];
 @endphp
 
@@ -238,7 +204,10 @@
                 <div class="flex items-center gap-2">
                     <div
                         class="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-500">
-                        <img src="{{ 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/refs/heads/master/svg/color/' . $btc['logo'] }}"
+                        @php
+                            $btc_logo = $btc['logo'] ?? 'btc.svg';
+                        @endphp
+                        <img src="{{ 'https://raw.githubusercontent.com/spothq/cryptocurrency-icons/refs/heads/master/svg/color/' . $btc_logo }}"
                             alt="BTC" class="w-4 h-4 lg:w-5 lg:h-5">
                     </div>
                     <div>
@@ -259,7 +228,14 @@
                 <div class="flex items-center gap-2">
                     <div
                         class="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-500">
-                        <img src="{{ $aapl['public_png_logo_url'] ?? '' }}" alt="AAPL" class="w-4 h-4 lg:w-5 lg:h-5">
+                        @php
+                            $aapl_logo = $aapl['public_png_logo_url'] ?? null;
+                        @endphp
+                        @if ($aapl_logo)
+                            <img src="{{ $aapl_logo }}" alt="AAPL" class="w-4 h-4 lg:w-5 lg:h-5">
+                        @else
+                            <div class="w-4 h-4 lg:w-5 lg:h-5 rounded-full bg-blue-500/30"></div>
+                        @endif
                     </div>
                     <div>
                         <div class="text-[8px] lg:text-[10px] text-text-secondary">AAPL</div>
@@ -540,6 +516,7 @@
                         </button>
                     @endforeach
                 </div>
+
 
                 {{-- Right: Feature Details (70%) --}}
                 <div class="w-full lg:w-[65%] flex flex-col gap-8 lg:block relative lg:min-h-[450px]">
@@ -1079,7 +1056,7 @@
                                 class="text-transparent bg-clip-text bg-gradient-to-r from-accent-primary to-accent-secondary">{{ __('Your Terminal.') }}</span>
                         </h2>
                         <p class="text-lg text-text-secondary mb-10 leading-relaxed max-w-md">
-                            {{ __('Direct access to high-liquidity markets. Trade Stocks, Forex, and Crypto Futures with up to 100x leverage on our institutional matching engine.') }}
+                            {{ __('Direct access to high-liquidity markets. Trade Stocks, and Crypto Futures with up to 100x leverage on our institutional matching engine.') }}
                         </p>
 
                         <div class="flex flex-col sm:flex-row gap-4">
@@ -1422,164 +1399,7 @@
 
 
     {{-- INVESTMENT SECTORS EXPLORER --}}
-    @if (isset($sectors))
-        <section id="sectors" class="py-24 relative overflow-hidden bg-[#050505]">
-            {{-- Structural Accents --}}
-            <div
-                class="absolute top-0 right-0 w-[800px] h-[800px] bg-accent-primary/[0.03] rounded-full blur-[150px] -z-10 animate-pulse-glow">
-            </div>
-            <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-500/[0.02] rounded-full blur-[130px] -z-10">
-            </div>
-
-            <div class="container mx-auto px-4 relative">
-                <div class="flex flex-col lg:flex-row justify-between items-end gap-8 mb-16">
-                    <div class="max-w-2xl">
-                        <span
-                            class="text-accent-primary font-bold uppercase tracking-[0.3em] text-[10px] block mb-4">{{ __('Asset Architecture') }}</span>
-                        <h2 class="text-4xl md:text-5xl font-black text-white leading-tight">
-                            {{ __('Multi-Asset') }} <br>
-                            <span
-                                class="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/40">{{ __('Sector Integration.') }}</span>
-                        </h2>
-                    </div>
-                    <p class="text-text-secondary text-lg max-w-sm lg:text-right">
-                        {{ __('Explore specialized investment vehicles curated through institutional-grade research and risk management.') }}
-                    </p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    @foreach ($sectors as $key => $sector)
-                        <div data-cursor-label="View Dynamics"
-                            class="group relative p-8 rounded-[2.5rem] bg-[#0B0F17]/40 border border-white/5 hover:border-accent-primary/30 transition-all duration-500 flex flex-col h-full overflow-hidden">
-
-                            {{-- Hover Background Effect --}}
-                            <div
-                                class="absolute inset-0 bg-gradient-to-br from-accent-primary/[0.05] via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-                            </div>
-
-                            <div class="relative z-10">
-                                {{-- Header: Icon & Risk --}}
-                                <div class="flex justify-between items-start mb-8">
-                                    <div
-                                        class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white group-hover:bg-accent-primary group-hover:scale-110 transition-all duration-500">
-                                        {{-- Use dynamic icons based on key --}}
-                                        @switch($key)
-                                            @case('stocks_and_etfs')
-                                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2">
-                                                    </path>
-                                                </svg>
-                                            @break
-
-                                            @case('crypto_assets')
-                                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                                    </path>
-                                                </svg>
-                                            @break
-
-                                            @case('real_estate')
-                                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6">
-                                                    </path>
-                                                </svg>
-                                            @break
-
-                                            @case('gaming_and_esports')
-                                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4v-3a2 2 0 002-2V7a2 2 0 00-2-2H5z">
-                                                    </path>
-                                                </svg>
-                                            @break
-
-                                            @default
-                                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                                </svg>
-                                        @endswitch
-                                    </div>
-                                    <div
-                                        class="px-3 py-1 rounded-full bg-white/5 border border-white/10 flex items-center gap-2">
-                                        <div
-                                            class="w-1.5 h-1.5 rounded-full {{ $sector['risk_level'] === 'high' ? 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.6)]' : ($sector['risk_level'] === 'medium' ? 'bg-amber-500' : 'bg-emerald-500') }}">
-                                        </div>
-                                        <span
-                                            class="text-[10px] font-bold text-white uppercase tracking-widest">{{ __($sector['risk_profile']) }}</span>
-                                    </div>
-                                </div>
-
-                                {{-- Content --}}
-                                <h3
-                                    class="text-2xl font-black text-white mb-3 group-hover:text-accent-primary transition-colors">
-                                    {{ __($key) }}</h3>
-                                <p class="text-text-secondary text-sm leading-relaxed mb-8 line-clamp-3">
-                                    {{ __($sector['context']) }}</p>
-
-                                {{-- Dynamics Grid --}}
-                                <div class="grid grid-cols-2 gap-4 mb-8">
-                                    <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5">
-                                        <div
-                                            class="text-[9px] font-bold text-text-secondary uppercase tracking-[0.2em] mb-1">
-                                            {{ __('Volatility') }}</div>
-                                        <div class="text-sm font-bold text-white capitalize">
-                                            {{ __($sector['volatility']) }}</div>
-                                    </div>
-                                    <div class="p-4 rounded-2xl bg-white/[0.03] border border-white/5">
-                                        <div
-                                            class="text-[9px] font-bold text-text-secondary uppercase tracking-[0.2em] mb-1">
-                                            {{ __('Yield Target') }}</div>
-                                        <div class="text-sm font-bold text-white">
-                                            {{ $sector['risk_level'] === 'high' ? __('Aggressive') : __('Sustainable') }}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {{-- Revenue Streams (Hover Reveal) --}}
-                                <div class="space-y-3 opacity-60 group-hover:opacity-100 transition-all duration-500">
-                                    <h4 class="text-[10px] font-black text-white uppercase tracking-widest">
-                                        {{ __('Profit Channels') }}</h4>
-                                    <div class="flex flex-wrap gap-2">
-                                        @php $i = 0; @endphp
-                                        @foreach ($sector['earnings_generated_from'] as $subKey => $desc)
-                                            @if ($i++ < 3)
-                                                <span
-                                                    class="text-[10px] px-2.5 py-1 rounded-lg bg-white/5 border border-white/5 text-text-secondary capitalize">{{ __($subKey) }}</span>
-                                            @endif
-                                        @endforeach
-                                        @if (count($sector['earnings_generated_from']) > 3)
-                                            <span
-                                                class="text-[10px] px-2.5 py-1 rounded-lg bg-accent-primary/10 text-accent-primary font-bold">+{{ count($sector['earnings_generated_from']) - 3 }}</span>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-
-                            {{-- Action Footer --}}
-                            <div class="mt-8 pt-8 border-t border-white/5 flex items-center justify-between relative z-10">
-                                <span
-                                    class="text-[10px] font-bold text-text-secondary uppercase tracking-widest">{{ __('System Ready') }}</span>
-                                <div
-                                    class="flex items-center gap-2 text-accent-primary font-black text-xs uppercase tracking-widest group/btn cursor-pointer">
-                                    {{ __('Analyze') }}
-                                    <svg class="w-4 h-4 transition-transform group-hover/btn:translate-x-1" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                                            d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </section>
-    @endif
-
+   
 
     {{-- FEATURES --}}
     <section id="company" class="py-24 bg-secondary-dark border-t border-white/5 relative overflow-hidden">
@@ -1615,40 +1435,10 @@
             </div>
         </div>
     </section>
+
+
     {{-- MARKET DOMINANCE (HEATMAP) --}}
-    <section id="dominance" class="py-24 relative overflow-hidden bg-[#0A0A0C]">
-        {{-- Data Glows --}}
-        <div
-            class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-accent-primary/[0.01] rounded-full blur-[150px] -z-10 animate-deep-pulse">
-        </div>
-
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col lg:flex-row justify-between items-end gap-8 mb-16">
-                <div class="max-w-2xl">
-                    <span
-                        class="text-accent-primary font-bold uppercase tracking-[0.3em] text-[10px] block mb-4">{{ __('Asset Architecture') }}</span>
-                    <h2 class="text-4xl md:text-5xl font-black text-white leading-tight">
-                        {{ __('Market Cap') }} <br>
-                        <span
-                            class="text-transparent bg-clip-text bg-gradient-to-r from-white to-white/40">{{ __('Heatmap & Analysis.') }}</span>
-                    </h2>
-                </div>
-                <p class="text-text-secondary text-lg max-w-sm lg:text-right">
-                    {{ __('Visualizing the global digital economy. Monitor sector dominance and capital rotation in real-time.') }}
-                </p>
-            </div>
-
-            <div
-                class="p-8 rounded-[2.5rem] bg-[#0B0F17]/40 border border-white/5 relative overflow-hidden group h-[500px] flex flex-col">
-                <div class="flex-1 w-full rounded-2xl overflow-hidden bg-white/[0.02] border border-white/5">
-                    {{-- TradingView Heatmap Widget --}}
-                    <div class="tradingview-widget-container h-full">
-                        <div class="tradingview-widget-container__widget h-full" id="tv-heatmap"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    
 
     {{-- OUR TEAMS SECTION --}}
     <section id="team" class="py-24 relative overflow-hidden bg-[#050505]">
@@ -2196,8 +1986,8 @@
                 "{{ __('Stocks.') }}",
                 "{{ __('Crypto.') }}",
                 "{{ __('ETFs.') }}",
-                "{{ __('Bonds.') }}",
-                "{{ __('Forex.') }}",
+                "{{ __('Copy Trading.') }}",
+                "{{ __('LaunchPad.') }}",
                 "{{ __('Everything.') }}"
             ];
             const el = document.getElementById('typing-text');

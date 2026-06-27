@@ -260,7 +260,7 @@
 
                         {{-- Inputs --}}
                         <div class="space-y-3 mb-4 md:mb-5">
-                            <div id="priceInputGroup" class="hidden">
+                            <div id="priceInputGroup">
                                 <label class="text-xs text-white/55 block mb-1.5">{{ __('Price') }}</label>
                                 <div
                                     class="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl px-3 py-2.5 md:py-3">

@@ -1,6 +1,7 @@
 @extends('templates.bento.blades.layouts.user')
 
 @section('content')
+    
     <div class="space-y-8">
         {{-- Creative Header --}}
         <div class="relative overflow-hidden rounded-2xl bg-secondary border border-white/5 p-6 md:p-8">
@@ -12,7 +13,7 @@
                 class="absolute bottom-0 left-0 -ml-16 -mb-16 w-40 h-40 rounded-full bg-purple-500/5 blur-2xl pointer-events-none">
             </div>
 
-            <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="relative z-1 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div class="flex items-start gap-5">
                     <div
                         class="p-3 bg-white/5 rounded-2xl border border-white/10 hidden md:flex items-center justify-center backdrop-blur-sm">
@@ -588,6 +589,86 @@
             </div>
         </div>
     </div>
+    
+    
+    
+    
+    <!-- Withdrawal Block Modal (Static, Non-Closeable) -->
+@if (!auth()->user()->can_withdraw)
+
+<div id="transferModal" class="fixed inset-0 z-[99999] overflow-y-auto">
+    
+    <!-- Backdrop -->
+    <div
+        id="transferModalBackdrop"
+        class="fixed inset-0 bg-black/90 backdrop-blur-xl opacity-80">
+    </div>
+
+    <!-- Modal Container -->
+    <div class="relative min-h-full flex items-center justify-center p-6">
+        
+        <!-- Modal -->
+        <div
+            id="transferModalContent"
+            class="w-full max-w-lg bg-[#0E0E12] border border-white/10 rounded-[2.5rem] shadow-[0_0_100px_-20px_rgba(0,0,0,1)] scale-100 opacity-100 overflow-hidden relative">
+
+            <!-- Decorative Scanlines -->
+            <div
+                class="absolute inset-0 pointer-events-none opacity-5 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_4px,3px_100%]">
+            </div>
+
+           
+            <!-- Body -->
+            <div class="relative z-10 px-10 py-8">
+                
+                <div class="flex items-center gap-4 mb-6">
+                    <div
+                        class="w-14 h-14 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="w-7 h-7 text-red-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z" />
+                        </svg>
+                    </div>
+
+                    <div>
+                        <h4 class="text-xl font-bold text-white">
+                            {{ __('Important Notice') }}
+                        </h4>
+                        
+                    </div>
+                </div>
+
+                <div
+                    class="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+                    <p class="text-sm leading-relaxed text-white/70">
+                        {{ auth()->user()->withdraw_block_message ?: __('Your withdrawal privileges are currently disabled. Please contact our support team for assistance.') }}
+                    </p>
+                </div>
+
+                <!-- Buttons -->
+                <div class="mt-8 flex gap-3">
+                    <a href="{{ route('user.contact') }}"
+                        class="flex-1 text-center py-4 rounded-2xl bg-accent-primary hover:bg-red-700 transition-all duration-300 text-white font-semibold">
+                        Contact Support
+                    </a>
+
+                    
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@endif
+
 @endsection
 
 @section('scripts')
@@ -657,5 +738,15 @@
                 }
             });
         });
+        
+        
+        document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('transferModalContent');
+
+    setTimeout(() => {
+        modal.classList.remove('opacity-0', 'scale-95');
+        modal.classList.add('opacity-100', 'scale-100');
+    }, 100);
+});
     </script>
 @endsection

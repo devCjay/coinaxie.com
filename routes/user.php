@@ -22,9 +22,9 @@ use App\Http\Controllers\User\Trading\CopyTradingController;
 use App\Http\Controllers\User\Trading\TradingAccountController;
 use App\Http\Controllers\User\LaunchpadController;
 use App\Http\Controllers\User\LaunchpadTradeController;
-use App\Http\Controllers\User\SupportTicketController;
 use App\Http\Controllers\User\TransactionController;
 use App\Http\Controllers\User\WithdrawalController;
+use App\Http\Controllers\User\ContactController;
 use App\Http\Controllers\User\Withdrawal\NowpaymentController as NowpaymentWithdrawalController;
 use Illuminate\Support\Facades\Route;
 
@@ -69,6 +69,10 @@ Route::prefix('user')->middleware(['auth', 'otp.verified', 'user.status', 'user.
     // KYC
     Route::get('/kyc', [KycController::class, 'index'])->name('kyc');
     Route::post('/kyc', [KycController::class, 'submitKyc'])->name('kyc.submit')->middleware('sandbox');
+
+    // Contact Support
+    Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+    Route::post('/contact', [ContactController::class, 'send'])->name('contact.send');
 
 
     // Deposits
@@ -121,6 +125,7 @@ Route::prefix('user')->middleware(['auth', 'otp.verified', 'user.status', 'user.
         Route::post('/margin/trade', [MarginController::class, 'trade'])->name('margin.trade');
         Route::post('/margin/cancel-order', [MarginController::class, 'cancelOrder'])->name('margin.cancel-order');
         Route::get('/copy-trading', [CopyTradingController::class, 'index'])->name('copy-trading');
+        Route::get('/copy-trading/activity', [CopyTradingController::class, 'activity'])->name('copy-trading.activity');
         Route::get('/copy-trading/leaders', [CopyTradingController::class, 'leaders'])->name('copy-trading.leaders');
         Route::get('/copy-trading/leaders/{id}', [CopyTradingController::class, 'profile'])->name('copy-trading.profile');
         Route::post('/copy-trading/follow', [CopyTradingController::class, 'follow'])->name('copy-trading.follow');
@@ -138,6 +143,8 @@ Route::prefix('user')->middleware(['auth', 'otp.verified', 'user.status', 'user.
         Route::get('/', [LaunchpadController::class, 'index'])->name('index');
         Route::get('/{slug}', [LaunchpadController::class, 'show'])->name('show');
         Route::post('/buy', [LaunchpadController::class, 'buy'])->name('buy');
+        Route::post('/web3/intent', [LaunchpadController::class, 'web3Intent'])->name('web3.intent');
+        Route::post('/web3/confirm', [LaunchpadController::class, 'web3Confirm'])->name('web3.confirm');
         Route::post('/submit', [LaunchpadController::class, 'submit'])->name('submit');
         Route::get('/{slug}/trade', [LaunchpadTradeController::class, 'index'])->name('trade');
         Route::post('/trade/order', [LaunchpadTradeController::class, 'placeOrder'])->name('trade.order');
@@ -175,14 +182,6 @@ Route::prefix('user')->middleware(['auth', 'otp.verified', 'user.status', 'user.
 
     // Transactions
     Route::get('transactions', [TransactionController::class, 'index'])->name('transactions');
-
-    // Support Tickets
-    Route::prefix('tickets')->name('tickets.')->group(function () {
-        Route::get('/', [SupportTicketController::class, 'index'])->name('index');
-        Route::post('/', [SupportTicketController::class, 'store'])->name('store');
-        Route::get('/{id}', [SupportTicketController::class, 'show'])->name('show');
-        Route::post('/{id}/reply', [SupportTicketController::class, 'reply'])->name('reply');
-    });
 
     // referrals
     Route::get('referrals', [ReferralController::class, 'index'])->name('referrals');

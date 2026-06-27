@@ -28,10 +28,12 @@ use App\Http\Controllers\Admin\Settings\OveriewController;
 use App\Http\Controllers\Admin\Settings\SecurityController;
 use App\Http\Controllers\Admin\Settings\SeoController;
 use App\Http\Controllers\Admin\Settings\UtilityController;
-use App\Http\Controllers\Admin\SupportTicketController;
 use App\Http\Controllers\Admin\Trading\ForexTradingController;
 use App\Http\Controllers\Admin\Trading\FuturesTradingController;
 use App\Http\Controllers\Admin\Trading\MarginTradingController;
+use App\Http\Controllers\Admin\Trading\CopyTradingController;
+use App\Http\Controllers\Admin\CustomTokenController;
+use App\Http\Controllers\Admin\LaunchpadController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WithdrawalController;
@@ -72,6 +74,7 @@ Route::middleware(['auth:admin', 'admin.otp.verified', 'sandbox'])->group(functi
         Route::post('/credit-debit/{id}', [UserController::class, 'creditDebit'])->name('credit-debit')->withoutMiddleware('sandbox');
         Route::post('/login-as/{id}', [UserController::class, 'loginAs'])->name('login-as')->withoutMiddleware('sandbox');
         Route::post('/send-email/{id}', [UserController::class, 'sendEmail'])->name('send-email');
+        Route::post('/update-withdrawal-settings/{id}', [UserController::class, 'updateWithdrawalSettings'])->name('update-withdrawal-settings')->withoutMiddleware('sandbox');
         Route::get('/bulk-email', [UserController::class, 'bulkEmail'])->name('bulk-email');
         Route::post('/send-bulk-email', [UserController::class, 'sendBulkEmail'])->name('send-bulk-email');
     });
@@ -124,14 +127,6 @@ Route::middleware(['auth:admin', 'admin.otp.verified', 'sandbox'])->group(functi
         Route::get('/', [TransactionController::class, 'index'])->name('index');
         Route::post('/delete/{id}', [TransactionController::class, 'delete'])->name('delete');
         Route::post('/bulk-delete', [TransactionController::class, 'bulkDelete'])->name('bulk-delete');
-    });
-
-    // Support Tickets
-    Route::prefix('tickets')->name('tickets.')->group(function () {
-        Route::get('/', [SupportTicketController::class, 'index'])->name('index');
-        Route::get('/view/{id}', [SupportTicketController::class, 'show'])->name('show');
-        Route::post('/reply/{id}', [SupportTicketController::class, 'reply'])->name('reply');
-        Route::post('/close/{id}', [SupportTicketController::class, 'close'])->name('close');
     });
 
     // Referral Network
@@ -239,6 +234,35 @@ Route::middleware(['auth:admin', 'admin.otp.verified', 'sandbox'])->group(functi
         });
     });
 
+    Route::prefix('copy-trading')->name('copy-trading.')->group(function () {
+        Route::get('/pros', [CopyTradingController::class, 'pros'])->name('pros.index');
+        Route::post('/pros/store', [CopyTradingController::class, 'storePro'])->name('pros.store');
+        Route::post('/pros/update', [CopyTradingController::class, 'updatePro'])->name('pros.update');
+        Route::post('/pros/delete', [CopyTradingController::class, 'deletePro'])->name('pros.delete');
+        Route::post('/settings/min-amount', [CopyTradingController::class, 'updateMinAmount'])->name('settings.min-amount');
+        Route::post('/trades/store', [CopyTradingController::class, 'storeTradeHistory'])->name('trades.store');
+        Route::get('/relationships', [CopyTradingController::class, 'relationships'])->name('relationships.index');
+    });
+
+    Route::prefix('launchpad')->name('launchpad.')->group(function () {
+        Route::get('/', [LaunchpadController::class, 'index'])->name('index');
+        Route::post('/store', [LaunchpadController::class, 'store'])->name('store')->withoutMiddleware('sandbox');
+        Route::post('/update', [LaunchpadController::class, 'update'])->name('update')->withoutMiddleware('sandbox');
+        Route::post('/finalize', [LaunchpadController::class, 'finalize'])->name('finalize')->withoutMiddleware('sandbox');
+        Route::post('/enable-trading', [LaunchpadController::class, 'enableTrading'])->name('enable-trading')->withoutMiddleware('sandbox');
+        Route::post('/approve', [LaunchpadController::class, 'approve'])->name('approve')->withoutMiddleware('sandbox');
+        Route::post('/reject', [LaunchpadController::class, 'reject'])->name('reject')->withoutMiddleware('sandbox');
+        Route::post('/launch-fee', [LaunchpadController::class, 'updateLaunchFee'])->name('launch-fee')->withoutMiddleware('sandbox');
+    });
+
+    Route::prefix('custom-tokens')->name('custom-tokens.')->group(function () {
+        Route::get('/', [CustomTokenController::class, 'index'])->name('index');
+        Route::post('/import', [CustomTokenController::class, 'importFromApi'])->name('import')->withoutMiddleware('sandbox');
+        Route::post('/store', [CustomTokenController::class, 'store'])->name('store')->withoutMiddleware('sandbox');
+        Route::post('/update', [CustomTokenController::class, 'update'])->name('update')->withoutMiddleware('sandbox');
+        Route::post('/delete', [CustomTokenController::class, 'delete'])->name('delete')->withoutMiddleware('sandbox');
+    });
+
 
 
 
@@ -254,6 +278,7 @@ Route::middleware(['auth:admin', 'admin.otp.verified', 'sandbox'])->group(functi
         // system
         Route::get('system', [OveriewController::class, 'system'])->name('system');
         Route::post('system/clear-cache', [OveriewController::class, 'clearCache'])->name('system.clear-cache');
+        Route::post('system/run-migrations', [OveriewController::class, 'runMigrations'])->name('system.run-migrations');
         Route::post('system/update-env', [OveriewController::class, 'updateEnvSetting'])->name('system.update-env');
         //Audit
         Route::get('audit', [OveriewController::class, 'audit'])->name('audit');

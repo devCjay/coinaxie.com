@@ -46,16 +46,6 @@ class Admin extends Authenticatable
         ];
     }
 
-    public function supportTicketMessages()
-    {
-        return $this->hasMany(SupportTicketMessage::class);
-    }
-
-    public function closedSupportTickets()
-    {
-        return $this->hasMany(SupportTicket::class, 'closed_by_admin_id');
-    }
-
     /**
      * Get the admin's name.
      */

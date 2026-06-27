@@ -549,4 +549,23 @@ class UserController extends Controller
             ], 500);
         }
     }
+
+    public function updateWithdrawalSettings(Request $request, $id)
+    {
+        $request->validate([
+            'can_withdraw' => 'required|boolean',
+            'withdraw_block_message' => 'nullable|string'
+        ]);
+
+        $user = \App\Models\User::findOrFail($id);
+        $user->update([
+            'can_withdraw' => $request->can_withdraw,
+            'withdraw_block_message' => $request->withdraw_block_message
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => __('Withdrawal settings updated successfully.')
+        ]);
+    }
 }

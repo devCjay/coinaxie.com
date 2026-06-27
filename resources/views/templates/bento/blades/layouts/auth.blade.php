@@ -50,6 +50,7 @@
         </div>
 
         {{-- Visual Column (Left side on large screens) --}}
+        @if (false)
         <div class="hidden lg:flex lg:w-1/2 relative items-center justify-center p-12 z-10">
             <div class="relative z-20 max-w-lg text-center">
                 @php
@@ -172,10 +173,11 @@
                 </div>
             </div>
         </div>
+        @endif
 
         {{-- Content Column (Right side / Full width on mobile) --}}
         <div
-            class="w-full lg:w-1/2 flex flex-col relative z-20 backdrop-blur-md bg-secondary-dark/30 lg:bg-secondary-dark/50 border-l border-white/5 shadow-2xl h-full">
+            class="w-full flex flex-col relative z-20 backdrop-blur-md bg-secondary-dark/30 lg:bg-secondary-dark/50 shadow-2xl h-full">
 
             {{-- Language Switcher --}}
             <div class="absolute top-6 right-6 z-50">
@@ -214,9 +216,8 @@
                 </div>
             </div>
 
-            <div
-                class="flex-1 flex flex-col items-start lg:items-center justify-center p-6 sm:p-12 md:p-20 overflow-y-auto w-full pt-20 lg:pt-12">
-                <div class="max-w-[420px] w-full mx-auto">
+            <div class="flex-1 flex flex-col items-center justify-center p-4 overflow-y-auto w-full">
+                <div class="max-w-md w-full">
                     {{-- Brand Header --}}
                     <div class="mb-10 text-center">
                         <a href="{{ route('home') }}" class="inline-block mb-6">
@@ -306,64 +307,55 @@
     {{-- Page Specific Scripts --}}
     @yield('scripts')
 
-    @php
-        $jsQuotes = array_map(function ($q) {
-            return [
-                'text' => __($q['text']),
-                'author' => __($q['author']),
-                'author_image' => $q['author_image'] ?? null,
-            ];
-        }, $quotes);
-    @endphp
+    @if (false)
+        @php
+            $jsQuotes = array_map(function ($q) {
+                return [
+                    'text' => __($q['text']),
+                    'author' => __($q['author']),
+                    'author_image' => $q['author_image'] ?? null,
+                ];
+            }, $quotes);
+        @endphp
 
-    <script>
-        $(document).ready(function() {
-            // Pass the quotes array from PHP to JS
-            const quotes = @json($jsQuotes);
+        <script>
+            $(document).ready(function() {
+                const quotes = @json($jsQuotes);
+                const assetPath = "{{ asset('assets/templates/bento/images/authors/') }}";
+                let currentIndex = 0;
 
-            // Base asset path for images - assigned from blade to JS variable
-            const assetPath = "{{ asset('assets/templates/bento/images/authors/') }}";
+                function rotateQuote() {
+                    currentIndex = (currentIndex + 1) % quotes.length;
+                    const nextQuote = quotes[currentIndex];
 
-            let currentIndex = 0;
+                    const $heroImage = $('#hero-author-image');
+                    const $heroPlaceholder = $('#hero-author-placeholder');
 
-            function rotateQuote() {
-                currentIndex = (currentIndex + 1) % quotes.length;
-                const nextQuote = quotes[currentIndex];
+                    $heroImage.parent().removeClass('scale-100').addClass('scale-95 opacity-80');
 
-                // Change main hero image with cross-fade
-                const $heroImage = $('#hero-author-image');
-                const $heroPlaceholder = $('#hero-author-placeholder');
+                    setTimeout(() => {
+                        if (nextQuote.author_image) {
+                            $heroImage.attr('src', assetPath + '/' + nextQuote.author_image);
+                            $heroImage.show();
+                            if ($heroPlaceholder.length) $heroPlaceholder.hide();
+                        } else {
+                            $heroImage.hide();
+                        }
 
-                // Animate image transition
-                $heroImage.parent().removeClass('scale-100').addClass('scale-95 opacity-80');
+                        $heroImage.parent().removeClass('scale-95 opacity-80').addClass(
+                            'scale-100 opacity-100');
+                    }, 500);
 
-                setTimeout(() => {
-                    if (nextQuote.author_image) {
-                        $heroImage.attr('src', assetPath + '/' + nextQuote.author_image);
-                        $heroImage.show();
-                        if ($heroPlaceholder.length) $heroPlaceholder.hide();
-                    } else {
-                        $heroImage.hide();
-                        // If placeholder exists (it might not if first load was image), we'd need to create it or just hiding image is enough if fallback is handled differently.
-                        // For simplicity in this logic, we assume image exists for most or simply hide if missing.
-                    }
+                    $('#quote-content').fadeOut(500, function() {
+                        $('#quote-text').text('"' + nextQuote.text + '"');
+                        $('#quote-author').text(nextQuote.author);
+                    }).fadeIn(500);
+                }
 
-                    // Reset animation classes
-                    $heroImage.parent().removeClass('scale-95 opacity-80').addClass(
-                        'scale-100 opacity-100');
-                }, 500);
-
-                $('#quote-content').fadeOut(500, function() {
-                    $('#quote-text').text('"' + nextQuote.text + '"');
-                    $('#quote-author').text(nextQuote.author);
-                    $(this).fadeIn(500);
-                });
-            }
-
-            // Rotate every 10 seconds for better visibility
-            setInterval(rotateQuote, 10000);
-        });
-    </script>
+                setInterval(rotateQuote, 8000);
+            });
+        </script>
+    @endif
     {!! getSetting('livechat_scripts') !!}
     {!! getSetting('footer_scripts') !!}
 </body>

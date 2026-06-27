@@ -232,18 +232,19 @@
                     'bg-accent-primary/20 border-accent-primary/30 text-white');
                 const type = $(this).data('type');
                 if (type === 'market') {
-                    $('#priceInputGroup').addClass('hidden');
-                    $('#inputPrice').prop('disabled', true);
+                    $('#priceInputGroup').removeClass('hidden');
+                    $('#inputPrice').val(currentPrice).prop('disabled', true).addClass('opacity-60 cursor-not-allowed');
                 } else {
                     $('#priceInputGroup').removeClass('hidden');
-                    $('#inputPrice').prop('disabled', false).val(currentPrice);
+                    $('#inputPrice').prop('disabled', false).removeClass('opacity-60 cursor-not-allowed').val(
+                        currentPrice);
                 }
             });
 
             // Initial state for Market orders
             if ($('.order-type-tab[data-type="market"]').hasClass('bg-accent-primary/20')) {
-                $('#priceInputGroup').addClass('hidden');
-                $('#inputPrice').prop('disabled', true);
+                $('#priceInputGroup').removeClass('hidden');
+                $('#inputPrice').val(currentPrice).prop('disabled', true).addClass('opacity-60 cursor-not-allowed');
             }
 
             $(document).on('click', '.time-btn', function() {
@@ -426,6 +427,17 @@
                             const rawBalance = $('#availableBalanceValue').text().replace(/,/g, '');
                             availableBalance = parseFloat(rawBalance) || 0;
 
+                            const type = $('.order-type-tab.bg-accent-primary\\/20').data('type');
+                            if (type === 'market') {
+                                $('#priceInputGroup').removeClass('hidden');
+                                $('#inputPrice').val(currentPrice).prop('disabled', true).addClass(
+                                    'opacity-60 cursor-not-allowed');
+                            } else {
+                                $('#priceInputGroup').removeClass('hidden');
+                                $('#inputPrice').prop('disabled', false).removeClass(
+                                    'opacity-60 cursor-not-allowed');
+                            }
+
                             // Re-initialize chart and slider
                             initChart(currentSymbol, currentInterval, showToolbar);
                             initLeverageSlider();
@@ -447,6 +459,17 @@
                             currentPrice = parseFloat(rawPrice) || 0;
                             const rawBalance = $('#availableBalanceValue').text().replace(/,/g, '');
                             availableBalance = parseFloat(rawBalance) || 0;
+
+                            const type = $('.order-type-tab.bg-accent-primary\\/20').data('type');
+                            if (type === 'market') {
+                                $('#priceInputGroup').removeClass('hidden');
+                                $('#inputPrice').val(currentPrice).prop('disabled', true).addClass(
+                                    'opacity-60 cursor-not-allowed');
+                            } else {
+                                $('#priceInputGroup').removeClass('hidden');
+                                $('#inputPrice').prop('disabled', false).removeClass(
+                                    'opacity-60 cursor-not-allowed');
+                            }
                         }
                     }
                 });

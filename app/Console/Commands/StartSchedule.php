@@ -83,6 +83,11 @@ class StartSchedule extends Command
                 'flags' => []
             ],
             [
+                'command' => "lozand:manage-launchpad",
+                'delay' => now()->addSeconds(30),
+                'flags' => []
+            ],
+            [
                 'command' => "lozand:delete-log",
                 'delay' => now()->addHours(1),
                 'flags' => []

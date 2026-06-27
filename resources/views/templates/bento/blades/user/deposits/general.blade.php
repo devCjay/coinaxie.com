@@ -637,7 +637,13 @@
                     // Update Action Form Section
                     const newFormHtml = $newData.find('#action-form-section').html();
                     if (newFormHtml && $('#action-form-section').html().trim() !== newFormHtml.trim()) {
-                        $('#action-form-section').html(newFormHtml);
+                        // Preserve input values if user is currently typing or has a file selected
+                        const currentHash = $('#action-form-section input[name="transaction_hash"]').val();
+                        const hasFile = $('#proof_file')[0]?.files?.length > 0;
+
+                        if (!currentHash && !hasFile) {
+                            $('#action-form-section').html(newFormHtml);
+                        }
                     }
                 });
             }

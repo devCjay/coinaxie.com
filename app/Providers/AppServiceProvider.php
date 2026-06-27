@@ -6,6 +6,7 @@ use App\Models\MenuItem;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
@@ -34,6 +35,191 @@ class AppServiceProvider extends ServiceProvider
 
         //Support for  older MySQL / MariaDB
         Schema::defaultStringLength(191);
+
+        $this->app->booted(function () {
+            if (!Schema::hasTable('menu_items')) {
+                return;
+            }
+
+            $touched = false;
+
+            $userItem = MenuItem::where('type', 'user')->where('route_name', 'user.launchpad.index')->first();
+            if (!$userItem) {
+                MenuItem::create([
+                    'label' => 'Launchpad',
+                    'route_name' => 'user.launchpad.index',
+                    'route_wildcard' => 'user.launchpad.*',
+                    'url' => null,
+                    'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13l3 3 9-9"/><path d="M9 16l-3.5 3.5a2 2 0 0 1-2.8 0 2 2 0 0 1 0-2.8L6 13"/><path d="M18 7l3.5-3.5a2 2 0 0 0 0-2.8 2 2 0 0 0-2.8 0L15 4"/></svg>',
+                    'type' => 'user',
+                    'sort_order' => 9,
+                    'is_active' => true,
+                    'parent_id' => null,
+                ]);
+                $touched = true;
+            } else {
+                $updates = [];
+                if (!$userItem->is_active) {
+                    $updates['is_active'] = true;
+                }
+                if ($userItem->parent_id !== null) {
+                    $updates['parent_id'] = null;
+                }
+                if (($userItem->route_wildcard ?? '') !== 'user.launchpad.*') {
+                    $updates['route_wildcard'] = 'user.launchpad.*';
+                }
+                if (!empty($updates)) {
+                    $userItem->update($updates);
+                    $touched = true;
+                }
+            }
+
+            $adminItem = MenuItem::where('type', 'admin')->where('route_name', 'admin.launchpad.index')->first();
+            if (!$adminItem) {
+                MenuItem::create([
+                    'label' => 'Launchpad',
+                    'route_name' => 'admin.launchpad.index',
+                    'route_wildcard' => 'admin.launchpad.*',
+                    'url' => null,
+                    'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></svg>',
+                    'type' => 'admin',
+                    'sort_order' => 7,
+                    'is_active' => true,
+                    'parent_id' => null,
+                ]);
+                $touched = true;
+            } else {
+                $updates = [];
+                if (!$adminItem->is_active) {
+                    $updates['is_active'] = true;
+                }
+                if ($adminItem->parent_id !== null) {
+                    $updates['parent_id'] = null;
+                }
+                if (($adminItem->route_wildcard ?? '') !== 'admin.launchpad.*') {
+                    $updates['route_wildcard'] = 'admin.launchpad.*';
+                }
+                if (!empty($updates)) {
+                    $adminItem->update($updates);
+                    $touched = true;
+                }
+            }
+
+            if ($touched) {
+                Cache::forget('admin_menu_items');
+                Cache::forget('user_menu_items');
+            }
+
+            $copyTradingLeaf = MenuItem::where('type', 'user')->where('route_name', 'user.trading.copy-trading')->first();
+            if (!$copyTradingLeaf) {
+                $copyTradingLeaf = MenuItem::create([
+                    'label' => 'Copy Trading',
+                    'route_name' => 'user.trading.copy-trading',
+                    'route_wildcard' => 'user.trading.copy-trading*',
+                    'url' => null,
+                    'type' => 'user',
+                    'sort_order' => 8,
+                    'is_active' => true,
+                    'parent_id' => null,
+                    'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 6a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4"/><path d="M21 10v7a3 3 0 0 1-3 3h-7"/><path d="M8 12h6"/><path d="M8 8h4"/></svg>',
+                ]);
+                Cache::forget('user_menu_items');
+            }
+
+            $parentLabel = 'Copy Trades';
+            $parent = MenuItem::where('type', 'user')
+                ->whereNull('route_name')
+                ->where('label', $parentLabel)
+                ->first();
+
+            if (!$parent) {
+                $parent = MenuItem::create([
+                    'label' => $parentLabel,
+                    'route_name' => null,
+                    'route_wildcard' => 'user.trading.copy-trading*',
+                    'url' => '#',
+                    'icon' => $copyTradingLeaf->icon,
+                    'type' => 'user',
+                    'sort_order' => (int) ($copyTradingLeaf->sort_order ?? 8),
+                    'is_active' => true,
+                    'parent_id' => null,
+                ]);
+                Cache::forget('user_menu_items');
+            } else {
+                $updates = [];
+                if (!$parent->is_active) {
+                    $updates['is_active'] = true;
+                }
+                if ($parent->parent_id !== null) {
+                    $updates['parent_id'] = null;
+                }
+                if (($parent->route_wildcard ?? '') !== 'user.trading.copy-trading*') {
+                    $updates['route_wildcard'] = 'user.trading.copy-trading*';
+                }
+                if (($parent->url ?? '') !== '#') {
+                    $updates['url'] = '#';
+                }
+                if (!$parent->icon) {
+                    $updates['icon'] = $copyTradingLeaf->icon;
+                }
+                if (!empty($updates)) {
+                    $parent->update($updates);
+                    Cache::forget('user_menu_items');
+                }
+            }
+
+            $leafUpdates = [];
+            if (!$copyTradingLeaf->is_active) {
+                $leafUpdates['is_active'] = true;
+            }
+            if ((int) $copyTradingLeaf->parent_id !== (int) $parent->id) {
+                $leafUpdates['parent_id'] = $parent->id;
+            }
+            if (($copyTradingLeaf->route_wildcard ?? '') !== 'user.trading.copy-trading*') {
+                $leafUpdates['route_wildcard'] = 'user.trading.copy-trading*';
+            }
+            if ((int) $copyTradingLeaf->sort_order !== 1) {
+                $leafUpdates['sort_order'] = 1;
+            }
+            if (!empty($leafUpdates)) {
+                $copyTradingLeaf->update($leafUpdates);
+                Cache::forget('user_menu_items');
+            }
+
+            $activityLeaf = MenuItem::where('type', 'user')->where('route_name', 'user.trading.copy-trading.activity')->first();
+            if (!$activityLeaf) {
+                MenuItem::create([
+                    'label' => 'Copy Activity',
+                    'route_name' => 'user.trading.copy-trading.activity',
+                    'route_wildcard' => 'user.trading.copy-trading.activity',
+                    'url' => null,
+                    'icon' => null,
+                    'type' => 'user',
+                    'sort_order' => 2,
+                    'is_active' => true,
+                    'parent_id' => $parent->id,
+                ]);
+                Cache::forget('user_menu_items');
+            } else {
+                $updates = [];
+                if (!$activityLeaf->is_active) {
+                    $updates['is_active'] = true;
+                }
+                if ((int) $activityLeaf->parent_id !== (int) $parent->id) {
+                    $updates['parent_id'] = $parent->id;
+                }
+                if (($activityLeaf->route_wildcard ?? '') !== 'user.trading.copy-trading.activity') {
+                    $updates['route_wildcard'] = 'user.trading.copy-trading.activity';
+                }
+                if ((int) $activityLeaf->sort_order !== 2) {
+                    $updates['sort_order'] = 2;
+                }
+                if (!empty($updates)) {
+                    $activityLeaf->update($updates);
+                    Cache::forget('user_menu_items');
+                }
+            }
+        });
 
         // Sharing variables only to the user layouts
         View::composer('templates.*.blades.layouts.user', function ($view) {

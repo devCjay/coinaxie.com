@@ -698,6 +698,11 @@
                                         class="btn-unfollow w-full bg-red-500/15 border border-red-500/25 text-red-200 rounded-2xl px-6 py-3 text-sm font-black hover:bg-red-500/20 transition inline-flex items-center justify-center gap-2">
                                         {{ __('Stop Copying') }}
                                     </button>
+                                @elseif ((int) ($pro->user_id ?? 0) === (int) auth()->id())
+                                    <button type="button"
+                                        class="w-full bg-white/5 border border-white/10 text-white/60 rounded-2xl px-6 py-3 text-sm font-black cursor-not-allowed inline-flex items-center justify-center">
+                                        {{ __('This is you') }}
+                                    </button>
                                 @else
                                     <button type="button" data-pro-id="{{ $pro->id }}" data-pro-name="{{ $name }}"
                                         class="btn-follow w-full bg-white text-black rounded-2xl px-6 py-3 text-sm font-black hover:bg-white/90 transition inline-flex items-center justify-center gap-3">
@@ -775,6 +780,169 @@
                         </form>
                     @endif
                 </div>
+            </div>
+        @elseif ($mode === 'activity')
+            <div class="bg-secondary border border-white/5 rounded-[2.5rem] overflow-hidden relative">
+                <div class="px-5 md:px-8 py-8 md:py-10">
+                    <div class="flex items-start justify-between gap-4 flex-wrap">
+                        <div>
+                            <div
+                                class="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/20 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-widest text-violet-300">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                {{ __('Copy Trading') }}
+                            </div>
+                            <h2 class="mt-4 text-2xl md:text-5xl font-black tracking-tight text-white">
+                                {{ __('Copy Activity') }}
+                            </h2>
+                            <p class="mt-3 text-white/55 text-sm max-w-2xl">
+                                {{ __('Track your active copy relationships, copied trades and execution history.') }}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <a href="{{ route('user.trading.copy-trading') }}"
+                                class="bg-white/5 border border-white/10 text-white rounded-2xl px-5 py-2.5 text-sm font-black hover:bg-white/10 transition">
+                                {{ __('Back') }}
+                            </a>
+                            <a href="{{ route('user.trading.copy-trading.leaders') }}"
+                                class="bg-accent-primary/25 border border-accent-primary/30 text-white rounded-2xl px-6 py-2.5 text-sm font-black hover:bg-accent-primary/30 transition">
+                                {{ __('Browse Leaders') }}
+                            </a>
+                            <form method="GET" action="{{ route('user.trading.copy-trading.activity') }}" class="relative">
+                                <input name="q" type="text" value="{{ request('q') }}"
+                                    class="bg-white/5 border border-white/10 rounded-2xl pl-10 pr-4 py-2.5 text-sm text-white/80 w-72 max-w-full"
+                                    placeholder="{{ __('Search history...') }}">
+                                <svg class="w-4 h-4 text-white/50 absolute left-3 top-1/2 -translate-y-1/2" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-4.35-4.35M10 18a8 8 0 100-16 8 8 0 000 16z"></path>
+                                </svg>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-7 md:mt-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 md:gap-6">
+                <div class="bg-secondary border border-white/5 rounded-3xl px-6 py-6">
+                    <div class="text-white/55 text-xs font-black uppercase tracking-widest">{{ __('Leaders Copied') }}</div>
+                    <div class="mt-2 text-white font-black text-2xl">{{ number_format((int) ($activityStats['leaders'] ?? 0)) }}</div>
+                </div>
+                <div class="bg-secondary border border-white/5 rounded-3xl px-6 py-6">
+                    <div class="text-white/55 text-xs font-black uppercase tracking-widest">{{ __('Active Leaders') }}</div>
+                    <div class="mt-2 text-emerald-300 font-black text-2xl">{{ number_format((int) ($activityStats['active_leaders'] ?? 0)) }}</div>
+                </div>
+                <div class="bg-secondary border border-white/5 rounded-3xl px-6 py-6">
+                    <div class="text-white/55 text-xs font-black uppercase tracking-widest">{{ __('Active Copies') }}</div>
+                    <div class="mt-2 text-white font-black text-2xl">{{ number_format((int) ($activityStats['active_copies'] ?? 0)) }}</div>
+                </div>
+                <div class="bg-secondary border border-white/5 rounded-3xl px-6 py-6">
+                    <div class="text-white/55 text-xs font-black uppercase tracking-widest">{{ __('Copied Trades') }}</div>
+                    <div class="mt-2 text-white font-black text-2xl">{{ number_format((int) ($activityStats['total_copied_trades'] ?? 0)) }}</div>
+                </div>
+                <div class="bg-secondary border border-white/5 rounded-3xl px-6 py-6">
+                    <div class="text-white/55 text-xs font-black uppercase tracking-widest">{{ __('Copied Volume') }}</div>
+                    <div class="mt-2 text-white font-black text-2xl">{{ number_format((float) ($activityStats['total_copied_volume'] ?? 0), 2) }}</div>
+                    <div class="text-white/45 text-xs font-bold mt-1">USDT</div>
+                </div>
+            </div>
+
+            <div class="mt-7 bg-secondary border border-white/5 rounded-3xl overflow-hidden">
+                <div class="px-6 py-5 flex items-center justify-between gap-4 flex-wrap border-b border-white/5">
+                    <div class="text-white font-black">{{ __('Copy History') }}</div>
+                    @if (request('q'))
+                        <a href="{{ route('user.trading.copy-trading.activity') }}"
+                            class="text-xs font-black uppercase tracking-widest text-white/60 hover:text-white transition">
+                            {{ __('Clear search') }}
+                        </a>
+                    @endif
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-primary-dark/50 text-text-secondary">
+                            <tr>
+                                <th class="text-left px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Leader') }}</th>
+                                <th class="text-left px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Market') }}</th>
+                                <th class="text-left px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Pair') }}</th>
+                                <th class="text-left px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Side') }}</th>
+                                <th class="text-left px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Type') }}</th>
+                                <th class="text-right px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Amount') }}</th>
+                                <th class="text-left px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Status') }}</th>
+                                <th class="text-right px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Time') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            @forelse ($activityHistory as $row)
+                                @php
+                                    $market = (string) ($row['market'] ?? 'futures');
+                                    $marketLabel = $market === 'margin' ? __('Margin') : __('Futures');
+                                    $ticker = strtoupper((string) ($row['ticker'] ?? ''));
+                                    $side = (string) ($row['side'] ?? 'buy');
+                                    $sideLabel = $side === 'sell' ? __('Short') : __('Long');
+                                    $type = strtoupper((string) ($row['type'] ?? 'market'));
+                                    $status = (string) ($row['status'] ?? '');
+                                    $leaderName = (string) ($row['leader_name'] ?? __('Leader'));
+                                    $quote = (float) ($row['quote'] ?? 0);
+                                    $ts = (int) ($row['timestamp'] ?? 0);
+                                    $sec = $ts > 20000000000 ? (int) floor($ts / 1000) : $ts;
+                                    $timeText = $sec > 0 ? \Carbon\Carbon::createFromTimestamp($sec)->diffForHumans() : '';
+                                    if ($status === 'filled') {
+                                        $statusClass = 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-200';
+                                    } elseif ($status === 'pending') {
+                                        $statusClass = 'bg-amber-500/10 border border-amber-500/20 text-amber-200';
+                                    } elseif ($status === 'canceled') {
+                                        $statusClass = 'bg-red-500/10 border border-red-500/20 text-red-200';
+                                    } else {
+                                        $statusClass = 'bg-white/5 border border-white/10 text-white/60';
+                                    }
+                                @endphp
+                                <tr class="bg-white/[0.02]">
+                                    <td class="px-6 py-5 text-white font-bold">{{ $leaderName }}</td>
+                                    <td class="px-6 py-5 text-white/70 font-bold">{{ $marketLabel }}</td>
+                                    <td class="px-6 py-5 text-white font-black">{{ $ticker }}</td>
+                                    <td class="px-6 py-5">
+                                        <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-black {{ $side === 'sell' ? 'bg-red-500/10 border border-red-500/20 text-red-200' : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-200' }}">
+                                            {{ $sideLabel }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-5 text-white/70 font-bold">{{ $type }}</td>
+                                    <td class="px-6 py-5 text-right text-white font-black">{{ number_format($quote, 2) }} <span class="text-white/45 font-bold">USDT</span></td>
+                                    <td class="px-6 py-5">
+                                        <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-black {{ $statusClass }}">
+                                            {{ strtoupper($status) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-5 text-right text-white/55 font-bold">{{ $timeText }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="px-6 py-16 text-center text-white/55">
+                                        {{ __('No copy history yet.') }}
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                @if ($activityHistory->lastPage() > 1)
+                    <div class="px-6 py-5 border-t border-white/5 flex items-center justify-between gap-4">
+                        <a href="{{ $activityHistory->previousPageUrl() ?: 'javascript:void(0)' }}"
+                            class="h-10 px-5 rounded-2xl border border-white/10 bg-white/5 text-white/80 font-black text-xs uppercase tracking-widest inline-flex items-center justify-center {{ $activityHistory->onFirstPage() ? 'opacity-40 pointer-events-none' : 'hover:bg-white/10' }}">
+                            {{ __('Prev') }}
+                        </a>
+                        <div class="text-xs text-white/55 font-bold">
+                            {{ __('Page') }} {{ $activityHistory->currentPage() }} {{ __('of') }} {{ $activityHistory->lastPage() }}
+                        </div>
+                        <a href="{{ $activityHistory->nextPageUrl() ?: 'javascript:void(0)' }}"
+                            class="h-10 px-5 rounded-2xl border border-white/10 bg-white/5 text-white/80 font-black text-xs uppercase tracking-widest inline-flex items-center justify-center {{ $activityHistory->hasMorePages() ? 'hover:bg-white/10' : 'opacity-40 pointer-events-none' }}">
+                            {{ __('Next') }}
+                        </a>
+                    </div>
+                @endif
             </div>
         @else
             @php
@@ -885,6 +1053,11 @@
                                         class="btn-unfollow w-full bg-red-500/15 border border-red-500/25 text-red-200 rounded-2xl px-6 py-4 text-sm font-black hover:bg-red-500/20 transition inline-flex items-center justify-center gap-2">
                                         {{ __('Stop Copying') }}
                                     </button>
+                                @elseif ((int) ($pro->user_id ?? 0) === (int) auth()->id())
+                                    <button type="button"
+                                        class="w-full bg-white/5 border border-white/10 text-white/60 rounded-2xl px-6 py-4 text-sm font-black cursor-not-allowed inline-flex items-center justify-center">
+                                        {{ __('This is you') }}
+                                    </button>
                                 @else
                                     <button type="button" data-pro-id="{{ $pro->id }}"
                                         class="btn-follow w-full bg-white text-black rounded-2xl px-6 py-4 text-sm font-black hover:bg-white/90 transition inline-flex items-center justify-center gap-3">
@@ -924,7 +1097,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 7h6v6"></path>
                                 </svg>
                             </div>
-                            <div class="mt-4 text-emerald-300 font-black text-xl">+{{ number_format((float) ($stats['roi'] ?? 0), 2) }}%</div>
+                            <div class="mt-4 text-emerald-300 font-black text-xl">{{ ((float) ($stats['roi'] ?? 0)) >= 0 ? '+' : '' }}{{ number_format((float) ($stats['roi'] ?? 0), 2) }}%</div>
                             <div class="mt-1 text-white/45 text-xs font-bold">{{ __('Total ROI') }}</div>
                         </div>
 
@@ -1005,24 +1178,6 @@
                             <div class="mt-1 text-white/45 text-xs font-bold">{{ __('Max Drawdown') }}</div>
                         </div>
                     </div>
-
-                    <div class="mt-6">
-                        <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-3 py-2 text-xs font-black text-white/70">
-                            <span class="bg-white/10 rounded-xl px-3 py-1">{{ __('Recent Trades') }}</span>
-                        
-                        </div>
-
-                        <div class="mt-6 bg-secondary border border-white/5 rounded-3xl p-10 md:p-16 text-center">
-                            <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 mx-auto grid place-items-center">
-                                <svg class="w-8 h-8 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M3 12h2l3 7 4-14 3 7h6"></path>
-                                </svg>
-                            </div>
-                            <div class="mt-5 text-white font-black text-xl">{{ __('No Recent Trades') }}</div>
-                            <div class="mt-2 text-white/55">{{ __("This leader hasn't completed any trades yet.") }}</div>
-                        </div>
-                    </div>
                 </div>
 
                 <div class="bg-secondary border border-white/5 rounded-3xl p-6 md:p-7 h-fit relative overflow-hidden">
@@ -1075,9 +1230,110 @@
                     </div>
                 </div>
             </div>
+
+            <div class="mt-6">
+                <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-2xl px-3 py-2 text-xs font-black text-white/70">
+                    <span class="bg-white/10 rounded-xl px-3 py-1">{{ __('Recent Trades') }}</span>
+                </div>
+
+                @if (!isset($tradeHistory) || $tradeHistory->count() === 0)
+                    <div class="mt-6 bg-secondary border border-white/5 rounded-3xl p-10 md:p-16 text-center">
+                        <div class="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 mx-auto grid place-items-center">
+                            <svg class="w-8 h-8 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 12h2l3 7 4-14 3 7h6"></path>
+                            </svg>
+                        </div>
+                        <div class="mt-5 text-white font-black text-xl">{{ __('No Recent Trades') }}</div>
+                        <div class="mt-2 text-white/55">{{ __("This leader hasn't completed any trades yet.") }}</div>
+                    </div>
+                @else
+                    <div class="mt-6 bg-secondary border border-white/5 rounded-3xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-primary-dark/50 text-text-secondary">
+                                    <tr>
+                                        <th class="text-left px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Asset') }}</th>
+                                        <th class="text-left px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Side') }}</th>
+                                        <th class="text-right px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Size') }}</th>
+                                        <th class="text-right px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Entry Price') }}</th>
+                                        <th class="text-right px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('Mark Price') }}</th>
+                                        <th class="text-right px-6 py-4 text-[11px] font-black uppercase tracking-widest opacity-60">{{ __('PnL (ROE%)') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-white/5">
+                                    @foreach ($tradeHistory as $t)
+                                        @php
+                                            $ticker = strtoupper((string) ($t['ticker'] ?? ''));
+                                            $side = (string) ($t['side'] ?? 'buy');
+                                            $isLong = $side === 'buy';
+                                            $size = (float) ($t['size'] ?? 0);
+                                            $entry = (float) ($t['entry_price'] ?? 0);
+                                            $mark = (float) ($t['mark_price'] ?? 0);
+                                            $pnl = (float) ($t['pnl'] ?? 0);
+                                            $roe = (float) ($t['roe'] ?? 0);
+                                            $lev = (float) ($t['leverage'] ?? 0);
+                                            $market = (string) ($t['market'] ?? 'futures');
+                                            $sub = $market === 'margin' ? __('Margin') : __('Perpetual');
+                                            $sub .= $lev > 0 ? (' ' . rtrim(rtrim(number_format($lev, 0, '.', ''), '0'), '.') . 'x') : '';
+                                            $pnlClass = $pnl >= 0 ? 'text-emerald-300' : 'text-red-300';
+                                        @endphp
+                                        <tr class="bg-white/[0.02]">
+                                            <td class="px-6 py-5">
+                                                <div class="flex items-center gap-4">
+                                                    <div class="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 grid place-items-center text-amber-300 font-black text-sm">
+                                                        {{ substr($ticker, 0, 1) ?: '•' }}
+                                                    </div>
+                                                    <div>
+                                                        <div class="text-white font-black">{{ $ticker }}</div>
+                                                        <div class="text-xs text-white/45">{{ $sub }}</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-5">
+                                                <span class="inline-flex items-center justify-center px-3 py-1.5 rounded-full text-xs font-black {{ $isLong ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-200' : 'bg-red-500/10 border border-red-500/20 text-red-200' }}">
+                                                    {{ $isLong ? __('Long') : __('Short') }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-5 text-right text-white font-mono">{{ number_format($size, 4) }}</td>
+                                            <td class="px-6 py-5 text-right text-white/80 font-mono">${{ number_format($entry, 2) }}</td>
+                                            <td class="px-6 py-5 text-right text-white/80 font-mono">${{ number_format($mark, 2) }}</td>
+                                            <td class="px-6 py-5 text-right">
+                                                <div class="{{ $pnlClass }} font-black font-mono">{{ $pnl >= 0 ? '+' : '' }}{{ number_format($pnl, 2) }}</div>
+                                                <div class="{{ $pnlClass }} text-xs font-bold font-mono">{{ $roe >= 0 ? '+' : '' }}{{ number_format($roe, 2) }}%</div>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    @if ($tradeHistory->lastPage() > 1)
+                        <div class="mt-5 flex items-center justify-between gap-4">
+                            <a href="{{ $tradeHistory->previousPageUrl() ?: 'javascript:void(0)' }}"
+                                class="h-10 px-5 rounded-2xl border border-white/10 bg-white/5 text-white/80 font-black text-xs uppercase tracking-widest inline-flex items-center justify-center {{ $tradeHistory->onFirstPage() ? 'opacity-40 pointer-events-none' : 'hover:bg-white/10' }}">
+                                {{ __('Prev') }}
+                            </a>
+
+                            <div class="text-xs text-white/55 font-bold">
+                                {{ __('Page') }} {{ $tradeHistory->currentPage() }} {{ __('of') }} {{ $tradeHistory->lastPage() }}
+                            </div>
+
+                            <a href="{{ $tradeHistory->nextPageUrl() ?: 'javascript:void(0)' }}"
+                                class="h-10 px-5 rounded-2xl border border-white/10 bg-white/5 text-white/80 font-black text-xs uppercase tracking-widest inline-flex items-center justify-center {{ $tradeHistory->hasMorePages() ? 'hover:bg-white/10' : 'opacity-40 pointer-events-none' }}">
+                                {{ __('Next') }}
+                            </a>
+                        </div>
+                    @endif
+                @endif
+            </div>
         @endif
 
-        <div id="copyTraderModal" class="modal" data-available-usdt="{{ (float) ($availableUsdt ?? 0) }}">
+        @php
+            $minCopyAmount = (float) getSetting('copy_trading_min_amount', 10);
+        @endphp
+        <div id="copyTraderModal" class="modal" data-available-usdt="{{ (float) ($availableUsdt ?? 0) }}" data-min-copy-amount="{{ $minCopyAmount }}">
             <div class="modal-content max-w-md">
                 <div class="flex items-center justify-between gap-4">
                     <div class="text-white font-black text-xl">{{ __('Copy Trader') }}</div>
@@ -1093,6 +1349,9 @@
                         <span class="text-accent-primary font-black">
                             ({{ __('Available:') }} <span id="copyTraderAvailable">0</span> {{ __('USDT') }})
                         </span>
+                        <span class="text-white/60 font-semibold">
+                            ({{ __('Min:') }} {{ number_format($minCopyAmount, 2) }} {{ __('USDT') }})
+                        </span>
                         <span class="text-red-400">*</span>
                     </label>
 
@@ -1105,9 +1364,9 @@
                         </div>
                     </div>
 
-                    <label class="mt-6 pb-7 text-sm font-black text-white/70 block">{{ __('Stop Loss') }}</label>
-                    
-                    <div class="mt-2 flex items-stretch rounded-2xl overflow-hidden border border-white/10 bg-white/5">
+                    <label class="mt-6 text-sm font-black text-white/70 block">{{ __('Stop Loss') }}</label>
+
+                    <div class="mt-2 mb-5 flex items-stretch rounded-2xl overflow-hidden border border-white/10 bg-white/5">
                         <input id="copyTraderStopLossPercent" name="stop_loss_percent" type="number" step="0.1" min="0" max="95"
                             class="flex-1 bg-transparent px-4 py-3 text-white/90 outline-none text-sm"
                             placeholder="0 - 95" />
@@ -1117,7 +1376,7 @@
                     </div>
 
                     <button type="submit" id="copyTraderSubmit"
-                        class="mt-7 pb-7 pt-7 w-full bg-accent-primary text-white rounded-2xl py-3.5 text-sm font-black hover:opacity-95 transition"> 
+                        class="mt-8 w-full bg-accent-primary text-white rounded-2xl py-3.5 text-sm font-black hover:opacity-95 transition">
                         {{ __('Submit') }}
                     </button>
 
@@ -1211,6 +1470,12 @@
                 $('#copyTraderProId').val(proId);
                 $('#copyTraderAmount').val('');
                 $('#copyTraderStopLossPercent').val('');
+                const minCopy = parseFloat($modal.data('min-copy-amount') || 0);
+                if (!isNaN(minCopy) && minCopy > 0) {
+                    $('#copyTraderAmount').attr('min', minCopy);
+                } else {
+                    $('#copyTraderAmount').attr('min', 0);
+                }
                 $modal.show();
             });
 
@@ -1233,9 +1498,15 @@
                 const amount = parseFloat($('#copyTraderAmount').val() || 0);
                 const sl = $('#copyTraderStopLossPercent').val();
                 const slNum = sl === '' ? null : parseFloat(sl);
+                const minCopy = parseFloat($('#copyTraderModal').data('min-copy-amount') || 0);
 
                 if (!proId || amount <= 0) {
                     toastNotification("{{ __('Please enter an amount') }}", 'error');
+                    return;
+                }
+
+                if (!isNaN(minCopy) && minCopy > 0 && amount < minCopy) {
+                    toastNotification("{{ __('Minimum copy amount is') }} " + minCopy.toFixed(2) + " {{ __('USDT') }}", 'error');
                     return;
                 }
 

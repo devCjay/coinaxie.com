@@ -196,6 +196,10 @@ class WithdrawalController extends Controller
     // new withdrawal
     public function newWithdrawal()
     {
+        if (!auth()->user()->can_withdraw) {
+            return redirect()->route('user.withdrawals.index');
+        }
+        
         $page_title = __('New Withdrawal');
         $template = config('site.template');
         $withdrawal_methods = WithdrawalMethod::active()->get();
@@ -209,6 +213,13 @@ class WithdrawalController extends Controller
     // new withdrawal validate
     public function newWithdrawalValidate(Request $request)
     {
+        if (!auth()->user()->can_withdraw) {
+            return response()->json([
+                'status' => 'error',
+                'message' => __('Withdrawals are temporarily disabled for your account. Please contact support.'),
+            ], 403);
+        }
+        
         $request->validate([
             'withdrawal_method_id' => 'required|exists:withdrawal_methods,id',
         ]);

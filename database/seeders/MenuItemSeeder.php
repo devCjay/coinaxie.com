@@ -43,6 +43,19 @@ class MenuItemSeeder extends Seeder
             ]
         );
 
+        // Contact Support
+        MenuItem::updateOrCreate(
+            ['route_name' => 'user.contact'],
+            [
+                'label' => 'Contact Support',
+                'url' => null, // generated from route
+                'type' => 'user',
+                'sort_order' => 3,
+                'is_active' => true,
+                'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>',
+            ]
+        );
+
         // Deposits
         $deposit_parent = MenuItem::create(
             [
@@ -50,7 +63,7 @@ class MenuItemSeeder extends Seeder
                 'label' => 'Deposits',
                 'url' => "#",
                 'type' => 'user',
-                'sort_order' => 3,
+                'sort_order' => 4,
                 'is_active' => true,
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7h-9"/><path d="M14 17H5"/><circle cx="17" cy="17" r="3"/><path d="M7 7h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12"/></svg>',
             ]
@@ -186,69 +199,97 @@ class MenuItemSeeder extends Seeder
         }
 
 
+        MenuItem::create([
+            'label' => "Account Overview",
+            'route_name' => 'user.trading.account',
+            'route_wildcard' => 'user.trading.account',
+            'url' => null,
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 2 2 5-5"/></svg>',
+            'type' => 'user',
+            'sort_order' => 5,
+            'is_active' => true,
+            'parent_id' => null,
+        ]);
+
+        MenuItem::create([
+            'label' => "Futures Trading",
+            'route_name' => 'user.trading.futures',
+            'route_wildcard' => 'user.trading.futures*',
+            'url' => null,
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 17V7a3 3 0 0 1 3-3h10"/><path d="M6 9h10a3 3 0 0 1 3 3v8"/><path d="M9 13h7"/><path d="M16 11l3 2-3 2"/></svg>',
+            'type' => 'user',
+            'sort_order' => 6,
+            'is_active' => true,
+            'parent_id' => null,
+        ]);
+
+        MenuItem::create([
+            'label' => "Margin Trading",
+            'route_name' => 'user.trading.margin',
+            'route_wildcard' => 'user.trading.margin*',
+            'url' => null,
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 13.5l3-3"/><path d="M8.5 15.5l-1 1a4 4 0 0 1-5.7-5.7l1-1"/><path d="M15.5 8.5l1-1a4 4 0 0 1 5.7 5.7l-1 1"/></svg>',
+            'type' => 'user',
+            'sort_order' => 7,
+            'is_active' => true,
+            'parent_id' => null,
+        ]);
+
+        MenuItem::create([
+            'label' => "Copy Trading",
+            'route_name' => 'user.trading.copy-trading',
+            'route_wildcard' => 'user.trading.copy-trading*',
+            'url' => null,
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 6a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4"/><path d="M21 10v7a3 3 0 0 1-3 3h-7"/><path d="M8 12h6"/><path d="M8 8h4"/></svg>',
+            'type' => 'user',
+            'sort_order' => 8,
+            'is_active' => true,
+            'parent_id' => null,
+        ]);
+
+        MenuItem::updateOrCreate(
+            ['route_name' => 'user.launchpad.index', 'type' => 'user'],
+            [
+                'label' => 'Launchpad',
+                'url' => null,
+                'route_wildcard' => 'user.launchpad.*',
+                'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 13l3 3 9-9"/><path d="M9 16l-3.5 3.5a2 2 0 0 1-2.8 0 2 2 0 0 1 0-2.8L6 13"/><path d="M18 7l3.5-3.5a2 2 0 0 0 0-2.8 2 2 0 0 0-2.8 0L15 4"/></svg>',
+                'sort_order' => 9,
+                'is_active' => true,
+                'parent_id' => null,
+            ]
+        );
+
         // Trading Menu
         $trading_parent = MenuItem::create([
             'route_name' => null,
             'label' => 'Self Trading',
             'url' => "#",
             'type' => 'user',
-            'sort_order' => 5,
+            'sort_order' => 12,
             'is_active' => true,
             'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5v4"/><rect width="4" height="6" x="7" y="9" rx="1"/><path d="M9 15v2"/><path d="M17 3v2"/><rect width="4" height="8" x="15" y="5" rx="1"/><path d="M17 13v3"/><path d="M3 3v18h18"/></svg>',
         ]);
-        // Trading submenu
-        MenuItem::create([
-            'label' => "Account Overview",
-            'route_name' => 'user.trading.account',
-            'url' => null,
-            'type' => 'user',
-            'sort_order' => 1,
-            'is_active' => true,
-            'parent_id' => $trading_parent->id,
-            'route_wildcard' => 'user.trading.*',
-        ]);
 
-        // Trading submenu
-        MenuItem::create([
-            'label' => "Futures Trading",
-            'route_name' => 'user.trading.futures',
-            'url' => null,
-            'type' => 'user',
-            'sort_order' => 2,
-            'is_active' => true,
-            'parent_id' => $trading_parent->id,
-            'route_wildcard' => 'user.trading.*',
-        ]);
-
-        MenuItem::create([
-            'label' => "Margin Trading",
-            'route_name' => 'user.trading.margin',
-            'url' => null,
-            'type' => 'user',
-            'sort_order' => 3,
-            'is_active' => true,
-            'parent_id' => $trading_parent->id,
-            'route_wildcard' => 'user.trading.*',
-        ]);
         MenuItem::create([
             'label' => "Forex Trading (Live)",
             'route_name' => 'user.trading.forex.live',
             'url' => null,
             'type' => 'user',
-            'sort_order' => 4,
+            'sort_order' => 1,
             'is_active' => true,
             'parent_id' => $trading_parent->id,
-            'route_wildcard' => 'user.trading.*',
+            'route_wildcard' => 'user.trading.forex.*',
         ]);
         MenuItem::create([
             'label' => "Forex Trading (Demo)",
             'route_name' => 'user.trading.forex.demo',
             'url' => null,
             'type' => 'user',
-            'sort_order' => 5,
+            'sort_order' => 2,
             'is_active' => true,
             'parent_id' => $trading_parent->id,
-            'route_wildcard' => 'user.trading.*',
+            'route_wildcard' => 'user.trading.forex.*',
         ]);
 
         // MenuItem::create([
@@ -437,19 +478,6 @@ class MenuItemSeeder extends Seeder
             ]
         );
 
-        MenuItem::updateOrCreate(
-            ['route_name' => 'user.tickets.index', 'type' => 'user'],
-            [
-                'label' => 'Support Tickets',
-                'url' => null,
-                'type' => 'user',
-                'sort_order' => 12,
-                'is_active' => true,
-                'route_wildcard' => 'user.tickets.*',
-                'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg>',
-            ]
-        );
-
 
 
 
@@ -463,6 +491,18 @@ class MenuItemSeeder extends Seeder
                 'sort_order' => 1,
                 'is_active' => true,
                 'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1" /><rect width="7" height="5" x="14" y="3" rx="1" /><rect width="7" height="9" x="14" y="12" rx="1" /><rect width="7" height="5" x="3" y="16" rx="1" /></svg>',
+            ]
+        );
+
+        MenuItem::updateOrCreate(
+            ['route_name' => 'admin.launchpad.index', 'type' => 'admin'],
+            [
+                'label' => 'Launchpad',
+                'url' => null,
+                'sort_order' => 7,
+                'is_active' => true,
+                'route_wildcard' => 'admin.launchpad.*',
+                'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></svg>',
             ]
         );
 
@@ -1000,6 +1040,38 @@ class MenuItemSeeder extends Seeder
             'route_wildcard' => 'admin.forex-trading.*',
         ]);
 
+        $copy_trading_parent = MenuItem::create([
+            'route_name' => null,
+            'label' => 'Copy Trading',
+            'url' => "#",
+            'type' => 'admin',
+            'sort_order' => 7,
+            'is_active' => true,
+            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 6a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4"/><path d="M21 10v7a3 3 0 0 1-3 3h-7"/><path d="M8 12h6"/><path d="M8 8h4"/></svg>'
+        ]);
+
+        MenuItem::create([
+            'label' => "Pro Traders",
+            'route_name' => 'admin.copy-trading.pros.index',
+            'url' => null,
+            'type' => 'admin',
+            'sort_order' => 1,
+            'is_active' => true,
+            'parent_id' => $copy_trading_parent->id,
+            'route_wildcard' => 'admin.copy-trading.*',
+        ]);
+
+        MenuItem::create([
+            'label' => "Relationships",
+            'route_name' => 'admin.copy-trading.relationships.index',
+            'url' => null,
+            'type' => 'admin',
+            'sort_order' => 2,
+            'is_active' => true,
+            'parent_id' => $copy_trading_parent->id,
+            'route_wildcard' => 'admin.copy-trading.*',
+        ]);
+
 
 
 
@@ -1088,20 +1160,6 @@ class MenuItemSeeder extends Seeder
             'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"> <circle cx="12" cy="6" r="2"/> <circle cx="4" cy="18" r="2"/> <circle cx="12" cy="18" r="2"/> <circle cx="20" cy="18" r="2"/> <path d="M12 8v4"/> <path d="M12 12H4"/> <path d="M12 12H20"/> <path d="M12 12v4"/> </svg>'
 
         ]);
-
-        MenuItem::updateOrCreate(
-            ['route_name' => 'admin.tickets.index', 'type' => 'admin'],
-            [
-                'label' => 'Support Tickets',
-                'url' => null,
-                'type' => 'admin',
-                'sort_order' => 7,
-                'is_active' => true,
-                'parent_id' => null,
-                'route_wildcard' => 'admin.tickets.*',
-                'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M8 9h8"/><path d="M8 13h5"/></svg>',
-            ]
-        );
 
         MenuItem::create([
             'label' => "Settings",

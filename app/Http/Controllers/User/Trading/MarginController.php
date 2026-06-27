@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User\Trading;
 use App\Http\Controllers\Controller;
 use App\Models\MarginTradingOrder;
 use App\Models\MarginTradingPosition;
+use App\Services\CopyTradingService;
 use App\Services\LozandServices;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -115,6 +116,8 @@ class MarginController extends Controller
             'leverage' => 'required|integer|min:1|max:100',
             'order_mode' => 'required|in:normal,borrow,repay',
             'price' => 'required_if:type,limit|numeric|min:0',
+            'take_profit' => 'nullable|numeric|min:0',
+            'stop_loss' => 'nullable|numeric|min:0',
         ]);
 
         $user = auth()->user();
@@ -170,20 +173,22 @@ class MarginController extends Controller
             return response()->json(['status' => 'error', 'message' => __('Invalid entry price')], 400);
         }
 
-        //check side againts current price, tp and sl
-        if ($request->side === 'buy' && $request->take_profit < $entry_price) {
+        $take_profit = (float) ($request->take_profit ?? 0);
+        $stop_loss = (float) ($request->stop_loss ?? 0);
+
+        if ($take_profit > 0 && $request->side === 'buy' && $take_profit <= $entry_price) {
             return response()->json(['status' => 'error', 'message' => __('Take profit should be greater than entry price')], 400);
         }
 
-        if ($request->side === 'sell' && $request->take_profit > $entry_price) {
+        if ($take_profit > 0 && $request->side === 'sell' && $take_profit >= $entry_price) {
             return response()->json(['status' => 'error', 'message' => __('Take profit should be less than entry price')], 400);
         }
 
-        if ($request->side === 'buy' && $request->stop_loss > $entry_price) {
+        if ($stop_loss > 0 && $request->side === 'buy' && $stop_loss >= $entry_price) {
             return response()->json(['status' => 'error', 'message' => __('Stop loss should be less than entry price')], 400);
         }
 
-        if ($request->side === 'sell' && $request->stop_loss < $entry_price) {
+        if ($stop_loss > 0 && $request->side === 'sell' && $stop_loss <= $entry_price) {
             return response()->json(['status' => 'error', 'message' => __('Stop loss should be greater than entry price')], 400);
         }
 
@@ -221,6 +226,9 @@ class MarginController extends Controller
                     'status' => $request->type === 'market' ? 'filled' : 'pending',
                     'timestamp' => (string) now()->valueOf(), // ms
                 ]);
+                DB::afterCommit(function () use ($order) {
+                    app(CopyTradingService::class)->handleMarginOrderCreated($order->fresh());
+                });
 
                 if ($request->type === 'market') {
                     // Fill Market Order
@@ -334,6 +342,9 @@ class MarginController extends Controller
                 }
 
                 $order->update(['status' => 'canceled']);
+                DB::afterCommit(function () use ($order) {
+                    app(CopyTradingService::class)->handleMarginOrderCanceled($order->fresh());
+                });
 
                 return response()->json([
                     'status' => 'success',
