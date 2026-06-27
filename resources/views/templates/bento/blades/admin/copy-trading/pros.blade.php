@@ -6,6 +6,7 @@
         $fmt8 = fn($v) => rtrim(rtrim(number_format((float) $v, 8, '.', ''), '0'), '.');
         $minCopyAmount = (float) ($minCopyAmount ?? 0);
         $stats = $stats ?? [];
+        $customTokens = $customTokens ?? collect();
     @endphp
 
     <style>
@@ -588,10 +589,28 @@
                 </div>
 
                 <div>
-                    <label class="text-sm text-text-secondary">{{ __('Ticker') }}</label>
-                    <input type="text" name="ticker" id="tradeHistoryTicker"
+                    <label class="text-sm text-text-secondary">{{ __('Custom Token') }}</label>
+                    <select name="custom_token_id" id="tradeHistoryToken"
                         class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
-                        placeholder="BTCUSDT" value="{{ old('ticker') }}" required>
+                        required>
+                        <option value="">{{ __('Select token') }}</option>
+                        @foreach ($customTokens as $token)
+                            <option value="{{ $token->id }}"
+                                data-market="{{ $token->market }}"
+                                data-ticker="{{ $token->ticker }}"
+                                data-price="{{ $token->current_price }}"
+                                @selected((string) old('custom_token_id') === (string) $token->id)>
+                                {{ $token->ticker }} ({{ strtoupper($token->market) }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label class="text-sm text-text-secondary">{{ __('Ticker') }}</label>
+                    <input type="text" id="tradeHistoryTicker"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/60 outline-none"
+                        placeholder="BTCUSDT" readonly>
                 </div>
 
                 <div>
@@ -620,10 +639,10 @@
 
                 <div id="tradeHistoryPriceWrap">
                     <label class="text-sm text-text-secondary">{{ __('Entry Price') }}</label>
-                    <input type="number" name="price" id="tradeHistoryPrice" step="0.00000001" min="0"
-                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/80 outline-none"
-                        placeholder="0.00" value="{{ old('price') }}" required>
-                    <p class="mt-1 text-xs text-text-secondary">{{ __('Used as the executed price for market trades or the limit price for pending orders.') }}</p>
+                    <input type="text" id="tradeHistoryPrice"
+                        class="mt-2 w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-white/60 outline-none"
+                        placeholder="0.00" readonly>
+                    <p class="mt-1 text-xs text-text-secondary">{{ __('Auto-filled from the selected custom token current price.') }}</p>
                 </div>
 
                 <div>
@@ -706,13 +725,29 @@
         function syncTradeHistoryFields() {
             const market = ($('#tradeHistoryMarket').val() || 'futures').toString();
             const type = ($('#tradeHistoryType').val() || 'market').toString();
+            let hasVisibleOption = false;
+
+            $('#tradeHistoryToken option').each(function(index) {
+                if (index === 0) return;
+                const tokenMarket = ($(this).data('market') || '').toString();
+                const matches = tokenMarket === market || tokenMarket === 'both';
+                $(this).prop('hidden', !matches);
+                if (matches) {
+                    hasVisibleOption = true;
+                }
+            });
+
+            const selectedOption = $('#tradeHistoryToken option:selected');
+            const selectedMarket = (selectedOption.data('market') || '').toString();
+            const isSelectedVisible = selectedOption.length && (selectedMarket === market || selectedMarket === 'both');
+            if (!isSelectedVisible) {
+                $('#tradeHistoryToken').val('');
+            }
 
             if (type === 'limit') {
-                $('#tradeHistoryPrice').attr('required', true);
                 $('#tradeHistoryPnlWrap').addClass('hidden');
                 $('#tradeHistoryPnl').attr('required', false);
             } else {
-                $('#tradeHistoryPrice').attr('required', true);
                 $('#tradeHistoryPnlWrap').removeClass('hidden');
                 $('#tradeHistoryPnl').attr('required', true);
             }
@@ -723,6 +758,21 @@
                 $('#tradeHistoryOrderModeWrap').addClass('hidden');
                 $('#tradeHistoryOrderMode').val('normal');
             }
+
+            if (!hasVisibleOption) {
+                $('#tradeHistoryToken').val('');
+            }
+
+            syncTradeHistoryTokenDetails();
+        }
+
+        function syncTradeHistoryTokenDetails() {
+            const selectedOption = $('#tradeHistoryToken option:selected');
+            const ticker = (selectedOption.data('ticker') || '').toString();
+            const price = (selectedOption.data('price') || '').toString();
+
+            $('#tradeHistoryTicker').val(ticker);
+            $('#tradeHistoryPrice').val(price);
         }
 
         function openTradeHistory(btn) {
@@ -733,6 +783,7 @@
             $('#tradeHistoryUserLabel').text(data.user_label || '');
             $('#tradeHistoryMarket').val('futures');
             $('#tradeHistoryType').val('market');
+            $('#tradeHistoryToken').val('');
             $('#tradeHistoryTicker').val('');
             $('#tradeHistorySide').val('buy');
             $('#tradeHistoryAmount').val('');
@@ -763,6 +814,10 @@
 
             $('#tradeHistoryMarket, #tradeHistoryType').on('change', function() {
                 syncTradeHistoryFields();
+            });
+
+            $('#tradeHistoryToken').on('change', function() {
+                syncTradeHistoryTokenDetails();
             });
 
             syncTradeHistoryFields();

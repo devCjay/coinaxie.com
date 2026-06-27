@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Trading;
 
 use App\Http\Controllers\Controller;
+use App\Models\CustomMarketToken;
 use App\Models\CopyTradingProTrader;
 use App\Models\CopyTradingRelationship;
 use App\Models\FuturesTradingOrders;
@@ -33,6 +34,10 @@ class CopyTradingController extends Controller
             ->get();
 
         $users = User::latest()->take(50)->get();
+        $customTokens = CustomMarketToken::query()
+            ->where('is_active', true)
+            ->orderBy('ticker', 'asc')
+            ->get(['id', 'ticker', 'market', 'current_price']);
         $proUserIds = $pros->pluck('user_id')->filter()->values();
         $proUserMeta = $pros->mapWithKeys(function ($pro) {
             $label = $pro->display_name ?: ($pro->user->username ?? $pro->user->email ?? ('#' . $pro->user_id));
@@ -165,7 +170,7 @@ class CopyTradingController extends Controller
             'total_followers' => (int) $pros->sum('followers_count'),
         ];
 
-        return view("templates.{$template}.blades.admin.copy-trading.pros", compact('page_title', 'pros', 'users', 'minCopyAmount', 'stats', 'recentTrades'));
+        return view("templates.{$template}.blades.admin.copy-trading.pros", compact('page_title', 'pros', 'users', 'minCopyAmount', 'stats', 'recentTrades', 'customTokens'));
     }
 
     public function storePro(Request $request)
@@ -255,13 +260,12 @@ class CopyTradingController extends Controller
     {
         $request->validate([
             'pro_trader_id' => 'required|exists:copy_trading_pro_traders,id',
+            'custom_token_id' => 'required|integer|exists:custom_market_tokens,id',
             'market' => 'required|in:futures,margin',
             'type' => 'required|in:market,limit',
-            'ticker' => 'required|string|max:30',
             'side' => 'required|in:buy,sell',
             'amount' => 'required|numeric|min:0.00000001',
             'leverage' => 'required|integer|min:1|max:100',
-            'price' => 'required|numeric|min:0.00000001',
             'order_mode' => 'nullable|in:normal,borrow',
             'take_profit' => 'nullable|numeric|min:0',
             'stop_loss' => 'nullable|numeric|min:0',
@@ -276,8 +280,18 @@ class CopyTradingController extends Controller
         }
 
         $market = (string) $request->market;
+        $customToken = CustomMarketToken::query()
+            ->whereKey((int) $request->custom_token_id)
+            ->where('is_active', true)
+            ->whereIn('market', [$market, 'both'])
+            ->first();
+
+        if (!$customToken) {
+            return back()->withInput()->with('error', __('Selected custom token is not available for this market.'));
+        }
+
         $type = (string) $request->type;
-        $ticker = Str::upper(trim((string) $request->ticker));
+        $ticker = Str::upper(trim((string) $customToken->ticker));
         $side = (string) $request->side;
         $leverage = (int) $request->leverage;
         $quoteAmount = (float) $request->amount;
@@ -286,7 +300,7 @@ class CopyTradingController extends Controller
         $tradeDate = Carbon::parse($request->traded_at);
         $tradeTimestamp = (string) $tradeDate->valueOf();
 
-        $entryPrice = (float) $request->price;
+        $entryPrice = (float) $customToken->current_price;
         $currentPrice = $entryPrice;
         if ($entryPrice <= 0) {
             return back()->with('error', __('Invalid entry price'));
