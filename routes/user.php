@@ -22,6 +22,7 @@ use App\Http\Controllers\User\Trading\CopyTradingController;
 use App\Http\Controllers\User\Trading\TradingAccountController;
 use App\Http\Controllers\User\LaunchpadController;
 use App\Http\Controllers\User\LaunchpadTradeController;
+use App\Http\Controllers\User\SupportTicketController;
 use App\Http\Controllers\User\TransactionController;
 use App\Http\Controllers\User\WithdrawalController;
 use App\Http\Controllers\User\ContactController;
@@ -182,6 +183,14 @@ Route::prefix('user')->middleware(['auth', 'otp.verified', 'user.status', 'user.
 
     // Transactions
     Route::get('transactions', [TransactionController::class, 'index'])->name('transactions');
+
+    // Support Tickets
+    Route::prefix('tickets')->name('tickets.')->group(function () {
+        Route::get('/', [SupportTicketController::class, 'index'])->name('index');
+        Route::post('/', [SupportTicketController::class, 'store'])->name('store');
+        Route::get('/{id}', [SupportTicketController::class, 'show'])->name('show');
+        Route::post('/{id}/reply', [SupportTicketController::class, 'reply'])->name('reply');
+    });
 
     // referrals
     Route::get('referrals', [ReferralController::class, 'index'])->name('referrals');

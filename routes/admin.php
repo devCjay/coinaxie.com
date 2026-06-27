@@ -34,6 +34,7 @@ use App\Http\Controllers\Admin\Trading\MarginTradingController;
 use App\Http\Controllers\Admin\Trading\CopyTradingController;
 use App\Http\Controllers\Admin\CustomTokenController;
 use App\Http\Controllers\Admin\LaunchpadController;
+use App\Http\Controllers\Admin\SupportTicketController;
 use App\Http\Controllers\Admin\TransactionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\WithdrawalController;
@@ -127,6 +128,14 @@ Route::middleware(['auth:admin', 'admin.otp.verified', 'sandbox'])->group(functi
         Route::get('/', [TransactionController::class, 'index'])->name('index');
         Route::post('/delete/{id}', [TransactionController::class, 'delete'])->name('delete');
         Route::post('/bulk-delete', [TransactionController::class, 'bulkDelete'])->name('bulk-delete');
+    });
+
+    // Support Tickets
+    Route::prefix('tickets')->name('tickets.')->group(function () {
+        Route::get('/', [SupportTicketController::class, 'index'])->name('index');
+        Route::get('/view/{id}', [SupportTicketController::class, 'show'])->name('show');
+        Route::post('/reply/{id}', [SupportTicketController::class, 'reply'])->name('reply');
+        Route::post('/close/{id}', [SupportTicketController::class, 'close'])->name('close');
     });
 
     // Referral Network
