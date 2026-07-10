@@ -35,7 +35,7 @@ class CheckUserStatus
             // Build a status-specific message
             $message = match ($user->status) {
                 'banned' => __('Your account has been banned. Please contact support.'),
-                'suspended' => __('Your account has been suspended. Please contact support.'),
+                'suspended' => __('Your account is not active. Please contact support.'),
                 default => __('Your account is not active. Please contact support.'),
             };
 
