@@ -64,5 +64,11 @@
         "flag": "gr",
         "rtl": false,
         "enabled": true
+    },
+    "tr": {
+        "name": "Türkçe",
+        "flag": "tr",
+        "rtl": false,
+        "enabled": true
     }
 }
