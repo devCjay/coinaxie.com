@@ -18,6 +18,13 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 
+if (!function_exists('sendMailImmediately')) {
+    function sendMailImmediately($mailable, $email, $locale)
+    {
+        return Mail::to($email)->locale($locale)->send($mailable);
+    }
+}
+
 // send verification email
 if (!function_exists('sendVerificationEmail')) {
     function sendVerificationEmail($name, $email, $otp_code)
@@ -33,12 +40,7 @@ if (!function_exists('sendVerificationEmail')) {
         try {
 
             $locale = Session::get('locale') ?? config('app.locale');
-
-            if (getSetting('email_queue') == 'enabled') {
-                Mail::to($email)->locale($locale)->queue(new EmailVerification($name, $email, $otp_code));
-            } else {
-                Mail::to($email)->locale($locale)->send(new EmailVerification($name, $email, $otp_code));
-            }
+            sendMailImmediately(new EmailVerification($name, $email, $otp_code), $email, $locale);
         } catch (\Exception $e) {
             Log::error('Failed to send verification email: ' . $e->getMessage());
         }
@@ -61,11 +63,7 @@ if (!function_exists('sendWelcomeEmail')) {
         }
         try {
             $locale = $user->lang;
-            if (getSetting('email_queue') == 'enabled') {
-                Mail::to($user->email)->locale($locale)->queue(new WelcomeEmail($user));
-            } else {
-                Mail::to($user->email)->locale($locale)->send(new WelcomeEmail($user));
-            }
+            sendMailImmediately(new WelcomeEmail($user), $user->email, $locale);
         } catch (\Exception $e) {
             Log::error('Failed to send welcome email: ' . $e->getMessage());
         }
@@ -87,8 +85,7 @@ if (!function_exists('sendOtpVerificationEmail')) {
         }
         try {
             $locale = Session::get('locale') ?? config('app.locale');
-            // otp mails are excluded from queue
-            Mail::to($email)->locale($locale)->send(new OtpVerificationEmail($name, $email, $otp_code, $ip, $user_agent, $message, $subject));
+            sendMailImmediately(new OtpVerificationEmail($name, $email, $otp_code, $ip, $user_agent, $message, $subject), $email, $locale);
         } catch (\Exception $e) {
             Log::error('Failed to send otp verification email: ' . $e->getMessage());
         }
@@ -110,11 +107,7 @@ if (!function_exists('sendNewTransactionEmail')) {
         }
         try {
             $locale = $transaction->user->lang;
-            if (getSetting('email_queue') == 'enabled') {
-                Mail::to($transaction->user->email)->locale($locale)->queue(new TransactionEmail($transaction));
-            } else {
-                Mail::to($transaction->user->email)->locale($locale)->send(new TransactionEmail($transaction));
-            }
+            sendMailImmediately(new TransactionEmail($transaction), $transaction->user->email, $locale);
         } catch (\Exception $e) {
             Log::error('Failed to send new transaction email: ' . $e->getMessage());
         }
@@ -135,11 +128,7 @@ if (!function_exists('sendKycEmail')) {
         }
         try {
             $locale = $kyc_record->user->lang;
-            if (getSetting('email_queue') == 'enabled') {
-                Mail::to($kyc_record->user->email)->locale($locale)->queue(new KycEmail($subject, $kyc_record));
-            } else {
-                Mail::to($kyc_record->user->email)->locale($locale)->send(new KycEmail($subject, $kyc_record));
-            }
+            sendMailImmediately(new KycEmail($subject, $kyc_record), $kyc_record->user->email, $locale);
         } catch (\Exception $e) {
             Log::error('Failed to send kyc email: ' . $e->getMessage());
         }
@@ -160,11 +149,7 @@ if (!function_exists('sendNewReferralEmail')) {
         }
         try {
             $locale = $referrer->lang;
-            if (getSetting('email_queue') == 'enabled') {
-                Mail::to($referrer->email)->locale($locale)->queue(new ReferralEmail($referral, $referrer));
-            } else {
-                Mail::to($referrer->email)->locale($locale)->send(new ReferralEmail($referral, $referrer));
-            }
+            sendMailImmediately(new ReferralEmail($referral, $referrer), $referrer->email, $locale);
         } catch (\Exception $e) {
             Log::error('Failed to send new referral email: ' . $e->getMessage());
         }
@@ -186,11 +171,7 @@ if (!function_exists('sendDepositEmail')) {
         }
         try {
             $locale = $deposit->user->lang;
-            if (getSetting('email_queue') == 'enabled') {
-                Mail::to($deposit->user->email)->locale($locale)->queue(new DepositEmail($custom_subject, $custom_message, $deposit));
-            } else {
-                Mail::to($deposit->user->email)->locale($locale)->send(new DepositEmail($custom_subject, $custom_message, $deposit));
-            }
+            sendMailImmediately(new DepositEmail($custom_subject, $custom_message, $deposit), $deposit->user->email, $locale);
         } catch (\Exception $e) {
             Log::error('Failed to send deposit email: ' . $e->getMessage());
         }
@@ -211,11 +192,7 @@ if (!function_exists('sendWithdrawalEmail')) {
         }
         try {
             $locale = $withdrawal->user->lang;
-            if (getSetting('email_queue') == 'enabled') {
-                Mail::to($withdrawal->user->email)->locale($locale)->queue(new WithdrawalEmail($custom_subject, $custom_message, $withdrawal));
-            } else {
-                Mail::to($withdrawal->user->email)->locale($locale)->send(new WithdrawalEmail($custom_subject, $custom_message, $withdrawal));
-            }
+            sendMailImmediately(new WithdrawalEmail($custom_subject, $custom_message, $withdrawal), $withdrawal->user->email, $locale);
         } catch (\Exception $e) {
             Log::error('Failed to send withdrawal email: ' . $e->getMessage());
         }
@@ -236,11 +213,7 @@ if (!function_exists('sendInvestmentEmail')) {
         }
         try {
             $locale = $investment->user->lang;
-            if (getSetting('email_queue') == 'enabled') {
-                Mail::to($investment->user->email)->locale($locale)->queue(new InvestmentEmail($custom_subject, $custom_message, $investment));
-            } else {
-                Mail::to($investment->user->email)->locale($locale)->send(new InvestmentEmail($custom_subject, $custom_message, $investment));
-            }
+            sendMailImmediately(new InvestmentEmail($custom_subject, $custom_message, $investment), $investment->user->email, $locale);
         } catch (\Exception $e) {
             Log::error('Failed to send investment email: ' . $e->getMessage());
         }
@@ -261,11 +234,7 @@ if (!function_exists('sendStockEmail')) {
         }
         try {
             $locale = $holding_history->user->lang;
-            if (getSetting('email_queue') == 'enabled') {
-                Mail::to($holding_history->user->email)->locale($locale)->queue(new StockEmail($holding_history, $custom_subject, $custom_message));
-            } else {
-                Mail::to($holding_history->user->email)->locale($locale)->send(new StockEmail($holding_history, $custom_subject, $custom_message));
-            }
+            sendMailImmediately(new StockEmail($holding_history, $custom_subject, $custom_message), $holding_history->user->email, $locale);
         } catch (\Exception $e) {
             Log::error('Failed to send stock email: ' . $e->getMessage());
         }
@@ -286,11 +255,7 @@ if (!function_exists('sendEtfEmail')) {
         }
         try {
             $locale = $holding_history->user->lang;
-            if (getSetting('email_queue') == 'enabled') {
-                Mail::to($holding_history->user->email)->locale($locale)->queue(new EtfEmail($holding_history, $custom_subject, $custom_message));
-            } else {
-                Mail::to($holding_history->user->email)->locale($locale)->send(new EtfEmail($holding_history, $custom_subject, $custom_message));
-            }
+            sendMailImmediately(new EtfEmail($holding_history, $custom_subject, $custom_message), $holding_history->user->email, $locale);
         } catch (\Exception $e) {
             Log::error('Failed to send etf email: ' . $e->getMessage());
         }
@@ -311,11 +276,7 @@ if (!function_exists('sendRichTextEmail')) {
         }
         try {
             $locale = $user->lang;
-            if (getSetting('email_queue') == 'enabled') {
-                Mail::to($user->email)->locale($locale)->queue(new RichTextEmail($user, $custom_message, $custom_subject));
-            } else {
-                Mail::to($user->email)->locale($locale)->send(new RichTextEmail($user, $custom_message, $custom_subject));
-            }
+            sendMailImmediately(new RichTextEmail($user, $custom_message, $custom_subject), $user->email, $locale);
         } catch (\Exception $e) {
             Log::error('Failed to send rich text email: ' . $e->getMessage());
         }
@@ -335,15 +296,11 @@ if (!function_exists('sendContactEmail')) {
         }
         try {
             $locale = $sender->lang ?? config('app.locale');
-            if (getSetting('email_queue') == 'enabled') {
-                Mail::to($supportEmail)->locale($locale)->queue(
-                    new ContactEmail($sender->name, $sender->email, $message, $subject)
-                );
-            } else {
-                Mail::to($supportEmail)->locale($locale)->send(
-                    new ContactEmail($sender->name, $sender->email, $message, $subject)
-                );
-            }
+            sendMailImmediately(
+                new ContactEmail($sender->name, $sender->email, $message, $subject),
+                $supportEmail,
+                $locale
+            );
         } catch (\Exception $e) {
             Log::error('Failed to send contact email: ' . $e->getMessage());
             throw $e;
@@ -364,11 +321,7 @@ if (!function_exists('sendAccountBanEmail')) {
         }
         try {
             $locale = $user->lang;
-            if (getSetting('email_queue') == 'enabled') {
-                Mail::to($user->email)->locale($locale)->queue(new AccountBan($user, $action));
-            } else {
-                Mail::to($user->email)->locale($locale)->send(new AccountBan($user, $action));
-            }
+            sendMailImmediately(new AccountBan($user, $action), $user->email, $locale);
         } catch (\Exception $e) {
             Log::error('Failed to send account ban email: ' . $e->getMessage());
         }

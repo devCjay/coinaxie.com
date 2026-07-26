@@ -70,6 +70,9 @@ Route::prefix('user')->middleware(['auth', 'otp.verified', 'user.status', 'user.
     // KYC
     Route::get('/kyc', [KycController::class, 'index'])->name('kyc');
     Route::post('/kyc', [KycController::class, 'submitKyc'])->name('kyc.submit')->middleware('sandbox');
+    Route::get('/under-review', function () {
+        return view('templates.bento.blades.user.under-review');
+    })->name('under-review');
 
     // Contact Support
     Route::get('/contact', [ContactController::class, 'index'])->name('contact');

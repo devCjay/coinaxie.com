@@ -55,7 +55,7 @@
                 @endphp
                 <form action="{{ route('user.register-validate') }}" method="POST"
                     data-action="{{ $email_verification == 'disabled' ? 'redirect' : 'reload' }}"
-                    @if ($email_verification == 'disabled') data-redirect="{{ route('user.dashboard') }}" @endif
+                    @if ($email_verification == 'disabled') data-redirect="{{ route('user.under-review') }}" @endif
                     class="ajax-form space-y-5">
                     @csrf
 
@@ -176,7 +176,7 @@
                 </div>
 
                 <form action="{{ route('user.email-verification') }}" method="POST" data-action="redirect"
-                    data-redirect="{{ route('user.dashboard') }}" class="ajax-form space-y-6">
+                    data-redirect="{{ route('user.under-review') }}" class="ajax-form space-y-6">
                     @csrf
                     <input type="hidden" name="email" value="{{ session('register_info.email') }}">
 

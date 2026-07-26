@@ -107,7 +107,8 @@ class RegisterController extends Controller
             $this->storeUser($validated);
             return response()->json([
                 'status' => 'success',
-                'message' => __('Registration successful')
+                'message' => __('Registration successful'),
+                'redirect' => route('user.under-review')
             ]);
         }
 
@@ -251,7 +252,7 @@ class RegisterController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => __('Registration successful'),
-            'redirect' => url('user/dashboard')
+            'redirect' => route('user.under-review')
         ]);
     }
 
