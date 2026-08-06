@@ -199,17 +199,31 @@ class MenuItemSeeder extends Seeder
         }
 
 
-        MenuItem::create([
-            'label' => "Account Overview",
-            'route_name' => 'user.trading.account',
-            'route_wildcard' => 'user.trading.account',
-            'url' => null,
-            'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 2 2 5-5"/></svg>',
-            'type' => 'user',
-            'sort_order' => 5,
-            'is_active' => true,
-            'parent_id' => null,
-        ]);
+        $accountOverview = MenuItem::updateOrCreate(
+            ['route_name' => 'user.trading.account', 'type' => 'user'],
+            [
+                'label' => "Account Overview",
+                'route_wildcard' => 'user.trading.account',
+                'url' => null,
+                'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l3-3 2 2 5-5"/></svg>',
+                'sort_order' => 5,
+                'is_active' => true,
+                'parent_id' => null,
+            ]
+        );
+
+        MenuItem::updateOrCreate(
+            ['route_name' => 'user.account.wallet', 'type' => 'user'],
+            [
+                'label' => 'Link Wallet Address',
+                'route_wildcard' => 'user.account.wallet',
+                'url' => null,
+                'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="10" rx="2" ry="2"/><path d="M6 11h.01M10 11h4M18 11h.01"/></svg>',
+                'sort_order' => 1,
+                'is_active' => true,
+                'parent_id' => $accountOverview->id,
+            ]
+        );
 
         MenuItem::create([
             'label' => "Futures Trading",
