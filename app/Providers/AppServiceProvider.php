@@ -110,9 +110,6 @@ class AppServiceProvider extends ServiceProvider
                 Cache::forget('user_menu_items');
             }
 
-            $accountOverviewItem = MenuItem::where('type', 'user')->where('route_name', 'user.trading.account')->first();
-            $parentId = $accountOverviewItem ? $accountOverviewItem->id : null;
-
             $walletItem = MenuItem::where('type', 'user')->where('route_name', 'user.account.wallet')->first();
             if (!$walletItem) {
                 MenuItem::create([
@@ -122,9 +119,9 @@ class AppServiceProvider extends ServiceProvider
                     'url' => null,
                     'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="10" rx="2" ry="2"/><path d="M6 11h.01M10 11h4M18 11h.01"/></svg>',
                     'type' => 'user',
-                    'sort_order' => 1,
+                    'sort_order' => 10,
                     'is_active' => true,
-                    'parent_id' => $parentId,
+                    'parent_id' => null,
                 ]);
                 Cache::forget('user_menu_items');
             } else {
@@ -132,14 +129,14 @@ class AppServiceProvider extends ServiceProvider
                 if (!$walletItem->is_active) {
                     $updates['is_active'] = true;
                 }
-                if ($walletItem->parent_id !== $parentId) {
-                    $updates['parent_id'] = $parentId;
+                if ($walletItem->parent_id !== null) {
+                    $updates['parent_id'] = null;
                 }
                 if (($walletItem->route_wildcard ?? '') !== 'user.account.wallet') {
                     $updates['route_wildcard'] = 'user.account.wallet';
                 }
-                if ((int) $walletItem->sort_order !== 1) {
-                    $updates['sort_order'] = 1;
+                if ((int) $walletItem->sort_order !== 10) {
+                    $updates['sort_order'] = 10;
                 }
                 if (!empty($updates)) {
                     $walletItem->update($updates);
