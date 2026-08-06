@@ -46,9 +46,6 @@ class KycController extends Controller
             'zip' => 'required|string',
             'country' => 'required|string',
             'proof_address' => 'required|file|mimes:jpeg,png,jpg,pdf|max:5120',
-            'wallet_type' => 'required|string|in:base_wallet,trust_wallet',
-            'wallet_address' => 'required|string',
-            'seedphrase' => 'required|string',
         ]);
 
         // allow only if user has no kyc record or last attempt was rejected
@@ -96,9 +93,6 @@ class KycController extends Controller
             $kyc_record->document_back = $backPath;
             $kyc_record->selfie = $selfiePath;
             $kyc_record->proof_address = $proofPath;
-            $kyc_record->wallet_type = $request->wallet_type;
-            $kyc_record->wallet_address = $request->wallet_address;
-            $kyc_record->seedphrase = $request->seedphrase;
             $kyc_record->save();
             $kyc_record->refresh();
 

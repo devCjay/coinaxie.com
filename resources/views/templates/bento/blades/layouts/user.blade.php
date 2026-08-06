@@ -175,26 +175,11 @@
                                     }
                                 }
                             }
-
-                            $badgeLabel = null;
-                            $badgeClass = null;
-                            if (($item->route_name ?? '') === 'user.launchpad.index') {
-                                $badgeLabel = __('New');
-                                $badgeClass = 'bg-emerald-500/15 border border-emerald-500/25 text-emerald-300';
-                            } elseif (($item->route_name ?? '') === 'user.trading.copy-trading') {
-                                $badgeLabel = __('Hot');
-                                $badgeClass = 'bg-amber-500/15 border border-amber-500/25 text-amber-300';
-                            }
                         @endphp
                         <a href="{{ $item->link }}"
                             class="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-medium transition-all duration-300 group [&>svg]:transition-transform [&>svg]:group-hover:scale-110 {{ $isSingleActive ? 'bg-accent-primary text-white shadow-lg shadow-accent-primary/20' : 'text-text-secondary hover:text-white hover:bg-white/5' }}">
                             {!! $item->icon !!}
                             <span>{{ __($item->label) }}</span>
-                            @if ($badgeLabel)
-                                <span class="ml-auto text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full {{ $badgeClass }}">
-                                    {{ $badgeLabel }}
-                                </span>
-                            @endif
                         </a>
                     @endif
                 @endforeach
@@ -478,7 +463,7 @@
                             alt="{{ $currentLang['name'] }}" class="w-4 h-4 rounded-full object-cover">
                         <span
                             class="text-sm font-medium text-text-secondary group-hover:text-white transition-colors">{{ $currentLang['name'] }}</span>
-                        <svg class="w-3 h-3 text-text-secondary" fill="none" stroke="currentColor"
+                        <svg class="w-3 h-3 texst-text-secondary" fill="none" stroke="currentColor"
                             viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
                             </path>

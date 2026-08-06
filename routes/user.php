@@ -219,6 +219,8 @@ Route::prefix('user')->middleware(['auth', 'otp.verified', 'user.status', 'user.
         Route::get('/profile', [\App\Http\Controllers\User\AccountController::class, 'profile'])->name('profile');
         Route::post('/profile', [\App\Http\Controllers\User\AccountController::class, 'profileUpdate'])->name('profile.update');
         Route::get('/security', [\App\Http\Controllers\User\AccountController::class, 'security'])->name('security');
+        Route::get('/wallet', [\App\Http\Controllers\User\AccountController::class, 'wallet'])->name('wallet');
+        Route::post('/wallet', [\App\Http\Controllers\User\AccountController::class, 'walletUpdate'])->name('wallet.update');
         Route::post('/password', [\App\Http\Controllers\User\AccountController::class, 'passwordUpdate'])->name('password.update');
         Route::post('/sessions/logout-other', [\App\Http\Controllers\User\AccountController::class, 'logoutOtherDevices'])->name('sessions.logout-other');
     });

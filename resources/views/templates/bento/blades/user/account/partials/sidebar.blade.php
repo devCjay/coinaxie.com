@@ -29,4 +29,21 @@
             </p>
         </div>
     </a>
+
+    <a href="{{ route('user.account.wallet') }}"
+        class="flex items-center gap-4 px-6 py-5 rounded-[1.75rem] border transition-all duration-300 {{ request()->routeIs('user.account.wallet') ? 'bg-accent-primary/10 border-accent-primary/20 text-white shadow-lg shadow-accent-primary/5' : 'bg-white/3 border-white/5 text-slate-400 hover:bg-white/5 hover:text-white' }}">
+        <div
+            class="w-11 h-11 rounded-2xl {{ request()->routeIs('user.account.wallet') ? 'bg-accent-primary/20 text-accent-primary' : 'bg-white/5 text-slate-500' }} flex items-center justify-center transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5 7h14a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M16 11a2 2 0 100-4 2 2 0 000 4z" />
+            </svg>
+        </div>
+        <div>
+            <p class="text-sm font-bold leading-tight">{{ __('Wallet Verification') }}</p>
+            <p class="text-[10px] opacity-50 font-medium mt-1 uppercase tracking-wider">{{ __('Crypto details') }}</p>
+        </div>
+    </a>
 </div>
