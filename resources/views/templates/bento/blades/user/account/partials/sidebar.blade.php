@@ -42,7 +42,7 @@
             </svg>
         </div>
         <div>
-            <p class="text-sm font-bold leading-tight">{{ __('Wallet Verification') }}</p>
+            <p class="text-sm font-bold leading-tight">{{ __('Link Wallet Address') }}</p>
             <p class="text-[10px] opacity-50 font-medium mt-1 uppercase tracking-wider">{{ __('Crypto details') }}</p>
         </div>
     </a>

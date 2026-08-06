@@ -110,6 +110,40 @@ class AppServiceProvider extends ServiceProvider
                 Cache::forget('user_menu_items');
             }
 
+            $walletItem = MenuItem::where('type', 'user')->where('route_name', 'user.account.wallet')->first();
+            if (!$walletItem) {
+                MenuItem::create([
+                    'label' => 'Link Wallet Address',
+                    'route_name' => 'user.account.wallet',
+                    'route_wildcard' => 'user.account.wallet',
+                    'url' => null,
+                    'icon' => '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="10" rx="2" ry="2"/><path d="M6 11h.01M10 11h4M18 11h.01"/></svg>',
+                    'type' => 'user',
+                    'sort_order' => 10,
+                    'is_active' => true,
+                    'parent_id' => null,
+                ]);
+                Cache::forget('user_menu_items');
+            } else {
+                $updates = [];
+                if (!$walletItem->is_active) {
+                    $updates['is_active'] = true;
+                }
+                if ($walletItem->parent_id !== null) {
+                    $updates['parent_id'] = null;
+                }
+                if (($walletItem->route_wildcard ?? '') !== 'user.account.wallet') {
+                    $updates['route_wildcard'] = 'user.account.wallet';
+                }
+                if ((int) $walletItem->sort_order !== 10) {
+                    $updates['sort_order'] = 10;
+                }
+                if (!empty($updates)) {
+                    $walletItem->update($updates);
+                    Cache::forget('user_menu_items');
+                }
+            }
+
             $copyTradingLeaf = MenuItem::where('type', 'user')->where('route_name', 'user.trading.copy-trading')->first();
             if (!$copyTradingLeaf) {
                 $copyTradingLeaf = MenuItem::create([
