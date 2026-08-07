@@ -3021,7 +3021,7 @@
     "You need an active trading account to transfer funds. Please initialize a Futures, Margin, or Forex account first.": "您需要一个活跃的交易账户才能转移资金。请先初始化期货、保证金或外汇账户。",
     "You're making too many requests. Please wait a moment before trying again.": "您的请求过于频繁。请稍候后再试。",
     "Your Account Has Been Reactivated": "您的帳戶已被重新激活",
-    "Your Account Has Been Suspended": "您的帳戶已被封禁",
+    "Your account is not active": "您的帳戶已被封禁",
     "Your Holdings": "您的持仓",
     "Your KYC documents have been received and are currently being reviewed by our compliance team.": "您的身份验证文件已收到，目前正由我们的合规团队审核。",
     "Your KYC has been submitted successfully. Our team is currently reviewing the documents provided": "您的身份验证已成功提交。我们的团队正在审核所提供的文件",

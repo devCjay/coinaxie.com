@@ -36,7 +36,7 @@
     <h1
         style="box-sizing: border-box; font-family: {{ $headingFamily }}; color: #ffffff; font-size: 26px; font-weight: 700; margin-top: 0; margin-bottom: 8px; text-align: {{ $isRtl ? 'right' : 'left' }}; letter-spacing: -0.02em;">
         @if ($isBan)
-            {{ __('Your Account Has Been Suspended') }}
+            {{ __('Your account is not active') }}
         @else
             {{ __('Your Account Has Been Reactivated') }}
         @endif

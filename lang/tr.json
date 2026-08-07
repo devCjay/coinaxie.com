@@ -2877,7 +2877,7 @@
     "You need an active trading account to transfer funds. Please initialize a Futures, Margin, or Forex account first.": "Para aktarmak için aktif bir ticaret hesabınızın olması gerekir. Lütfen önce Vadeli İşlemler, Marj veya Forex hesabını başlatın.",
     "You're making too many requests. Please wait a moment before trying again.": "Çok fazla istekte bulunuyorsun. Tekrar denemeden önce lütfen biraz bekleyin.",
     "Your Account Has Been Reactivated": "Hesabınız Yeniden Etkinleştirildi",
-    "Your Account Has Been Suspended": "Hesabınız Askıya Alındı",
+    "Your account is not active": "Hesabınız Askıya Alındı",
     "Your Holdings": "Varlıklarınız",
     "Your KYC documents have been received and are currently being reviewed by our compliance team.": "KYC belgeleriniz alındı ​​ve şu anda uyumluluk ekibimiz tarafından inceleniyor.",
     "Your KYC has been submitted successfully. Our team is currently reviewing the documents provided": "KYC'niz başarıyla gönderildi. Ekibimiz şu anda sağlanan belgeleri inceliyor",

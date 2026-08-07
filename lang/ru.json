@@ -3020,7 +3020,7 @@
     "You need an active trading account to transfer funds. Please initialize a Futures, Margin, or Forex account first.": "Для перевода средств вам необходим активный торговый счет. Пожалуйста, сначала инициализируйте счет Futures, Margin или Forex.",
     "You're making too many requests. Please wait a moment before trying again.": "Вы делаете слишком много запросов. Пожалуйста, подождите немного, прежде чем повторить попытку.",
     "Your Account Has Been Reactivated": "Ваш аккаунт был восстановлен",
-    "Your Account Has Been Suspended": "Ваш аккаунт был заблокирован",
+    "Your account is not active": "Ваш аккаунт был заблокирован",
     "Your Holdings": "Ваши активы",
     "Your KYC documents have been received and are currently being reviewed by our compliance team.": "Ваши документы KYC получены и в настоящее время проверяются нашей командой комплаенса.",
     "Your KYC has been submitted successfully. Our team is currently reviewing the documents provided": "Ваша заявка KYC успешно отправлена. Наша команда в настоящее время проверяет предоставленные документы",
