@@ -233,6 +233,7 @@
                         <div class="flex flex-col items-center justify-center">
                             <!-- Hidden File Input for Form Submission Fallback -->
                             <input type="file" name="selfie" id="selfie_input" class="hidden" accept="image/*">
+                            <input type="hidden" name="selfie_data" id="selfie_data">
 
                             <div class="relative group w-full max-w-sm aspect-[3/4] rounded-2xl border-2 border-dashed border-white/10 bg-black/20 overflow-hidden flex flex-col items-center justify-center"
                                 id="camera_container">
@@ -1232,26 +1233,21 @@
 
             // Navigation Handlers
             $('#btn-next').click(function() {
-                // Validate current step before proceeding
                 if (!validateStep(currentStep)) {
                     return;
                 }
 
-                // If step is valid, proceed with existing logic
                 if (currentStep === 5) {
-                    // AML Simulation
                     if (!$('#aml_consent').is(':checked')) {
                         window.toastNotification(
                             "{{ __('Please consent to the AML checks to proceed.') }}", 'error');
                         return;
                     }
 
-                    // Simulate Loading
                     $('#btn-next').prop('disabled', true).addClass('opacity-50');
                     $('#aml-loading').removeClass('hidden');
 
-                        // Populate Review Data
-                        // Personal
+                    setTimeout(function() {
                         $('#review_fullname').text($('input[name="first_name"]').val() + ' ' + $(
                             'input[name="last_name"]').val());
                         $('#review_dob').text(
@@ -1261,15 +1257,15 @@
                             `+${$('#country_code_select').val()} ${$('input[name="phone"]').val()}`
                         );
 
-                        // Address
                         const address =
                             `${$('input[name="address_line_1"]').val()}, ${$('input[name="city"]').val()}, ${$('input[name="zip"]').val()}, ${$('select[name="country"] option:selected').text()}`;
                         $('#review_address').text(address);
 
-                        // Docs
-                        var docType = $('input[name="document_type"]:checked').val();
+                        const docType = $('input[name="document_type"]:checked').val();
                         $('#review_doc_type_label').text(docType.replace(/_/g, ' '));
 
+                        $('#aml-loading').addClass('hidden');
+                        $('#btn-next').prop('disabled', false).removeClass('opacity-50');
                         currentStep++;
                         updateStepUI();
                     }, 2000);
